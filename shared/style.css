@@ -48,6 +48,7 @@ input, select { font: inherit; color: inherit; }
 .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; min-height: 52px; }
 .topbar .spacer { flex: 1; }
 .icon-btn {
+  color: var(--ink); text-decoration: none;
   width: 52px; aspect-ratio: 1; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--tile); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);

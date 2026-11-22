@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f3f5f9">
+<title>약</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%23f59e0b%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="page">
+  <div class="topbar">
+    <a class="icon-btn" href="../" aria-label="홈으로" id="back"></a>
+    <div class="spacer"></div>
+    <button class="icon-btn" type="button" aria-label="약 설정" id="open-settings"></button>
+  </div>
+  <h1 class="title">약</h1>
+  <p class="subtitle" id="summary"></p>
+  <div id="people"></div>
+</main>
+
+<div class="sheet-back" id="settings">
+  <div class="sheet" role="dialog" aria-label="약 설정">
+    <div class="sheet-head"><h3>약 설정</h3><button class="btn primary" type="button" id="close-settings">완료</button></div>
+    <div id="settings-body"></div>
+  </div>
+</div>
+
+<script type="module" src="meds.js"></script>
+<script type="module" src="../shared/watch.js"></script>
+</body>
+</html>
