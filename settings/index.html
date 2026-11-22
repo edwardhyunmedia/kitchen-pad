@@ -59,6 +59,15 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
   <div class="group"><div class="row"><span class="label grow">사진 시계에 쓸 사진</span><label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer">사진 고르기<input type="file" accept="image/*" id="file2" hidden></label></div></div>
   <p class="note">배경은 지금은 흰색으로만 써요. 사진은 "사진" 시계 모양에서만 쓰이고, 이 태블릿 안에만 저장돼요.</p>
 
+  <p class="group-label">구글 캘린더</p>
+  <div class="group">
+    <div class="row"><span class="label">주소</span><input class="grow" type="text" id="cal-url" placeholder="https://script.google.com/macros/s/…/exec?t=…" autocomplete="off" spellcheck="false"></div>
+    <div class="row"><span class="label grow">일정 알림</span>
+      <select id="cal-min"><option value="0">끄기</option><option value="5">5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option></select></div>
+    <div class="row"><span class="label grow" id="cal-status">연결 안 됨</span><button class="row-btn" style="width:auto" type="button" id="cal-test">지금 확인</button></div>
+  </div>
+  <p class="note">내 구글 계정의 Apps Script로 일정을 읽기만 해요. 주소를 넣으면 15분마다 그 주소에서 7일 치 일정을 받아와요. 주소를 지우면 아무것도 받지 않아요.</p>
+
   <p class="group-label">날씨</p>
   <div class="group">
     <div class="row"><span class="label grow">날씨 보기</span><button class="switch" type="button" id="weather" aria-label="날씨 보기"></button></div>

@@ -142,3 +142,8 @@ body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px,
 .wg { border-radius: calc(26px * var(--s, 1)); }
 .minus { background: rgba(120,120,128,.55) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 0 0 .5px rgba(0,0,0,.06); }
 .addcard { border-radius: calc(26px * var(--s, 1)); }
+
+/* 오늘 일정 위젯 */
+.wcal { font-size: clamp(17px, 2.5vh, 28px); font-weight: 600; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: .3vh; }
+.wcal b { color: #0088ff; margin-right: 10px; font-variant-numeric: tabular-nums; }
+.gl.cal i { background: #0088ff; }

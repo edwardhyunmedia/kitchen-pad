@@ -1,5 +1,6 @@
 import { icons } from '../shared/icons.js';
-import { save } from '../shared/store.js';
+import { save, load } from '../shared/store.js';
+import { isCalUrl, getEvents } from '../shared/calendar.js';
 import { faceById } from '../shared/faces.js';
 import { getSettings, setSettings, savePhoto, getPhotoUrl, deletePhoto } from '../shared/settings.js';
 
@@ -47,3 +48,27 @@ $('reset-layout').addEventListener('click', () => {
   $('reset-layout').textContent = '처음대로 바꿨어요';
 });
 draw();
+
+// ---------- 구글 캘린더 ----------
+async function drawCal(force) {
+  const st = getSettings();
+  $('cal-url').value = st.calUrl || '';
+  $('cal-min').value = String(st.calAlertMin ?? 10);
+  if (!st.calUrl) { $('cal-status').textContent = '연결 안 됨'; return; }
+  $('cal-status').textContent = '확인하는 중…';
+  const ev = await getEvents(force);
+  const c = load('cal.cache', null);
+  $('cal-status').textContent = c && ev ? `연결됨, 7일 일정 ${ev.length}개` : '연결 실패: 주소나 배포 설정을 확인해 주세요';
+}
+$('cal-url').addEventListener('change', e => {
+  const v = e.target.value.trim();
+  if (v && !isCalUrl(v)) { $('cal-status').textContent = 'script.google.com 주소만 넣을 수 있어요'; return; }
+  setSettings({ calUrl: v });
+  save('cal.cache', null);
+  // 처음 연결하면 홈에 "오늘 일정" 위젯 추가
+  if (v) { const l = load('home.layout', null); if (Array.isArray(l) && !l.includes('w:cal')) save('home.layout', [...l, 'w:cal']); }
+  drawCal(true);
+});
+$('cal-min').addEventListener('change', e => setSettings({ calAlertMin: Number(e.target.value) }));
+$('cal-test').addEventListener('click', () => drawCal(true));
+drawCal(false);

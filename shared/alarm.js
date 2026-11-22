@@ -49,13 +49,14 @@ function fully(fn) {
 let overlay = null;
 let loop = null;
 let speakLoop = null;
+let speakText = '약 먹을 시간이에요';
 
 function ensureOverlay() {
   if (overlay) return overlay;
   overlay = document.createElement('div');
   overlay.className = 'alarm';
   overlay.innerHTML = `
-      <div class="a-top">${icons.bell}약 먹을 시간이에요</div>
+      <div class="a-top">${icons.bell}<span>약 먹을 시간이에요</span></div>
       <div class="a-mid"><div class="a-time"></div><ul></ul></div>
       <div class="a-btns"><button class="a-later" type="button">10분 뒤 다시</button><button class="a-stop" type="button">먹었어요</button></div>`;
   document.body.appendChild(overlay);
@@ -66,9 +67,14 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 
 export const isAlarmOn = () => !!loop;
 
-// items: [{ title, sub }], onTaken: 먹었어요, onLater: 10분 뒤 다시
-export function startAlarm(items, onTaken, onLater) {
+// items: [{ title, sub }], onTaken: 먹었어요(확인), onLater: 10분 뒤 다시
+// opts: { title, primary, later, speak }
+export function startAlarm(items, onTaken, onLater, opts = {}) {
   const el = ensureOverlay();
+  el.querySelector('.a-top').lastChild.textContent = opts.title || '약 먹을 시간이에요';
+  el.querySelector('.a-stop').textContent = opts.primary || '먹었어요';
+  el.querySelector('.a-later').textContent = opts.later || '10분 뒤 다시';
+  speakText = opts.speak || '약 먹을 시간이에요';
   el.querySelector('ul').innerHTML = items.map(i => `<li>${esc(i.title)}<small>${esc(i.sub || '')}</small></li>`).join('');
   el.querySelector('.a-stop').onclick = () => { stopAlarm(); onTaken && onTaken(); };
   el.querySelector('.a-later').onclick = () => { stopAlarm(); onLater && onLater(); };
@@ -77,7 +83,7 @@ export function startAlarm(items, onTaken, onLater) {
   el.querySelector('.a-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   if (loop) return;
   fully(f => f.turnScreenOn());
-  const say = () => fully(f => f.textToSpeech('약 먹을 시간이에요', 'ko'));
+  const say = () => fully(f => f.textToSpeech(speakText, 'ko'));
   chime();
   say();
   loop = setInterval(chime, 1500);

@@ -7,6 +7,7 @@ import { normalizeLayout, itemSize, moveItem, removeItem, addItem, addable } fro
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
+import { getEvents, todayEvents, upcoming, fmtTime } from './calendar.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
 import { currentSlotFor, toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
@@ -28,6 +29,7 @@ let weather = null;
 let photo = null;
 let layout = [];
 let summary = null;
+let events = [];
 
 // ---------- 배경 ----------
 async function applyBg() {
@@ -45,7 +47,7 @@ async function applyBg() {
 let faceKey = '';
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo, summary, log: getLog(), coffeeName: recipes[0]?.name };
+  return { opts, weather, photo, summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()) };
 }
 function drawFace(force) {
   const now = new Date();
@@ -79,6 +81,15 @@ function widgetHtml(id) {
     const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
     const min = r ? Math.round(r.steps.reduce((a, s) => a + s.sec, 0) / 60) : 0;
     return `<div class="wg"><div class="wh">커피</div><div><div class="wbig">${esc(r?.name || '레시피 없음')}</div>${r ? `<div class="wsub">${min}분</div>` : ''}</div>${r ? `<button class="wplay" type="button" data-play aria-label="커피 타이머 시작">${icons.play}</button>` : ''}</div>`;
+  }
+  if (id === 'w:cal') {
+    const now = new Date();
+    const list = todayEvents(events, now).slice(0, 2);
+    const hasCal = !!settings.calUrl;
+    return `<div class="wg"><div style="min-width:0;flex:1"><div class="wh">오늘 일정</div>${
+      !hasCal ? '<div class="wsub">설정에서 구글 캘린더를 연결하세요</div>'
+      : list.length ? list.map(e => `<div class="wcal"><b>${e.allDay ? '종일' : fmtTime(e.start)}</b>${esc(e.title)}</div>`).join('')
+      : '<div class="wsub">오늘 남은 일정이 없어요</div>'}</div></div>`;
   }
   if (id === 'w:next') {
     const n = summary.next;
@@ -282,7 +293,9 @@ function drawGlance() {
   if (!summary || f === 'mod' || f === 'cal') { g.innerHTML = ''; return; }
   const late = summary.people.find(p => p.late);
   if (late) { g.innerHTML = `<span class="gl late"><i></i>${esc(late.name)} ${esc(late.lateTime)} ${esc(late.lateMed)} 아직 안 먹음</span>`; return; }
+  const ev = todayEvents(events, new Date()).find(e => !e.allDay && e.start > new Date());
   const n = summary.next;
+  if (ev && (!n || fmtTime(ev.start) <= n.time)) { g.innerHTML = `<span class="gl cal"><i></i>${fmtTime(ev.start)} ${esc(ev.title)}</span>`; return; }
   g.innerHTML = n ? `<span class="gl"><i></i>다음 약 ${esc(n.time)} ${esc(n.medName)} <small>${esc(n.personName)}</small></span>` : '';
 }
 
@@ -296,6 +309,7 @@ const ADD_INFO = id => {
   if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', svg: APP_INFO[id].svg };
   if (id.startsWith('w:person:')) { const p = summary.people.find(x => `w:person:${x.id}` === id); return { title: `${p?.name || ''} 약`, sub: '위젯', icon: 'pill', grad: '#ff9500' }; }
   if (id === 'w:coffee') return { title: '커피', sub: '위젯', icon: 'cup', grad: '#a2845e' };
+  if (id === 'w:cal') return { title: '오늘 일정', sub: '긴 위젯', icon: 'bell', grad: '#0088ff' };
   return { title: '다음 약', sub: '긴 위젯', icon: 'bell', grad: '#ff9500' };
 };
 function openAdd() {
@@ -354,6 +368,7 @@ $('pick-done').addEventListener('click', () => {
 
 // ---------- 시작 ----------
 async function loadWeather() { weather = await getWeather(); drawHero(); drawFace(); }
+async function loadEvents() { events = await getEvents(); if (!body.classList.contains('edit')) drawGrid(); drawGlance(); drawFace(true); }
 
 async function init() {
   if (load('hint.seen', false)) document.querySelector('.idle-hint')?.remove();
@@ -367,9 +382,11 @@ async function init() {
   setInterval(() => { drawHero(); drawFace(); }, 1000);
   setInterval(() => { if (!body.classList.contains('edit')) { refreshData(); drawGrid(); } }, 30000);
   setInterval(loadWeather, 10 * 60000);
+  loadEvents();
+  setInterval(loadEvents, 5 * 60000);
   const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
   window.addEventListener('kp-meds-changed', onData);
-  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); } });
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
   setInterval(drawGlance, 30000);
   drawGlance();
   // 알람이 울리면 깨우기

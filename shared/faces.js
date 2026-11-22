@@ -50,13 +50,17 @@ function calendar(now, ctx, c) {
     cells += `<td class="${d === now.getDate() ? 't' : ''}"><span ${d === now.getDate() ? `style="background:${c[0]}"` : ''}>${d}</span></td>`;
     if ((first + d) % 7 === 0) cells += '</tr><tr>';
   }
-  const evs = (ctx.summary?.slots || []).filter(s => !ctx.log?.[s.key] && s.at >= now).slice(0, 3)
-    .map(s => `<div class="ev" style="border-color:${c[0]}">${esc(s.time)} ${esc(s.medName)} <small>${esc(s.personName)}</small></div>`).join('');
+  const pad2 = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const items = [
+    ...(ctx.events || []).map(e => ({ t: e.allDay ? '종일' : pad2(e.start), k: e.allDay ? '' : pad2(e.start), title: e.title, who: '' })),
+    ...(ctx.summary?.slots || []).filter(s => !ctx.log?.[s.key] && s.at >= now).map(s => ({ t: s.time, k: s.time, title: s.medName, who: s.personName })),
+  ].sort((a, b) => a.k.localeCompare(b.k)).slice(0, 4);
+  const evs = items.map(i => `<div class="ev" style="border-color:${c[0]}">${esc(i.t)} ${esc(i.title)} ${i.who ? `<small>${esc(i.who)}</small>` : ''}</div>`).join('');
   return `<div class="cal">
     <div class="mon" style="color:${c[0]}">${y}년 ${mo + 1}월</div>
     <div class="day">${now.getDate()}</div><div class="wd">${DAYS[now.getDay()]}요일 <b>${pad(now.getHours())}:${pad(now.getMinutes())}</b></div>
     <table><tr>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr><tr>${cells}</tr></table>
-    ${evs || '<div class="ev none">오늘 남은 약이 없어요</div>'}</div>`;
+    ${evs || '<div class="ev none">오늘 남은 일정이 없어요</div>'}</div>`;
 }
 
 function modular(now, ctx, c) {

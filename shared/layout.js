@@ -3,18 +3,18 @@
 export const APPS = ['app:meds', 'app:coffee', 'app:settings'];
 
 export function allItems(people) {
-  return [...APPS, ...(people || []).map(p => `w:person:${p.id}`), 'w:coffee', 'w:next'];
+  return [...APPS, ...(people || []).map(p => `w:person:${p.id}`), 'w:coffee', 'w:next', 'w:cal'];
 }
 
 export function itemSize(id) {
   if (id.startsWith('app:')) return 'app';
-  if (id === 'w:next') return 'wide';
+  if (id === 'w:next' || id === 'w:cal') return 'wide';
   return 'square';
 }
 
 export function defaultLayout(people) {
   const ps = (people || []).map(p => `w:person:${p.id}`);
-  return ['app:meds', 'app:coffee', ...ps.slice(0, 1), 'app:settings', ...ps.slice(1), 'w:coffee', 'w:next'];
+  return ['app:meds', 'app:coffee', ...ps.slice(0, 1), 'app:settings', ...ps.slice(1), 'w:coffee', 'w:cal', 'w:next'];
 }
 
 export function normalizeLayout(layout, people) {
