@@ -236,3 +236,21 @@ h1.clock-hero { font-size: clamp(64px, 11vh, 128px); font-weight: 600; letter-sp
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* 오른쪽 위 작은 시간 (메인 화면 제외) */
+.mini-time { position: fixed; top: max(14px, 2.4vh); right: 20px; z-index: 30; font-size: clamp(16px, 2.2vh, 24px); font-weight: 600;
+  font-variant-numeric: tabular-nums; pointer-events: none; }
+/* 커피 타이머 알약 */
+.live-pill { position: fixed; left: 50%; bottom: 3vh; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 60;
+  display: flex; align-items: center; gap: 10px; padding: 8px 20px 8px 8px; border-radius: 999px; background: rgba(28,28,30,.9);
+  color: #fff; font-size: clamp(15px, 2vh, 21px); font-weight: 600; transition: opacity .25s, transform .25s; }
+.live-pill.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.live-pill b { color: #f2c48f; font-variant-numeric: tabular-nums; margin-left: 4px; }
+.lp-ico { width: clamp(30px, 3.8vh, 42px); aspect-ratio: 1; border-radius: 50%; background: var(--brown); display: grid; place-items: center; }
+.lp-ico svg { width: 56%; height: 56%; }
+body.edit .live-pill { display: none; }
+/* 아래쪽 버튼 줄 (닫기·홈은 아래로) */
+.bottombar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: flex; justify-content: center; gap: 16px; padding: 12px 20px max(16px, 2.4vh);
+  background: linear-gradient(180deg, transparent, rgba(238,240,245,.9) 40%); }
+.bottombar .icon-btn { width: clamp(52px, 7vh, 68px); background: rgba(255,255,255,.75); }
+.bottombar .icon-btn svg { width: 46%; height: 46%; }

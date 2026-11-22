@@ -14,5 +14,8 @@ export const icons = {
   play: s('<path d="M8 5.5v13l10-6.5-10-6.5z" fill="currentColor"/>'),
   pause: s('<path d="M8 5v14M16 5v14" stroke-width="3"/>'),
   reset: s('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/>'),
+  minus: s('<path d="M6 12h12" stroke-width="3"/>'),
+  photo: s('<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 15l-5-5-8 8"/>'),
+  home: s('<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/>'),
   trash: s('<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>'),
 };
