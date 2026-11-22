@@ -254,3 +254,6 @@ body.edit .live-pill { display: none; }
   background: linear-gradient(180deg, transparent, rgba(238,240,245,.9) 40%); }
 .bottombar .icon-btn { width: clamp(52px, 7vh, 68px); background: rgba(255,255,255,.75); }
 .bottombar .icon-btn svg { width: 46%; height: 46%; }
+body:has(.bottombar) .page { padding-bottom: 140px; }
+.mini-time { z-index: 70; }
+body:has(.bottombar) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px, 7vh, 68px) + 24px); }

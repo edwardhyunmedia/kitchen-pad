@@ -1,9 +1,10 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v7';
+const VERSION = 'kp-v8';
 const FILES = [
   "./",
   "meds/",
   "coffee/",
+  "settings/",
   "coffee/coffee.js",
   "coffee/index.html",
   "coffee/logic.js",
@@ -13,14 +14,25 @@ const FILES = [
   "meds/meds.js",
   "meds/state.js",
   "robots.txt",
+  "settings/index.html",
+  "settings/settings.js",
   "shared/alarm.js",
+  "shared/faces.css",
+  "shared/faces.js",
   "shared/fonts/LICENSE-Pretendard.txt",
   "shared/fonts/PretendardVariable.woff2",
+  "shared/home.css",
   "shared/home.js",
   "shared/icons.js",
+  "shared/layout.js",
+  "shared/live.js",
+  "shared/mini.js",
+  "shared/settings.js",
   "shared/store.js",
   "shared/style.css",
+  "shared/summary.js",
   "shared/watch.js",
+  "shared/weather.js",
 ];
 
 self.addEventListener('install', e => {

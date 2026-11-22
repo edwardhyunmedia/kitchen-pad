@@ -11,12 +11,7 @@
 </head>
 <body>
 <main class="page">
-  <div class="topbar">
-    <a class="icon-btn" href="../" aria-label="홈으로" id="back"></a>
-    <div class="spacer"></div>
-    <button class="icon-btn" type="button" aria-label="약 설정" id="open-settings"></button>
-  </div>
-  <h1 class="title">약</h1>
+  <h1 class="title" style="margin-top:40px">약</h1>
   <p class="subtitle" id="summary"></p>
   <div id="people"></div>
 </main>
@@ -28,7 +23,10 @@
   </div>
 </div>
 
+<nav class="bottombar"><a class="icon-btn" href="../" aria-label="홈으로" id="back"></a><button class="icon-btn" type="button" aria-label="약 설정" id="open-settings"></button></nav>
 <script type="module" src="meds.js"></script>
+<script type="module" src="../shared/mini.js"></script>
+<script type="module" src="../shared/live.js"></script>
 <script type="module" src="../shared/watch.js"></script>
 </body>
 </html>

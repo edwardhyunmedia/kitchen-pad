@@ -1,7 +1,7 @@
 import { icons } from '../shared/icons.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
-import { DEFAULT_RECIPES, timerState, totalSec, Timer } from './logic.js';
+import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed } from './logic.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -9,7 +9,7 @@ const newId = () => 'r' + Date.now().toString(36) + Math.random().toString(36).s
 const getRecipes = () => load('coffee.recipes', DEFAULT_RECIPES);
 const mmss = s => `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`;
 
-$('back').innerHTML = icons.back;
+$('back').innerHTML = icons.home;
 $('open-edit').innerHTML = icons.gear;
 $('t-close').innerHTML = icons.close;
 $('t-reset').innerHTML = icons.reset;
@@ -21,45 +21,50 @@ function renderList() {
     <button class="tile on" type="button" data-i="${i}">
       <span class="glyph" style="background:var(--brown)">${icons.cup}</span>
       <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}</div></span>
-    </button>`).join('') || '<p class="empty">레시피가 없어요. 오른쪽 위 설정에서 추가하세요.</p>';
+    </button>`).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }
 $('recipes').addEventListener('click', e => {
   const t = e.target.closest('[data-i]');
   if (t) openTimer(getRecipes()[t.dataset.i]);
 });
 
-// ---------- 타이머 ----------
+// ---------- 타이머 (실행 상태를 저장해서 다른 화면으로 가도 계속 돎) ----------
 $('t-icon').innerHTML = icons.cup;
 let recipe = null;
-const timer = new Timer();
 let lastStep = 0;
 let raf = null;
+const getRun = () => load('coffee.run', null);
+const myRun = () => { const r = getRun(); return r && recipe && r.recipeId === recipe.id ? r : null; };
+const running = () => { const r = myRun(); return !!(r && r.since != null); };
 
 function openTimer(r) {
   if (!r || !r.steps.length) return;
   recipe = r;
-  timer.reset();
-  lastStep = 0;
+  lastStep = timerState(recipe, runElapsed(myRun(), Date.now())).stepIndex;
   $('t-title').textContent = r.name;
   $('t-sub').textContent = `원두 ${r.dose}g, 물 ${r.water}g`;
   $('timer-sheet').classList.add('open');
+  window.kpCoffeeOpen = true;
   draw();
 }
+// 닫아도 타이머는 계속 돌고, 아래쪽 알약으로 보여요
 function closeTimer() {
-  timer.reset();
   cancelAnimationFrame(raf);
   $('timer-sheet').classList.remove('open');
+  window.kpCoffeeOpen = false;
 }
 function draw() {
-  const st = timerState(recipe, timer.elapsed(performance.now()) / 1000);
+  cancelAnimationFrame(raf);
+  const now = Date.now();
+  const el = runElapsed(myRun(), now);
+  const st = timerState(recipe, el);
   const step = recipe.steps[st.stepIndex];
   const next = recipe.steps[st.stepIndex + 1];
-  if (st.stepIndex !== lastStep && !st.done) beep(2);
-  if (st.done && timer.running) { beep(3); timer.pause(performance.now()); }
+  if (running() && st.stepIndex !== lastStep && !st.done) beep(2);
+  if (st.done && running()) { beep(3); save('coffee.run', pauseRun(myRun(), now)); }
   lastStep = st.stepIndex;
 
   $('t-sec').textContent = st.done ? 0 : st.stepRemaining;
-  const el = timer.elapsed(performance.now()) / 1000;
   const stepStart = recipe.steps.slice(0, st.stepIndex).reduce((a, x) => a + x.sec, 0);
   $('t-fill').style.height = st.done ? '100%' : `${Math.min(100, ((el - stepStart) / step.sec) * 100)}%`;
   $('t-cap').classList.toggle('done', st.done);
@@ -67,22 +72,32 @@ function draw() {
   $('t-pour').textContent = !st.done && step.pourTo ? `${step.pourTo}g까지 붓기` : '';
   $('t-next').textContent = st.done ? '' : next ? `다음: ${next.label}` : `남은 시간 ${mmss(st.totalRemaining)}`;
   $('t-dots').innerHTML = recipe.steps.map((_, i) => `<span class="${st.done || i < st.stepIndex ? 'done' : i === st.stepIndex ? 'now' : ''}"></span>`).join('');
-  $('t-play').innerHTML = timer.running ? icons.pause : icons.play;
-  $('t-play').setAttribute('aria-label', timer.running ? '일시정지' : '시작');
-  if (timer.running) raf = requestAnimationFrame(draw);
+  $('t-play').innerHTML = running() ? icons.pause : icons.play;
+  $('t-play').setAttribute('aria-label', running() ? '일시정지' : '시작');
+  if (running()) raf = requestAnimationFrame(draw);
 }
 $('t-play').addEventListener('click', () => {
-  const now = performance.now();
-  if (timer.running) timer.pause(now);
+  const now = Date.now();
+  if (running()) save('coffee.run', pauseRun(myRun(), now));
   else {
-    if (timerState(recipe, timer.elapsed(now) / 1000).done) { timer.reset(); lastStep = 0; }
-    timer.start(now);
+    let r = myRun();
+    if (r && timerState(recipe, runElapsed(r, now)).done) r = null;
+    save('coffee.run', startRun(r || null, recipe.id, now));
+    lastStep = timerState(recipe, runElapsed(getRun(), now)).stepIndex;
   }
-  cancelAnimationFrame(raf);
   draw();
 });
-$('t-reset').addEventListener('click', () => { timer.reset(); lastStep = 0; cancelAnimationFrame(raf); draw(); });
+// 처음부터: 타이머를 멈추고 지움
+$('t-reset').addEventListener('click', () => { if (myRun()) save('coffee.run', null); lastStep = 0; draw(); });
 $('t-close').addEventListener('click', closeTimer);
+
+// 홈 위젯이나 알약에서 들어오면 돌고 있는 타이머를 바로 열기
+if (new URLSearchParams(location.search).has('run')) {
+  const r = getRun();
+  const rec = r && getRecipes().find(x => x.id === r.recipeId);
+  history.replaceState(null, '', location.pathname);
+  if (rec) openTimer(rec);
+}
 
 // ---------- 편집 ----------
 let draft = null;

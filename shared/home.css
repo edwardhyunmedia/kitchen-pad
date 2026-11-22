@@ -16,6 +16,7 @@ body.homeview.plain { color: #000; }
 
 /* 시계 페이스 층 */
 #face-layer { position: fixed; inset: 0; z-index: 1; transition: opacity .45s, filter .45s, transform .45s; }
+body:not(.idle) #face-layer[data-face="cal"], body:not(.idle) #face-layer[data-face="mod"] { opacity: 0 !important; }
 body:not(.idle) #face-layer { opacity: .14; filter: blur(2px); transform: scale(1.06); pointer-events: none; }
 body:not(.idle) #face-layer .fdate, body:not(.idle) #face-layer .corner { visibility: hidden; }
 

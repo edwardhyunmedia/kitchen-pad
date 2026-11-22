@@ -11,12 +11,7 @@
 </head>
 <body>
 <main class="page">
-  <div class="topbar">
-    <a class="icon-btn" href="../" aria-label="홈으로" id="back"></a>
-    <div class="spacer"></div>
-    <button class="icon-btn" type="button" aria-label="레시피 편집" id="open-edit"></button>
-  </div>
-  <h1 class="title">커피</h1>
+  <h1 class="title" style="margin-top:40px">커피</h1>
   <p class="subtitle">레시피를 누르면 타이머가 열려요</p>
   <div class="grid" id="recipes"></div>
 </main>
@@ -27,7 +22,6 @@
       <div class="d-head" style="padding-top:16px">
         <span class="glyph" id="t-icon"></span>
         <div class="txt"><div class="t1" id="t-title"></div><div class="t2" id="t-sub"></div></div>
-        <button class="icon-btn" type="button" aria-label="닫기" id="t-close" style="background:rgba(120,120,128,.16)"></button>
       </div>
       <div class="d-main">
         <div><div class="d-step" id="t-step"></div><div class="d-pour" id="t-pour"></div></div>
@@ -38,6 +32,7 @@
       <div class="controls">
         <button class="round-btn" type="button" aria-label="처음부터" id="t-reset"></button>
         <button class="round-btn main" type="button" aria-label="시작" id="t-play"></button>
+        <button class="round-btn" type="button" aria-label="닫기" id="t-close"></button>
       </div>
     </div>
   </div>
@@ -50,7 +45,10 @@
   </div>
 </div>
 
+<nav class="bottombar"><a class="icon-btn" href="../" aria-label="홈으로" id="back"></a><button class="icon-btn" type="button" aria-label="레시피 편집" id="open-edit"></button></nav>
 <script type="module" src="coffee.js"></script>
+<script type="module" src="../shared/mini.js"></script>
+<script type="module" src="../shared/live.js"></script>
 <script type="module" src="../shared/watch.js"></script>
 </body>
 </html>

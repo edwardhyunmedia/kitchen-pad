@@ -51,6 +51,7 @@ function drawFace(force) {
   const key = [f.id, f.color, f.showDate, f.showWeather, weather?.temp, photo, now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
   if (!force && key === faceKey) return;
   faceKey = key;
+  $('face-layer').dataset.face = f.id;
   renderFace($('face-layer'), now, faceCtx(f));
 }
 
@@ -105,7 +106,12 @@ let idleTimer = null;
 const busy = () => body.classList.contains('edit') || document.querySelector('.sheet-back.open, .picker.open, .alarm.open');
 function sleep() { if (!busy()) body.classList.add('idle'); else armIdle(); }
 function armIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(sleep, Math.max(5, settings.idleSec) * 1000); }
-function wake() { body.classList.remove('idle'); armIdle(); }
+function wake() {
+  body.classList.remove('idle');
+  armIdle();
+  // 안내 문구는 처음 한 번만
+  if (!load('hint.seen', false)) { save('hint.seen', true); document.querySelector('.idle-hint')?.remove(); }
+}
 
 // ---------- 터치: 탭 / 길게 누르기 / 끌기 ----------
 let press = null; // { x, y, t, id, el, longTimer, dragging, grab }
@@ -260,12 +266,14 @@ $('pick-done').addEventListener('click', () => {
 async function loadWeather() { weather = await getWeather(); drawHero(); drawFace(); }
 
 async function init() {
+  if (load('hint.seen', false)) document.querySelector('.idle-hint')?.remove();
   refreshData();
   await applyBg();
   drawHero();
   drawFace(true);
   drawGrid();
   loadWeather();
+  if (new URLSearchParams(location.search).has('pick')) { history.replaceState(null, '', location.pathname); openPicker(); }
   setInterval(() => { drawHero(); drawFace(); }, 1000);
   setInterval(() => { if (!body.classList.contains('edit')) { refreshData(); drawGrid(); } }, 30000);
   setInterval(loadWeather, 10 * 60000);

@@ -7,7 +7,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const hm = iso => { const d = new Date(iso); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
 const newId = () => 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
-$('back').innerHTML = icons.back;
+$('back').innerHTML = icons.home;
 $('open-settings').innerHTML = icons.gear;
 
 // ---------- 오늘 화면 ----------
@@ -18,13 +18,13 @@ function render() {
   const slots = todaySlots(cfg, now);
   const taken = slots.filter(s => log[s.key]).length;
   if (!cfg.people.length) {
-    $('summary').textContent = '등록된 사람이 없어요. 오른쪽 위 설정에서 사람을 추가하세요.';
+    $('summary').textContent = '등록된 사람이 없어요. 아래 설정 버튼에서 사람을 추가하세요.';
     $('people').innerHTML = '';
     return;
   }
   $('summary').textContent = slots.length
     ? `오늘 ${slots.length}번 중 ${taken}번 먹었어요`
-    : '아직 등록된 약이 없어요. 오른쪽 위 설정에서 추가하세요.';
+    : '아직 등록된 약이 없어요. 아래 설정 버튼에서 추가하세요.';
 
   $('people').innerHTML = cfg.people.map(p => {
     const mine = slots.filter(s => s.personId === p.id);
