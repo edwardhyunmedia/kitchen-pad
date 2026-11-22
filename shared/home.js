@@ -50,8 +50,8 @@ function medsSummary() {
       const l = mine.filter(s => !log[s.key] && now >= s.at).length;
       const r = mine.filter(s => !log[s.key]).length;
       const cls = l ? 'warn' : r ? '' : 'ok';
-      const txt = l ? `${p.name} 약 ${l}번 안 먹음` : r ? `${p.name} 약 ${r}번 남음` : `${p.name} 약 다 먹음`;
-      return `<span class="pill ${cls}"><span class="dot"></span>${esc(txt)}</span>`;
+      const txt = l ? `${l}번 안 먹음` : r ? `${r}번 남음` : '오늘 다 먹음';
+      return `<div class="pill ${cls}"><span class="pi">${l ? icons.bell : r ? icons.pill : icons.check}</span><span><b>${esc(p.name)}</b><span class="v">${esc(txt)}</span></span></div>`;
     })
     .join('');
   renderApps();

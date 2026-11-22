@@ -20,7 +20,7 @@ function renderList() {
   $('recipes').innerHTML = list.map((r, i) => `
     <button class="tile on" type="button" data-i="${i}">
       <span class="glyph" style="background:var(--brown)">${icons.cup}</span>
-      <span><div class="name">${esc(r.name)}</div><div class="state">원두 ${esc(r.dose)}g, 물 ${esc(r.water)}g<br>${mmss(totalSec(r))}</div></span>
+      <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}</div></span>
     </button>`).join('') || '<p class="empty">레시피가 없어요. 오른쪽 위 설정에서 추가하세요.</p>';
 }
 $('recipes').addEventListener('click', e => {
@@ -29,8 +29,7 @@ $('recipes').addEventListener('click', e => {
 });
 
 // ---------- 타이머 ----------
-const C = 2 * Math.PI * 54;
-$('t-bar').style.strokeDasharray = C;
+$('t-icon').innerHTML = icons.cup;
 let recipe = null;
 const timer = new Timer();
 let lastStep = 0;
@@ -42,6 +41,7 @@ function openTimer(r) {
   timer.reset();
   lastStep = 0;
   $('t-title').textContent = r.name;
+  $('t-sub').textContent = `원두 ${r.dose}g, 물 ${r.water}g`;
   $('timer-sheet').classList.add('open');
   draw();
 }
@@ -58,12 +58,15 @@ function draw() {
   if (st.done && timer.running) { beep(3); timer.pause(performance.now()); }
   lastStep = st.stepIndex;
 
-  $('t-sec').textContent = st.done ? '끝' : st.stepRemaining;
-  $('t-bar').style.strokeDashoffset = st.done ? 0 : C * (st.stepRemaining / step.sec);
+  $('t-sec').textContent = st.done ? 0 : st.stepRemaining;
+  const el = timer.elapsed(performance.now()) / 1000;
+  const stepStart = recipe.steps.slice(0, st.stepIndex).reduce((a, x) => a + x.sec, 0);
+  $('t-fill').style.height = st.done ? '100%' : `${Math.min(100, ((el - stepStart) / step.sec) * 100)}%`;
+  $('t-cap').classList.toggle('done', st.done);
   $('t-step').textContent = st.done ? '추출 완료' : step.label;
   $('t-pour').textContent = !st.done && step.pourTo ? `${step.pourTo}g까지 붓기` : '';
   $('t-next').textContent = st.done ? '' : next ? `다음: ${next.label}` : `남은 시간 ${mmss(st.totalRemaining)}`;
-  $('t-dots').innerHTML = recipe.steps.map((_, i) => `<span class="${st.done || i < st.stepIndex ? 'done' : i === st.stepIndex && timer.running ? 'now' : ''}"></span>`).join('');
+  $('t-dots').innerHTML = recipe.steps.map((_, i) => `<span class="${st.done || i < st.stepIndex ? 'done' : i === st.stepIndex ? 'now' : ''}"></span>`).join('');
   $('t-play').innerHTML = timer.running ? icons.pause : icons.play;
   $('t-play').setAttribute('aria-label', timer.running ? '일시정지' : '시작');
   if (timer.running) raf = requestAnimationFrame(draw);
@@ -102,19 +105,25 @@ function closeEdit() {
 }
 function renderEdit() {
   $('edit-body').innerHTML = draft.map((r, ri) => `
-    <p class="group-label">레시피 ${ri + 1}</p>
+    <p class="group-label">${esc(String(r.name).trim() || '새 레시피')}</p>
     <div class="group">
-      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(r.name)}" placeholder="레시피 이름" data-f="${ri}.name" maxlength="20"></div>
-      <div class="row"><span>원두(g)</span><input type="number" value="${esc(r.dose)}" data-f="${ri}.dose" style="width:100px"><span>물(g)</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:100px"></div>
+      <div class="row"><span class="label">이름</span><input class="grow" type="text" value="${esc(r.name)}" placeholder="레시피 이름" data-f="${ri}.name" maxlength="20"></div>
+      <div class="row"><span class="label grow">원두</span><input type="number" value="${esc(r.dose)}" data-f="${ri}.dose" style="width:70px"><span class="unit">g</span></div>
+      <div class="row"><span class="label grow">물</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:70px"><span class="unit">g</span></div>
+    </div>
+    <p class="group-label">단계</p>
+    <div class="group">
       ${r.steps.map((s, si) => `
         <div class="row">
-          <input type="text" value="${esc(s.label)}" data-s="${ri}.${si}.label" style="flex:1;min-width:0" maxlength="16">
-          <input type="number" value="${esc(s.sec)}" data-s="${ri}.${si}.sec" style="width:84px" aria-label="초"><span>초</span>
-          <input type="number" value="${esc(s.pourTo ?? '')}" data-s="${ri}.${si}.pourTo" style="width:84px" placeholder="-" aria-label="붓는 양"><span>g</span>
-          <button class="icon-btn" type="button" style="width:40px" aria-label="단계 삭제" data-delstep="${ri}.${si}">${icons.close}</button>
+          <input class="grow left" type="text" value="${esc(s.label)}" placeholder="단계 이름" data-s="${ri}.${si}.label" maxlength="16">
+          <input type="number" value="${esc(s.sec)}" data-s="${ri}.${si}.sec" style="width:48px" aria-label="초"><span class="unit">초</span>
+          <input type="number" value="${esc(s.pourTo ?? '')}" data-s="${ri}.${si}.pourTo" style="width:52px" placeholder="-" aria-label="붓는 양"><span class="unit">g</span>
+          <button class="icon-btn" type="button" style="width:32px;background:var(--fill)" aria-label="단계 삭제" data-delstep="${ri}.${si}">${icons.close}</button>
         </div>`).join('')}
-      <div class="row"><button class="link-btn" type="button" data-addstep="${ri}">단계 추가</button><span class="grow"></span><button class="link-btn" type="button" style="color:var(--red)" data-delrecipe="${ri}">${armed === ri ? '한 번 더 누르면 삭제' : '레시피 삭제'}</button></div>
-    </div>`).join('') + `<button class="btn" type="button" data-addrecipe>레시피 추가</button>`;
+      <div class="row"><button class="row-btn" type="button" data-addstep="${ri}">+ 단계 추가</button></div>
+    </div>
+    <div class="group" style="margin-top:10px"><div class="row"><button class="row-btn danger center" type="button" data-delrecipe="${ri}">${armed === ri ? '한 번 더 누르면 삭제' : `${esc(String(r.name).trim() || '이 레시피')} 삭제`}</button></div></div>`).join('') +
+    `<div class="group" style="margin-top:22px"><div class="row"><button class="row-btn" type="button" data-addrecipe>+ 레시피 추가</button></div></div>`;
 }
 $('edit-body').addEventListener('input', e => {
   const d = e.target.dataset;

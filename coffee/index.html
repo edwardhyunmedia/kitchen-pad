@@ -23,16 +23,18 @@
 
 <div class="sheet-back" id="timer-sheet">
   <div class="sheet" role="dialog" aria-label="타이머">
-    <div class="sheet-head"><h3 id="t-title"></h3><button class="icon-btn" type="button" aria-label="닫기" id="t-close"></button></div>
-    <div class="timer">
-      <div class="ring">
-        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="54" fill="none" stroke-width="8"/><circle class="bar" id="t-bar" cx="60" cy="60" r="54" fill="none" stroke-width="8" stroke-linecap="round"/></svg>
-        <div class="center"><div class="sec" id="t-sec">0</div><div class="unit">초</div></div>
+    <div class="detail">
+      <div class="d-head" style="padding-top:16px">
+        <span class="glyph" id="t-icon"></span>
+        <div class="txt"><div class="t1" id="t-title"></div><div class="t2" id="t-sub"></div></div>
+        <button class="icon-btn" type="button" aria-label="닫기" id="t-close" style="background:rgba(120,120,128,.16)"></button>
       </div>
-      <p class="step-name" id="t-step"></p>
-      <p class="step-pour" id="t-pour"></p>
-      <p class="step-next" id="t-next"></p>
-      <div class="steps-dots" id="t-dots"></div>
+      <div class="d-main">
+        <div><div class="d-step" id="t-step"></div><div class="d-pour" id="t-pour"></div></div>
+        <div class="d-sec"><span id="t-sec">0</span><small>초</small></div>
+        <div class="capsule" id="t-cap"><div class="fill" id="t-fill"></div></div>
+        <div><div class="d-next" id="t-next"></div><div class="dots" id="t-dots" style="margin-top:10px"></div></div>
+      </div>
       <div class="controls">
         <button class="round-btn" type="button" aria-label="처음부터" id="t-reset"></button>
         <button class="round-btn main" type="button" aria-label="시작" id="t-play"></button>
@@ -43,8 +45,8 @@
 
 <div class="sheet-back" id="edit-sheet">
   <div class="sheet" role="dialog" aria-label="레시피 편집">
-    <div class="sheet-head"><h3>레시피 편집</h3><button class="btn primary" type="button" id="edit-done">완료</button></div>
-    <div id="edit-body"></div>
+    <div class="navbar"><span></span><h3>레시피 편집</h3><button class="nav-right" type="button" id="edit-done">완료</button></div>
+    <div class="sheet-body" id="edit-body"></div>
   </div>
 </div>
 

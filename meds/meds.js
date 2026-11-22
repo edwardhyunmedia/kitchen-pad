@@ -31,10 +31,10 @@ function render() {
     const tiles = mine.map(s => {
       const done = log[s.key];
       const late = !done && now >= s.at;
-      const state = done ? `${s.time} 먹음 · ${hm(done)}` : late ? `${s.time} 아직 안 먹음` : `${s.time} 예정`;
-      return `<button class="tile ${done ? 'on' : ''} ${late ? 'late' : ''}" type="button" data-key="${esc(s.key)}" aria-pressed="${!!done}">
-        <span class="glyph" style="${done ? 'background:var(--green)' : ''}">${done ? icons.check : icons.pill}</span>
-        <span><div class="name">${esc(s.medName)}</div><div class="state" style="${late ? 'color:var(--red)' : ''}">${esc(state)}</div></span>
+      const state = done ? `${hm(done)}에 먹음` : late ? `${s.time} 안 먹음` : `${s.time} 예정`;
+      return `<button class="tile ${done ? 'on' : ''}" type="button" data-key="${esc(s.key)}" aria-pressed="${!!done}">
+        <span class="glyph" style="${done ? 'background:var(--green)' : late ? 'background:var(--red);color:#fff' : ''}">${done ? icons.check : icons.pill}</span>
+        <span><div class="name">${esc(s.medName)}</div><div class="state ${late ? 'alert' : ''}">${esc(state)}</div></span>
       </button>`;
     }).join('');
     const add = `<button class="tile" type="button" data-add="${esc(p.id)}">
@@ -79,28 +79,30 @@ function closeSettings() {
 }
 
 function renderSettings() {
+  const del = (id, label) => (armed === id ? '한 번 더 누르면 삭제' : label);
   const people = draft.people.map((p, pi) => `
     <p class="group-label">${esc(p.name.trim() || '새 사람')}</p>
     <div class="group">
-      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(p.name)}" placeholder="이름" data-pname="${pi}" maxlength="12"></div>
+      <div class="row"><span class="label">이름</span><input class="grow" type="text" value="${esc(p.name)}" placeholder="이름 입력" data-pname="${pi}" maxlength="12"></div>
       ${p.meds.map((m, mi) => `
-        <div class="row" style="flex-wrap:wrap">
-          <input type="text" placeholder="약 이름" value="${esc(m.name)}" data-mname="${pi}.${mi}" style="flex:1 1 200px" maxlength="20">
-          ${m.times.map((t, ti) => `<span style="display:inline-flex;gap:4px;align-items:center">
-              <input type="time" value="${esc(t)}" data-time="${pi}.${mi}.${ti}">
-              <button class="icon-btn" type="button" style="width:40px" aria-label="시간 지우기" data-deltime="${pi}.${mi}.${ti}">${icons.close}</button>
-            </span>`).join('')}
-          <button class="link-btn" type="button" data-addtime="${pi}.${mi}">시간 추가</button>
-          <button class="link-btn" type="button" style="color:var(--red)" data-delmed="${pi}.${mi}">${armed === 'm' + pi + '.' + mi ? '한 번 더 누르면 삭제' : '약 삭제'}</button>
-        </div>`).join('')}
-      <div class="row"><button class="link-btn" type="button" data-addmed="${pi}">약 추가</button><span class="grow"></span>
-        <button class="link-btn" type="button" style="color:var(--red)" data-delperson="${pi}">${armed === 'p' + pi ? '한 번 더 누르면 삭제' : '사람 삭제'}</button></div>
-    </div>`).join('') + `<button class="btn" type="button" data-addperson>사람 추가</button>`;
+        <div class="row"><span class="label">약 이름</span><input class="grow" type="text" placeholder="예: 비타민" value="${esc(m.name)}" data-mname="${pi}.${mi}" maxlength="20"></div>
+        <div class="row">
+          <span class="label">시간</span>
+          <div class="chips" style="justify-content:flex-end">
+            ${m.times.map((t, ti) => `<span class="chip"><input type="time" value="${esc(t)}" data-time="${pi}.${mi}.${ti}"><button class="x" type="button" aria-label="시간 지우기" data-deltime="${pi}.${mi}.${ti}">${icons.close}</button></span>`).join('')}
+            <button class="add-chip" type="button" data-addtime="${pi}.${mi}">+ 시간</button>
+          </div>
+        </div>
+        <div class="row"><button class="row-btn danger" type="button" data-delmed="${pi}.${mi}">${del('m' + pi + '.' + mi, `${esc(m.name.trim() || '이 약')} 삭제`)}</button></div>`).join('')}
+      <div class="row"><button class="row-btn" type="button" data-addmed="${pi}">+ 약 추가</button></div>
+    </div>
+    <div class="group" style="margin-top:10px"><div class="row"><button class="row-btn danger center" type="button" data-delperson="${pi}">${del('p' + pi, `${esc(p.name.trim() || '이 사람')} 삭제`)}</button></div></div>`).join('');
   $('settings-body').innerHTML = people + `
+    <div class="group" style="margin-top:22px"><div class="row"><button class="row-btn" type="button" data-addperson>+ 사람 추가</button></div></div>
     <p class="group-label">알림</p>
     <div class="group">
-      <div class="row"><span class="grow">안 먹었을 때 다시 알림 간격(분)</span><input type="number" min="5" max="240" value="${esc(draft.remindAfterMin)}" data-remind style="width:110px"></div>
-      <div class="row"><span class="grow">다시 알림 횟수</span><input type="number" min="0" max="10" value="${esc(draft.maxRemind)}" data-maxremind style="width:110px"></div>
+      <div class="row"><span class="label grow">안 먹으면 다시 알림</span><input type="number" min="5" max="240" value="${esc(draft.remindAfterMin)}" data-remind style="width:70px"><span class="unit">분 뒤</span></div>
+      <div class="row"><span class="label grow">다시 알림 횟수</span><input type="number" min="0" max="10" value="${esc(draft.maxRemind)}" data-maxremind style="width:70px"><span class="unit">번</span></div>
     </div>`;
 }
 
