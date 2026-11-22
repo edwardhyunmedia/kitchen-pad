@@ -1,0 +1,168 @@
+@font-face {
+  font-family: "Pretendard";
+  src: url("fonts/PretendardVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg-top: #f3f5f9;
+  --bg-bottom: #e3e8ef;
+  --tile: rgba(255, 255, 255, 0.62);
+  --tile-on: #ffffff;
+  --ink: #1c1c1e;
+  --ink-2: #6e6e73;
+  --ink-3: #aeaeb2;
+  --line: rgba(60, 60, 67, 0.12);
+  --green: #30b158;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --brown: #a0764f;
+  --blue: #2f7cf6;
+  --radius-tile: 22px;
+  --radius-sheet: 28px;
+  --gap: 14px;
+  --tile-size: 168px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: "Pretendard", system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)) fixed;
+  font-size: 20px;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+.page { max-width: 1280px; margin: 0 auto; padding: 36px 36px 60px; }
+
+/* 상단: 애플 홈처럼 왼쪽 큰 제목, 오른쪽 정사각 버튼 */
+.topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; min-height: 52px; }
+.topbar .spacer { flex: 1; }
+.icon-btn {
+  width: 52px; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--tile); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn:active { transform: scale(0.94); }
+
+h1.title { font-size: 44px; font-weight: 750; letter-spacing: -0.02em; margin: 4px 0 2px; }
+.subtitle { color: var(--ink-2); font-size: 20px; margin: 0 0 22px; }
+
+/* 상태 알약 줄 (애플 홈 상단 요약) */
+.pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 28px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 999px;
+  background: var(--tile); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  font-size: 17px; font-weight: 600;
+}
+.pill .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-3); }
+.pill.warn .dot { background: var(--red); }
+.pill.ok .dot { background: var(--green); }
+
+h2.section { font-size: 22px; font-weight: 700; margin: 26px 0 12px; }
+
+/* 정사각 타일 */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tile-size), 1fr)); gap: var(--gap); }
+.tile {
+  position: relative; aspect-ratio: 1; border-radius: var(--radius-tile);
+  background: var(--tile); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  padding: 16px; text-align: left;
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background 0.2s, transform 0.12s;
+}
+.tile:active { transform: scale(0.97); }
+.tile.on { background: var(--tile-on); box-shadow: 0 4px 18px rgba(30, 40, 60, 0.08); }
+.tile .glyph {
+  width: 48px; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(120, 120, 128, 0.14); color: var(--ink-2);
+}
+.tile .glyph svg { width: 26px; height: 26px; }
+.tile.on .glyph { color: #fff; }
+.tile .name { font-size: 19px; font-weight: 650; line-height: 1.2; }
+.tile .state { font-size: 16px; color: var(--ink-2); margin-top: 2px; }
+.tile .badge {
+  position: absolute; top: 14px; right: 14px; min-width: 26px; height: 26px; padding: 0 8px;
+  border-radius: 13px; background: var(--red); color: #fff; font-size: 15px; font-weight: 700;
+  display: grid; place-items: center;
+}
+.tile.late { box-shadow: inset 0 0 0 3px var(--red); }
+
+/* 시트 (애플 홈 상세 팝업) */
+.sheet-back {
+  position: fixed; inset: 0; background: rgba(30, 34, 44, 0.28);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; z-index: 50; padding: 24px;
+}
+.sheet-back.open { display: flex; }
+.sheet {
+  width: min(720px, 100%); max-height: 100%; overflow: auto;
+  background: #f6f7f9; border-radius: var(--radius-sheet); padding: 22px 24px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+.sheet-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.sheet-head h3 { flex: 1; margin: 0; font-size: 28px; font-weight: 750; }
+
+/* 설정 묶음 리스트 */
+.group { background: #fff; border-radius: 16px; overflow: hidden; margin: 0 0 18px; }
+.group-label { color: var(--ink-2); font-size: 16px; margin: 18px 6px 8px; }
+.row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 60px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .grow { flex: 1; min-width: 0; }
+.row input[type="text"], .row input[type="number"], .row input[type="time"] {
+  border: 0; background: rgba(120, 120, 128, 0.1); border-radius: 10px; padding: 10px 12px; min-width: 0;
+}
+.row input[type="text"] { width: 100%; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 52px; padding: 0 22px; border-radius: 14px;
+  background: #fff; font-weight: 650;
+}
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.danger { color: var(--red); }
+.btn.big { min-height: 72px; font-size: 24px; padding: 0 34px; border-radius: 20px; }
+.btn:active { transform: scale(0.97); }
+.link-btn { color: var(--blue); font-weight: 600; padding: 8px 4px; }
+
+/* 알람 배너 */
+.alarm {
+  position: fixed; inset: 0; z-index: 100; display: none;
+  background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  align-items: center; justify-content: center; padding: 30px;
+}
+.alarm.open { display: flex; }
+.alarm-card { width: min(720px, 100%); text-align: center; }
+.alarm-ring {
+  width: 120px; aspect-ratio: 1; border-radius: 50%; margin: 0 auto 20px;
+  background: var(--orange); color: #fff; display: grid; place-items: center;
+  animation: ring 1.2s ease-in-out infinite;
+}
+.alarm-ring svg { width: 60px; height: 60px; }
+@keyframes ring { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.alarm h2 { font-size: 40px; margin: 0 0 16px; }
+.alarm ul { list-style: none; padding: 0; margin: 0 0 30px; font-size: 26px; font-weight: 600; }
+.alarm li { padding: 6px 0; }
+.alarm li small { color: var(--ink-2); font-weight: 500; font-size: 20px; margin-left: 8px; }
+
+.empty { color: var(--ink-2); padding: 30px 6px; font-size: 19px; }
+
+@media (max-width: 700px) {
+  :root { --tile-size: 140px; }
+  .page { padding: 20px 18px 50px; }
+  h1.title { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
