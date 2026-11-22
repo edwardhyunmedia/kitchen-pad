@@ -2,11 +2,11 @@
 import { load, save } from './store.js';
 import { DEFAULT_FACE } from './faces.js';
 
-export const DEFAULT_SETTINGS = { weather: false, idleSec: 30, face: DEFAULT_FACE, bg: { type: 'default', blur: 18, dim: 0.18 } };
+export const DEFAULT_SETTINGS = { weather: false, idleSec: 30, face: DEFAULT_FACE, bg: { type: 'default', blur: 18, dim: 0.18 }, night: { on: true, from: '00:00', to: '06:00', dimScreen: true } };
 
 export function getSettings() {
   const s = load('settings', {});
-  return { ...DEFAULT_SETTINGS, ...s, face: { ...DEFAULT_FACE, ...(s.face || {}) }, bg: { ...DEFAULT_SETTINGS.bg, ...(s.bg || {}) } };
+  return { ...DEFAULT_SETTINGS, ...s, face: { ...DEFAULT_FACE, ...(s.face || {}) }, bg: { ...DEFAULT_SETTINGS.bg, ...(s.bg || {}) }, night: { ...DEFAULT_SETTINGS.night, ...(s.night || {}) } };
 }
 export function setSettings(patch) {
   const next = { ...getSettings(), ...patch };

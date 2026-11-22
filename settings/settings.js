@@ -72,3 +72,18 @@ $('cal-url').addEventListener('change', e => {
 $('cal-min').addEventListener('change', e => setSettings({ calAlertMin: Number(e.target.value) }));
 $('cal-test').addEventListener('click', () => drawCal(true));
 drawCal(false);
+
+// ---------- 야간 모드 ----------
+function drawNight() {
+  const n = getSettings().night;
+  $('night-on').classList.toggle('on', !!n.on);
+  $('night-dim').classList.toggle('on', !!n.dimScreen);
+  $('night-from').value = n.from;
+  $('night-to').value = n.to;
+}
+const setNight = patch => { setSettings({ night: { ...getSettings().night, ...patch } }); drawNight(); };
+$('night-on').addEventListener('click', () => setNight({ on: !getSettings().night.on }));
+$('night-dim').addEventListener('click', () => setNight({ dimScreen: !getSettings().night.dimScreen }));
+$('night-from').addEventListener('change', e => e.target.value && setNight({ from: e.target.value }));
+$('night-to').addEventListener('change', e => e.target.value && setNight({ to: e.target.value }));
+drawNight();

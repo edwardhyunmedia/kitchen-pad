@@ -1,0 +1,55 @@
+/* 야간 모드 (html.dark): iOS 다크 색 (키트 Dark 값) + 밤에 눈부시지 않게 시계는 어두운 회색 */
+html.dark {
+  color-scheme: dark;
+  --label: #fff; --label-2: rgba(235,235,245,.60); --label-3: rgba(235,235,245,.30); --label-4: rgba(235,235,245,.16);
+  --fill-1: rgba(120,120,128,.36); --fill-2: rgba(120,120,128,.32); --fill-3: rgba(118,118,128,.24); --fill-4: rgba(118,118,128,.18);
+  --bg: #000; --bg-2: #1c1c1e; --sep: rgba(255,255,255,.17);
+  --blue: #0091ff; --green: #30d158; --red: #ff4245; --orange: #ff9230;
+  --ink: var(--label); --ink-2: var(--label-2); --ink-3: var(--label-3); --fill: var(--fill-3);
+  --glass-s-bg: rgba(40,40,42,.72);
+  --glass-s-shadow: 0 0 0 .5px rgba(255,255,255,.12), inset 0 1px 1px rgba(255,255,255,.12), 0 8px 15px rgba(0,0,0,.3);
+  --glass-l-bg: rgba(30,30,32,.82);
+  --glass-l-shadow: 0 0 0 .5px rgba(255,255,255,.1), inset 0 1px 0 rgba(255,255,255,.12), 0 18px 46px rgba(0,0,0,.5);
+  background: #000;
+}
+html.dark body, html.dark body.homeview, html.dark body.homeview.plain { background: #000 !important; color: #fff; }
+html.dark .bgl, html.dark .bgl.plain { background: #000 !important; }
+html.dark .bottombar { background: linear-gradient(180deg, rgba(0,0,0,0), #000 40%); }
+
+/* 카드·목록 */
+html.dark .group, html.dark .row-bg { background: #1c1c1e; }
+html.dark .sheet { background: #000; }
+html.dark #timer-sheet .sheet { background: #1c1c1e; }
+html.dark .wg, html.dark .tile, html.dark .hrow, html.dark .addcard { background: #1c1c1e !important; color: #fff; }
+html.dark .tile.on { background: #16301f !important; box-shadow: none; }
+html.dark .wh, html.dark .wsub, html.dark .wsub2, html.dark .tile .state { color: var(--label-2); }
+html.dark .wplay { background: #fff; color: #000; }
+html.dark .seg button.on { background: #636366 !important; }
+html.dark .seg button { color: #fff !important; }
+html.dark .gl { background: rgba(28,28,30,.92); color: #fff; }
+html.dark .gl small { color: var(--label-2); }
+html.dark .gl.late { background: #3a1212; color: #ff8a8a; }
+html.dark .dots span { background: #3a3a3c; }
+html.dark .dots span.miss { background: #000; }
+html.dark .capsule { background: rgba(120,120,128,.3); }
+html.dark .switch::after { background: #fff; }
+html.dark .alarm .a-later { color: #fff !important; }
+html.dark .ico.glass { filter: brightness(.75); }
+html.dark .addslot span { border-color: rgba(255,255,255,.3) !important; color: rgba(255,255,255,.6) !important; }
+html.dark .hero { text-shadow: none; }
+html.dark body:not(.idle) #face-layer { opacity: .1; }
+
+/* 시계 페이스: 밤엔 검은 바탕에 낮은 밝기의 회색 숫자 */
+html.dark .fc { background: #000 !important; color: #8e8e93 !important; }
+html.dark .bn { color: #8e8e93 !important; }
+html.dark .bn + .bn { color: rgba(255,146,48,.7) !important; }
+html.dark .ana text { fill: #8e8e93; }
+html.dark .ana line { stroke: #c7c7cc; }
+html.dark .flow { background: #000 !important; animation: none; }
+html.dark .fn { opacity: .55; }
+html.dark .ph { filter: brightness(.45); }
+html.dark .cal, html.dark .cal .wd b { color: #c7c7cc; }
+html.dark .cal .ev { color: #c7c7cc; }
+html.dark .mod { background: #000 !important; color: #c7c7cc; }
+html.dark .mw { background: #1c1c1e; }
+html.dark .fdate { color: #8e8e93; }
