@@ -1,5 +1,5 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v5';
+const VERSION = 'kp-v6';
 const FILES = [
   "./",
   "meds/",
@@ -36,7 +36,8 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    // 저장해둔 예전 파일 말고 항상 새 파일이 있는지 확인
+    fetch(e.request, { cache: 'no-cache' })
       .then(res => {
         const copy = res.clone();
         if (res.ok) caches.open(VERSION).then(c => c.put(e.request, copy));
