@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f3f5f9">
+<title>커피</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%23f59e0b%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="page">
+  <div class="topbar">
+    <a class="icon-btn" href="../" aria-label="홈으로" id="back"></a>
+    <div class="spacer"></div>
+    <button class="icon-btn" type="button" aria-label="레시피 편집" id="open-edit"></button>
+  </div>
+  <h1 class="title">커피</h1>
+  <p class="subtitle">레시피를 누르면 타이머가 열려요</p>
+  <div class="grid" id="recipes"></div>
+</main>
+
+<div class="sheet-back" id="timer-sheet">
+  <div class="sheet" role="dialog" aria-label="타이머">
+    <div class="sheet-head"><h3 id="t-title"></h3><button class="icon-btn" type="button" aria-label="닫기" id="t-close"></button></div>
+    <div class="timer">
+      <div class="ring">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="54" fill="none" stroke-width="8"/><circle class="bar" id="t-bar" cx="60" cy="60" r="54" fill="none" stroke-width="8" stroke-linecap="round"/></svg>
+        <div class="center"><div class="sec" id="t-sec">0</div><div class="unit">초</div></div>
+      </div>
+      <p class="step-name" id="t-step"></p>
+      <p class="step-pour" id="t-pour"></p>
+      <p class="step-next" id="t-next"></p>
+      <div class="steps-dots" id="t-dots"></div>
+      <div class="controls">
+        <button class="round-btn" type="button" aria-label="처음부터" id="t-reset"></button>
+        <button class="round-btn main" type="button" aria-label="시작" id="t-play"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-back" id="edit-sheet">
+  <div class="sheet" role="dialog" aria-label="레시피 편집">
+    <div class="sheet-head"><h3>레시피 편집</h3><button class="btn primary" type="button" id="edit-done">완료</button></div>
+    <div id="edit-body"></div>
+  </div>
+</div>
+
+<script type="module" src="coffee.js"></script>
+<script type="module" src="../shared/watch.js"></script>
+</body>
+</html>
