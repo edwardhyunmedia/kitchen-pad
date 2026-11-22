@@ -57,7 +57,8 @@ function drawFace(force) {
   if (!force && key === faceKey) return;
   faceKey = key;
   $('face-layer').dataset.face = f.id;
-  renderFace($('face-layer'), now, faceCtx(f));
+  try { renderFace($('face-layer'), now, faceCtx(f)); }
+  catch { $('face-layer').innerHTML = `<div class="fc fallback"><div class="bn">${pad(now.getHours())}</div><div class="bn">${pad(now.getMinutes())}</div></div>`; }
 }
 
 // ---------- 상단 시간·날짜·날씨 ----------

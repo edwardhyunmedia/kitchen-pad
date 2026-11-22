@@ -40,16 +40,16 @@ html.dark .hero { text-shadow: none; }
 html.dark body:not(.idle) #face-layer { opacity: .1; }
 
 /* 시계 페이스: 밤엔 검은 바탕에 낮은 밝기의 회색 숫자 */
-html.dark .fc { background: #000 !important; color: #8e8e93 !important; }
-html.dark .bn { color: #8e8e93 !important; }
-html.dark .bn + .bn { color: rgba(255,146,48,.7) !important; }
-html.dark .ana text { fill: #8e8e93; }
+html.dark .fc { background: #000 !important; color: #d1d1d6 !important; }
+html.dark .bn { color: #e5e5ea !important; }
+html.dark .bn + .bn { color: #ff9f0a !important; }
+html.dark .ana text { fill: #d1d1d6; }
 html.dark .ana line { stroke: #c7c7cc; }
 html.dark .flow { background: #000 !important; animation: none; }
-html.dark .fn { opacity: .55; }
-html.dark .ph { filter: brightness(.45); }
+html.dark .fn { opacity: .85; }
+html.dark .ph { filter: brightness(.6); }
 html.dark .cal, html.dark .cal .wd b { color: #c7c7cc; }
 html.dark .cal .ev { color: #c7c7cc; }
 html.dark .mod { background: #000 !important; color: #c7c7cc; }
 html.dark .mw { background: #1c1c1e; }
-html.dark .fdate { color: #8e8e93; }
+html.dark .fdate { color: #aeaeb2; }

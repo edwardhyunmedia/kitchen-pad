@@ -15,7 +15,7 @@ function apply() {
   if (top && night !== wasNight) {
     try {
       if (window.fully && n.dimScreen) {
-        if (night) { savedBrightness = fully.getScreenBrightness(); fully.setScreenBrightness(15); }
+        if (night) { savedBrightness = fully.getScreenBrightness(); fully.setScreenBrightness(Math.min(90, Number(savedBrightness) || 90)); }
         else if (wasNight && savedBrightness != null) fully.setScreenBrightness(savedBrightness);
       }
     } catch { /* Fully 기능 없음 */ }
