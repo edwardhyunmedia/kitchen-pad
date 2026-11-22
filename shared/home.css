@@ -137,3 +137,8 @@ body.idle .glance { display: flex; }
 .gl.late i { background: #ff3b30; }
 /* 앱이 열려 있으면 알약을 앱의 아래 버튼 위로 */
 body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px, 7vh, 68px) + 24px); }
+
+/* 키트 맞춤: 위젯 모서리 26, 편집 버튼 유리 */
+.wg { border-radius: calc(26px * var(--s, 1)); }
+.minus { background: rgba(120,120,128,.55) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 0 0 .5px rgba(0,0,0,.06); }
+.addcard { border-radius: calc(26px * var(--s, 1)); }

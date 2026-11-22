@@ -1,0 +1,126 @@
+/* iOS 27 UI 키트(Apple_iOS_27_UI_Kit.sketch)에서 뽑은 값으로 맞춘 공통 스타일
+   - 색: System Colors / Labels / Fills / Backgrounds / Separators (Light)
+   - 글자: Large Title 34/41 Bold, Title2 22/28, Headline 17/22 Semibold, Body 17/22, Subheadline 15/20, Footnote 13/18
+   - 재질: Liquid Glass Light Regular Small / Large
+   - 크기: 버튼 50·34·28 캡슐, 토글 64×28(손잡이 38×24), 슬라이더 트랙 6, 세그먼트 48·32 캡슐,
+           목록 행 52 · 모서리 26, 알림 300 · 모서리 34
+   태블릿은 폰보다 커서 --s 배율로 키움 */
+:root {
+  --s: 1;
+  --label: #000; --label-2: rgba(60,60,67,.60); --label-3: rgba(60,60,67,.30); --label-4: rgba(60,60,67,.18);
+  --fill-1: rgba(120,120,120,.20); --fill-2: rgba(120,120,128,.16); --fill-3: rgba(118,118,128,.12); --fill-4: rgba(116,116,128,.08);
+  --bg: #fff; --bg-2: #f2f2f7; --sep: rgba(0,0,0,.12); --sep-opaque: #c6c6c8;
+  --blue: #0088ff; --green: #34c759; --red: #ff383c; --orange: #ff8d28; --yellow: #ffcc00; --brown: #ac7f5e; --gray: #8e8e93;
+  --ink: var(--label); --ink-2: var(--label-2); --ink-3: var(--label-3); --fill: var(--fill-3);
+  /* Liquid Glass (Light) */
+  --glass-s-bg: rgba(255,255,255,.62);
+  --glass-s-shadow: 0 0 0 .5px rgba(0,0,0,.09), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(0,0,0,.03), 0 8px 15px rgba(0,0,0,.04);
+  --glass-l-bg: rgba(255,255,255,.72);
+  --glass-l-shadow: 0 0 0 .5px rgba(0,0,0,.07), inset 0 2px .5px -1px rgba(255,255,255,1), 0 18px 46px rgba(0,0,0,.14);
+  --glass-blur: blur(24px) saturate(180%);
+  --r-list: calc(26px * var(--s)); --r-alert: calc(34px * var(--s)); --r-sheet: calc(40px * var(--s));
+}
+@media (min-width: 441px) { :root { --s: 1.18; } }
+@media (min-width: 700px) { :root { --s: 1.4; } }
+
+body { color: var(--label); }
+
+/* 글자 */
+h1.title { font-size: calc(34px * var(--s)); line-height: 1.2; font-weight: 700; letter-spacing: -.01em; }
+.subtitle { font-size: calc(15px * var(--s)); color: var(--label-2); }
+h2.section { font-size: calc(22px * var(--s)); font-weight: 700; letter-spacing: -.01em; }
+.group-label { font-size: calc(13px * var(--s)); color: var(--label-2); margin: calc(22px * var(--s)) calc(16px * var(--s)) 7px; }
+.note { font-size: calc(13px * var(--s)) !important; color: var(--label-2) !important; }
+
+/* 리퀴드 글래스 버튼 (Bordered = 유리, Prominent = 파란 유리) */
+.icon-btn, .round-btn, .bottombar .icon-btn, .pillbtn, .tb, .x {
+  background: var(--glass-s-bg) !important; color: var(--label) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-s-shadow) !important; border: 0;
+}
+.icon-btn { width: calc(50px * var(--s)); height: calc(50px * var(--s)); border-radius: 50%; }
+.icon-btn svg { width: 44%; height: 44%; }
+.bottombar .icon-btn { width: calc(56px * var(--s)); height: calc(56px * var(--s)); }
+.round-btn { width: calc(70px * var(--s)); height: calc(70px * var(--s)); border-radius: 50%; }
+.round-btn.main, .pillbtn.done, .btn.primary, .navbar .nav-right {
+  background: var(--blue) !important; color: #fff !important;
+  box-shadow: 0 0 0 .5px rgba(0,0,0,.06), inset 0 1px 1px rgba(255,255,255,.45), 0 8px 18px rgba(0,136,255,.25) !important;
+}
+.round-btn.main { background: var(--brown) !important; box-shadow: inset 0 1px 1px rgba(255,255,255,.4), 0 8px 18px rgba(172,127,94,.3) !important; }
+.pillbtn { height: calc(50px * var(--s)); padding: 0 calc(22px * var(--s)); border-radius: 999px; font-size: calc(17px * var(--s)); font-weight: 600; }
+.btn { min-height: calc(50px * var(--s)); padding: 0 calc(22px * var(--s)); border-radius: 999px; font-size: calc(17px * var(--s)); font-weight: 600;
+  background: var(--glass-s-bg); box-shadow: var(--glass-s-shadow); }
+
+/* 시트: 둥근 유리 판이 떠 있는 모양 (상하좌우 8px 띄움) */
+.sheet-back { background: rgba(0,0,0,.18); align-items: flex-end; padding: 0 8px 8px; }
+.sheet { background: var(--bg-2); border-radius: var(--r-sheet); box-shadow: var(--glass-l-shadow); max-height: calc(100% - 20px); }
+#timer-sheet .sheet { height: calc(100% - 20px); background: #fff; }
+.navbar { min-height: calc(70px * var(--s)); padding: 0 calc(16px * var(--s)); }
+.navbar h3 { font-size: calc(17px * var(--s)); font-weight: 600; }
+.navbar .nav-right { min-height: calc(44px * var(--s)); padding: 0 calc(18px * var(--s)); border-radius: 999px; font-weight: 600; font-size: calc(17px * var(--s)); }
+.sheet-body { padding: 0 calc(16px * var(--s)) calc(30px * var(--s)); }
+
+/* 그룹 목록: 행 52, 모서리 26, 구분선 안쪽 16 */
+.group { background: #fff; border-radius: var(--r-list); }
+.row { min-height: calc(52px * var(--s)); padding: 0 calc(16px * var(--s)); font-size: calc(17px * var(--s)); gap: calc(12px * var(--s)); }
+.row + .row::before { left: calc(16px * var(--s)); background: var(--sep); height: .5px; }
+.row input[type="text"], .row input[type="number"] { font-size: calc(17px * var(--s)); color: var(--label-2); }
+.row input[type="time"] { font-size: calc(16px * var(--s)); background: var(--fill-3); border-radius: 999px; padding: calc(6px * var(--s)) calc(12px * var(--s)); }
+.chip { border-radius: 999px; background: var(--fill-3); }
+.row-btn { font-size: calc(17px * var(--s)); color: var(--blue); padding: calc(14px * var(--s)) 0; }
+.row-btn.danger { color: var(--red); }
+.add-chip, .link-btn { color: var(--blue); font-size: calc(17px * var(--s)); }
+
+/* 토글 64×28, 손잡이 38×24 알약 */
+.switch { width: calc(64px * var(--s)); height: calc(28px * var(--s)); border-radius: 999px; background: var(--fill-2); }
+.switch::after { top: calc(2px * var(--s)); left: calc(2px * var(--s)); width: calc(38px * var(--s)); height: calc(24px * var(--s)); border-radius: 999px; box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+.switch.on { background: var(--green); }
+.switch.on::after { transform: translateX(calc(22px * var(--s))); }
+
+/* 슬라이더: 트랙 6, 손잡이 37×24 유리 알약 */
+input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; height: calc(28px * var(--s)); }
+input[type="range"]::-webkit-slider-runnable-track { height: calc(6px * var(--s)); border-radius: 3px; background: var(--fill-2); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: calc(37px * var(--s)); height: calc(24px * var(--s)); border-radius: 999px; background: #fff;
+  margin-top: calc(-9px * var(--s)); box-shadow: 0 0 0 .5px rgba(0,0,0,.08), 0 3px 8px rgba(0,0,0,.14); }
+
+/* 세그먼트: 캡슐, 선택은 흰 유리 알약 */
+.seg { background: var(--fill-3) !important; border-radius: 999px !important; padding: calc(3px * var(--s)) !important; }
+.seg button { min-height: calc(32px * var(--s)); border-radius: 999px !important; font-size: calc(15px * var(--s)); font-weight: 600; padding: 0 calc(22px * var(--s)) !important; color: var(--label) !important; }
+.seg button.on { background: #fff !important; box-shadow: 0 0 0 .5px rgba(0,0,0,.04), 0 3px 8px rgba(0,0,0,.12) !important; }
+
+/* 알림 (약 알람): 유리 카드 300 · 모서리 34 · 캡슐 버튼 */
+.alarm { background: rgba(0,0,0,.22) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center !important; padding: 24px !important; }
+.alarm.open { display: flex; }
+.alarm .a-top, .alarm .a-mid, .alarm .a-btns { width: min(calc(300px * var(--s) * 1.25), 92vw); }
+.alarm .a-top { background: var(--glass-l-bg); border-radius: var(--r-alert) var(--r-alert) 0 0; padding: calc(26px * var(--s)) calc(20px * var(--s)) 0; color: var(--label) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); font-size: calc(17px * var(--s)) !important; font-weight: 600; flex-direction: column; gap: 6px !important; }
+.alarm .a-top svg { width: calc(34px * var(--s)) !important; height: calc(34px * var(--s)) !important; color: var(--orange); }
+.alarm .a-mid { flex: none !important; background: var(--glass-l-bg); padding: calc(6px * var(--s)) calc(20px * var(--s)) calc(16px * var(--s));
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+.alarm .a-time { font-size: calc(44px * var(--s)) !important; font-weight: 700 !important; margin: 0 !important; }
+.alarm li { font-size: calc(17px * var(--s)) !important; }
+.alarm li small { font-size: calc(15px * var(--s)) !important; }
+.alarm .a-btns { background: var(--glass-l-bg); border-radius: 0 0 var(--r-alert) var(--r-alert); padding: 0 calc(16px * var(--s)) calc(16px * var(--s)); gap: calc(10px * var(--s)) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: 0 18px 46px rgba(0,0,0,.18); }
+.alarm .a-btns button { min-height: calc(48px * var(--s)) !important; font-size: calc(17px * var(--s)) !important; font-weight: 600 !important; }
+.alarm .a-later { background: var(--fill-3) !important; color: var(--label) !important; }
+.alarm .a-stop { background: var(--blue) !important; color: #fff !important; }
+
+/* 아래 알약들: 유리 */
+.live-pill, .toast { background: var(--glass-l-bg) !important; color: var(--label) !important; box-shadow: var(--glass-l-shadow) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); font-size: calc(15px * var(--s)) !important; }
+.live-pill b { color: var(--brown) !important; }
+.toast button { background: var(--blue) !important; color: #fff !important; }
+
+/* 타일 (약·커피 목록) */
+.tile { border-radius: calc(26px * var(--s)); background: var(--bg-2); }
+.tile.on { background: #fff; box-shadow: 0 0 0 .5px var(--sep), 0 6px 18px rgba(0,0,0,.06); }
+.tile .name { font-size: calc(17px * var(--s)); font-weight: 600; }
+.tile .state { font-size: calc(15px * var(--s)); }
+
+/* 작은 시간 */
+.mini-time { font-size: calc(17px * var(--s)); font-weight: 600; }
+/* 시트는 오른쪽 위 작은 시간 아래에서 시작 */
+.sheet-back { padding-top: calc(44px * var(--s)); }
+.sheet { max-height: 100%; }
+#timer-sheet .sheet { height: 100%; }
