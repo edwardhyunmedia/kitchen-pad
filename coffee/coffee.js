@@ -49,8 +49,9 @@ function openTimer(r) {
   tellParent({ type: 'coffee-open', open: true });
   draw();
 }
-// 닫아도 타이머는 계속 돌고, 아래쪽 알약으로 보여요
+// 닫으면 타이머도 멈춤 (뒤에서 몰래 돌거나 알림이 뜨지 않게)
 function closeTimer() {
+  if (myRun()) save('coffee.run', null);
   cancelAnimationFrame(raf);
   $('timer-sheet').classList.remove('open');
   window.kpCoffeeOpen = false;

@@ -275,15 +275,6 @@ window.addEventListener('message', e => {
   else if (m.type === 'pick') closeApp(() => openPicker());
   else if (m.type === 'coffee-open') { coffeeSheetOpen = !!m.open; window.kpCoffeeOpen = coffeeSheetOpen; }
 });
-// 타이머 알약을 누르면 커피 앱을 겹쳐 열기
-document.addEventListener('click', e => {
-  const pill = e.target.closest('.live-pill');
-  if (!pill) return;
-  e.preventDefault();
-  wake();
-  if (appOpen) closeApp(() => openApp('coffee/?run', pill)); else openApp('coffee/?run', pill);
-}, true);
-
 // ---------- 시계 화면 정보 (멀리서 보는 다음 약) ----------
 function drawGlance() {
   const g = $('glance');
