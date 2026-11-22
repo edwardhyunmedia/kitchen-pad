@@ -22,3 +22,8 @@ check();
 setInterval(check, 20000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
 window.addEventListener('kp-meds-changed', () => setTimeout(check, 0));
+
+// 오프라인 캐시 등록
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(new URL('../sw.js', import.meta.url)).catch(() => {});
+}
