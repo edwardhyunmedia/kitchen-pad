@@ -20,3 +20,15 @@ test('pause and resume continues', () => {
   t.start(100); assert.equal(t.elapsed(105), 15); assert.equal(t.running, true);
 });
 test('reset', () => { const t = new Timer(); t.start(0); t.reset(); assert.equal(t.elapsed(99), 0); assert.equal(t.running, false); });
+
+import { runElapsed, startRun, pauseRun } from '../coffee/logic.js';
+test('persisted run survives page change', () => {
+  let r = startRun(null, 'basic', 1000);
+  assert.equal(runElapsed(r, 6000), 5);
+  r = pauseRun(r, 11000);
+  assert.equal(runElapsed(r, 99000), 10);
+  r = startRun(r, 'basic', 20000);
+  assert.equal(runElapsed(r, 22000), 12);
+  assert.equal(startRun(r, 'strong', 30000).recipeId, 'strong');
+  assert.equal(runElapsed(startRun(r, 'strong', 30000), 30000), 0);
+});

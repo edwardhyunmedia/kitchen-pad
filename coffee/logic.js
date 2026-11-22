@@ -42,3 +42,15 @@ export class Timer {
   pause(now) { if (this.since !== null) { this.acc += now - this.since; this.since = null; } }
   elapsed(now) { return this.acc + (this.since !== null ? now - this.since : 0); }
 }
+
+// 페이지를 옮겨도 이어지는 커피 실행 상태 (ms 시각 기준, 저장 가능)
+// { recipeId, acc: 누적 ms, since: 시작 시각 ms | null(일시정지) }
+export function startRun(run, recipeId, now) {
+  if (!run || run.recipeId !== recipeId) return { recipeId, acc: 0, since: now };
+  return run.since == null ? { ...run, since: now } : { ...run };
+}
+export function pauseRun(run, now) {
+  if (!run || run.since == null) return run;
+  return { ...run, acc: run.acc + (now - run.since), since: null };
+}
+export const runElapsed = (run, now) => (run ? (run.acc + (run.since != null ? now - run.since : 0)) / 1000 : 0);
