@@ -34,6 +34,7 @@ $('file').addEventListener('change', async e => {
   setSettings({ bg: { ...getSettings().bg, type: 'photo' } });
   draw();
 });
+$('file2').addEventListener('change', async e => { const f = e.target.files[0]; if (f) { await savePhoto(f); e.target.value = ''; draw(); } });
 $('blur').addEventListener('input', e => setSettings({ bg: { ...getSettings().bg, blur: Number(e.target.value) } }));
 $('dim').addEventListener('input', e => setSettings({ bg: { ...getSettings().bg, dim: Number(e.target.value) } }));
 $('del-photo').addEventListener('click', async () => { await deletePhoto(); setSettings({ bg: { ...getSettings().bg, type: 'default' } }); draw(); });

@@ -57,7 +57,7 @@ function ensureOverlay() {
   overlay.innerHTML = `
       <div class="a-top">${icons.bell}약 먹을 시간이에요</div>
       <div class="a-mid"><div class="a-time"></div><ul></ul></div>
-      <button class="a-stop" type="button">확인</button>`;
+      <div class="a-btns"><button class="a-later" type="button">10분 뒤 다시</button><button class="a-stop" type="button">먹었어요</button></div>`;
   document.body.appendChild(overlay);
   return overlay;
 }
@@ -66,11 +66,12 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 
 export const isAlarmOn = () => !!loop;
 
-// items: [{ title, sub }]
-export function startAlarm(items, onAck) {
+// items: [{ title, sub }], onTaken: 먹었어요, onLater: 10분 뒤 다시
+export function startAlarm(items, onTaken, onLater) {
   const el = ensureOverlay();
   el.querySelector('ul').innerHTML = items.map(i => `<li>${esc(i.title)}<small>${esc(i.sub || '')}</small></li>`).join('');
-  el.querySelector('.a-stop').onclick = () => { stopAlarm(); onAck && onAck(); };
+  el.querySelector('.a-stop').onclick = () => { stopAlarm(); onTaken && onTaken(); };
+  el.querySelector('.a-later').onclick = () => { stopAlarm(); onLater && onLater(); };
   el.classList.add('open');
   const now = new Date();
   el.querySelector('.a-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;

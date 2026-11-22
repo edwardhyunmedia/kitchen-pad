@@ -8,6 +8,8 @@ import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
+import { currentSlotFor, toggleTaken } from '../meds/logic.js';
+import { setLog } from '../meds/state.js';
 
 const $ = id => document.getElementById(id);
 const body = document.body;
@@ -30,7 +32,7 @@ let summary = null;
 // ---------- 배경 ----------
 async function applyBg() {
   photo = await getPhotoUrl();
-  const usePhoto = settings.bg.type === 'photo' && photo;
+  const usePhoto = false; // 일단 배경은 흰색만
   const bg = $('bgl');
   bg.className = 'bgl ' + (usePhoto ? 'photo' : 'plain');
   bg.style.backgroundImage = usePhoto ? `url('${photo}')` : '';
@@ -104,8 +106,16 @@ function refreshData() {
 
 // ---------- 자는 상태 ↔ 깨어난 상태 ----------
 let idleTimer = null;
-const busy = () => body.classList.contains('edit') || document.querySelector('.sheet-back.open, .picker.open, .alarm.open');
-function sleep() { if (!busy()) body.classList.add('idle'); else armIdle(); }
+const busy = () => body.classList.contains('edit') || document.querySelector('#home .sheet-back.open, .sheet-back.open, .picker.open, .alarm.open');
+function coffeeRunning() { const r = load('coffee.run', null); return !!(r && r.since != null); }
+function sleep() {
+  if (busy()) return armIdle();
+  if (appOpen) {
+    if (coffeeSheetOpen && coffeeRunning()) return armIdle(); // 커피 타이머 보는 중엔 그대로
+    return closeApp(() => body.classList.add('idle'));
+  }
+  body.classList.add('idle');
+}
 function armIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(sleep, Math.max(5, settings.idleSec) * 1000); }
 function wake() {
   body.classList.remove('idle');
@@ -121,7 +131,7 @@ const LONG = 550;
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 document.addEventListener('pointerdown', e => {
-  if (e.target.closest('.sheet-back, .picker, .alarm, .editbar, .live-pill')) return;
+  if (e.target.closest('.sheet-back, .picker, .alarm, .editbar, .live-pill, .appview, .toast')) return;
   const idle = body.classList.contains('idle');
   const itEl = e.target.closest('.it[data-id]');
   press = { x: e.clientX, y: e.clientY, idle, el: itEl, id: itEl?.dataset.id, target: e.target, moved: false };
@@ -184,9 +194,10 @@ document.addEventListener('pointerup', e => {
   }
   if (p.target.closest('[data-play]')) return startCoffee();
   if (!p.id) return;
-  if (p.id.startsWith('app:')) location.href = APP_INFO[p.id].href;
-  else if (p.id === 'w:coffee') location.href = 'coffee/';
-  else location.href = 'meds/';
+  if (p.id.startsWith('app:')) openApp(APP_INFO[p.id].href, p.el);
+  else if (p.id.startsWith('w:person:')) quickTake(p.id.slice(9));
+  else if (p.id === 'w:coffee') openApp('coffee/', p.el);
+  else openApp('meds/', p.el);
 });
 document.addEventListener('pointercancel', () => { if (press?.el) { press.el.classList.remove('dragging'); press.el.style.transform = ''; } press = null; });
 
@@ -194,7 +205,94 @@ function startCoffee() {
   const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
   if (!r) return;
   save('coffee.run', startRun(null, r.id, Date.now()));
-  location.href = 'coffee/?run';
+  openApp('coffee/?run', document.querySelector('.it[data-id="w:coffee"]'));
+}
+
+// ---------- 위젯 눌러서 바로 먹음 체크 (3초 되돌리기) ----------
+let undo = null, toastTimer = null;
+function toast(text, onUndo) {
+  $('toast-text').textContent = text;
+  undo = onUndo;
+  $('toast').classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('toast').classList.remove('on'); undo = null; }, 3000);
+}
+$('toast-undo').addEventListener('click', () => { if (undo) undo(); $('toast').classList.remove('on'); undo = null; });
+function quickTake(personId) {
+  const cfg = getConfig();
+  const slot = currentSlotFor(cfg, getLog(), personId, new Date());
+  const name = cfg.people.find(p => p.id === personId)?.name || '';
+  if (!slot) { toast(`${name} 오늘 약은 다 먹었어요`, null); $('toast-undo').hidden = true; return; }
+  $('toast-undo').hidden = false;
+  setLog(toggleTaken(getLog(), slot.key, new Date()));
+  toast(`${name} ${slot.time} ${slot.medName} 먹음`, () => setLog(toggleTaken(getLog(), slot.key, new Date())));
+}
+
+// ---------- 앱 열기: 아이콘에서 커지며 열림, 새로고침 없음 ----------
+let appOpen = false, appFrom = null, coffeeSheetOpen = false;
+function rectOf(el) {
+  const r = el?.getBoundingClientRect();
+  return r && r.width ? r : { left: innerWidth / 2 - 40, top: innerHeight / 2 - 40, width: 80, height: 80 };
+}
+function setFromTransform(r) {
+  const v = $('appview');
+  v.style.transform = `translate(${r.left}px, ${r.top}px) scale(${r.width / innerWidth}, ${r.height / innerHeight})`;
+  v.style.borderRadius = `${Math.max(40, innerWidth * 0.12)}px`;
+}
+function openApp(href, fromEl) {
+  const v = $('appview');
+  appFrom = fromEl;
+  $('appframe').src = href;
+  v.style.transition = 'none';
+  setFromTransform(rectOf(fromEl));
+  v.style.opacity = '0';
+  v.classList.add('open');
+  appOpen = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    v.style.transition = '';
+    v.style.transform = 'none';
+    v.style.borderRadius = '0px';
+    v.style.opacity = '1';
+  }));
+  armIdle();
+}
+function closeApp(then) {
+  if (!appOpen) { then && then(); return; }
+  const v = $('appview');
+  appOpen = false;
+  coffeeSheetOpen = false;
+  window.kpCoffeeOpen = false;
+  const el = appFrom && document.contains(appFrom) ? appFrom : null;
+  setFromTransform(rectOf(el));
+  v.style.opacity = '0';
+  setTimeout(() => { v.classList.remove('open'); $('appframe').src = 'about:blank'; refreshData(); drawGrid(); then && then(); }, 320);
+}
+window.addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data?.kp) return;
+  const m = e.data;
+  if (m.type === 'close') closeApp();
+  else if (m.type === 'activity') armIdle();
+  else if (m.type === 'pick') closeApp(() => openPicker());
+  else if (m.type === 'coffee-open') { coffeeSheetOpen = !!m.open; window.kpCoffeeOpen = coffeeSheetOpen; }
+});
+// 타이머 알약을 누르면 커피 앱을 겹쳐 열기
+document.addEventListener('click', e => {
+  const pill = e.target.closest('.live-pill');
+  if (!pill) return;
+  e.preventDefault();
+  wake();
+  if (appOpen) closeApp(() => openApp('coffee/?run', pill)); else openApp('coffee/?run', pill);
+}, true);
+
+// ---------- 시계 화면 정보 (멀리서 보는 다음 약) ----------
+function drawGlance() {
+  const g = $('glance');
+  const f = settings.face.id;
+  if (!summary || f === 'mod' || f === 'cal') { g.innerHTML = ''; return; }
+  const late = summary.people.find(p => p.late);
+  if (late) { g.innerHTML = `<span class="gl late"><i></i>${esc(late.name)} ${esc(late.lateTime)} ${esc(late.lateMed)} 아직 안 먹음</span>`; return; }
+  const n = summary.next;
+  g.innerHTML = n ? `<span class="gl"><i></i>다음 약 ${esc(n.time)} ${esc(n.medName)} <small>${esc(n.personName)}</small></span>` : '';
 }
 
 // ---------- 편집 모드 ----------
@@ -278,7 +376,11 @@ async function init() {
   setInterval(() => { drawHero(); drawFace(); }, 1000);
   setInterval(() => { if (!body.classList.contains('edit')) { refreshData(); drawGrid(); } }, 30000);
   setInterval(loadWeather, 10 * 60000);
-  window.addEventListener('kp-meds-changed', () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); });
+  const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
+  window.addEventListener('kp-meds-changed', onData);
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); } });
+  setInterval(drawGlance, 30000);
+  drawGlance();
   // 알람이 울리면 깨우기
   // (body 클래스를 바꾸면 다시 불리므로, 잠든 상태일 때만 깨움)
   setInterval(() => { if (body.classList.contains('idle') && document.querySelector('.alarm.open')) wake(); }, 500);

@@ -8,10 +8,16 @@ export const setLog = l => { save('meds.log', l); changed(); };
 export const getAcks = () => load('meds.acks', {});
 export const setAcks = a => save('meds.acks', a);
 
+export const getSnooze = () => load('meds.snooze', {});
+export const setSnooze = a => save('meds.snooze', a);
+
 export function prune(now = new Date()) {
   const today = dateKey(now);
   save('meds.log', pruneLog(getLog(), today));
   save('meds.acks', pruneLog(getAcks(), today, 2));
+  const sn = getSnooze();
+  for (const k of Object.keys(sn)) if (sn[k] < now.getTime()) delete sn[k];
+  setSnooze(sn);
 }
 
 // 같은 화면 안의 다른 부분에 "약 데이터 바뀜" 알림

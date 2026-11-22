@@ -1,6 +1,7 @@
 import { icons } from '../shared/icons.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
+import { tellParent } from '../shared/inframe.js';
 import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed } from './logic.js';
 
 const $ = id => document.getElementById(id);
@@ -45,6 +46,7 @@ function openTimer(r) {
   $('t-sub').textContent = `원두 ${r.dose}g, 물 ${r.water}g`;
   $('timer-sheet').classList.add('open');
   window.kpCoffeeOpen = true;
+  tellParent({ type: 'coffee-open', open: true });
   draw();
 }
 // 닫아도 타이머는 계속 돌고, 아래쪽 알약으로 보여요
@@ -52,6 +54,7 @@ function closeTimer() {
   cancelAnimationFrame(raf);
   $('timer-sheet').classList.remove('open');
   window.kpCoffeeOpen = false;
+  tellParent({ type: 'coffee-open', open: false });
 }
 function draw() {
   cancelAnimationFrame(raf);

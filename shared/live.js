@@ -4,6 +4,8 @@ import { icons } from './icons.js';
 import { beep } from './alarm.js';
 import { DEFAULT_RECIPES, timerState, runElapsed, totalSec } from '../coffee/logic.js';
 
+// 겹친 앱 안에서는 바깥 홈이 알약을 보여줌
+if (window === window.top) {
 const base = new URL('../', import.meta.url);
 const el = document.createElement('a');
 el.className = 'live-pill';
@@ -32,3 +34,4 @@ function tick() {
 }
 tick();
 setInterval(tick, 500);
+}

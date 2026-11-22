@@ -101,3 +101,39 @@ body.idle .hint.idle-hint { display: block; }
 .ico.glass { background: none; border-radius: 0; box-shadow: none; filter: drop-shadow(0 4px 10px rgba(0,0,0,.14)); }
 .ico.glass svg { width: 100%; height: 100%; display: block; }
 .addcard .ico.glass { filter: none; }
+
+/* ===== 흰 배경 ===== */
+body.homeview, body.homeview.plain { background: #fff; color: #000; }
+.bgl.plain { background: #fff; }
+.wg { background: #f2f2f7; backdrop-filter: none; -webkit-backdrop-filter: none; }
+body.plain .addslot span { border-color: rgba(60,60,67,.25); }
+.ico.glass { filter: drop-shadow(0 2px 6px rgba(0,0,0,.12)); }
+body:not(.idle) #face-layer { opacity: .07; }
+
+/* 겹쳐 열리는 앱 */
+.appview { position: fixed; inset: 0; z-index: 50; display: none; overflow: hidden; background: #fff; transform-origin: 0 0;
+  transition: transform .34s cubic-bezier(.2,.85,.25,1), border-radius .34s, opacity .25s; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+.appview.open { display: block; }
+.appview iframe { width: 100vw; height: 100vh; border: 0; display: block; }
+.alarm { z-index: 100; }
+.live-pill { z-index: 90; }
+
+/* 되돌리기 알림 */
+.toast { position: fixed; left: 50%; bottom: 3vh; transform: translate(-50%, 30px); opacity: 0; pointer-events: none; z-index: 95;
+  display: flex; align-items: center; gap: 16px; padding: 12px 12px 12px 22px; border-radius: 999px; background: rgba(28,28,30,.92); color: #fff;
+  font-size: clamp(15px, 2vh, 21px); font-weight: 600; transition: opacity .2s, transform .2s; white-space: nowrap; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast button { background: rgba(255,255,255,.18); color: #fff; font-weight: 700; padding: 8px 16px; border-radius: 999px; }
+body:has(.live-pill.on) .toast { bottom: calc(3vh + 64px); }
+
+/* 시계 화면: 멀리서 보는 다음 약 */
+.glance { position: fixed; left: 0; right: 0; bottom: 9vh; z-index: 3; display: none; justify-content: center; pointer-events: none; }
+body.idle .glance { display: flex; }
+.gl { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 999px; background: rgba(242,242,247,.92); color: #000;
+  font-size: clamp(17px, 2.5vh, 28px); font-weight: 600; }
+.gl small { color: rgba(60,60,67,.6); font-weight: 500; }
+.gl i { width: 12px; height: 12px; border-radius: 50%; background: #ff9500; }
+.gl.late { background: #fff0ef; color: #d70015; }
+.gl.late i { background: #ff3b30; }
+/* 앱이 열려 있으면 알약을 앱의 아래 버튼 위로 */
+body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px, 7vh, 68px) + 24px); }

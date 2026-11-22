@@ -56,3 +56,32 @@ test('pruneLog keeps 90 days', () => {
   const out = pruneLog({ [old]: 'x', [keep + '#0']: true }, '2026-11-22');
   assert.deepEqual(Object.keys(out), [keep + '#0']);
 });
+
+import { currentSlotFor, history } from '../meds/logic.js';
+const cfg2 = { remindAfterMin: 30, maxRemind: 2, people: [{ id: 'me', name: '나', meds: [{ id: 'a', name: 'A', times: ['08:00', '20:00'] }, { id: 'b', name: 'B', times: ['12:00'] }] }] };
+test('current slot: earliest late first, else next upcoming', () => {
+  assert.equal(currentSlotFor(cfg2, {}, 'me', at(13, 0)).time, '08:00');
+  const log = { [slotKey('2026-11-22', 'me', 'a', '08:00')]: 'x' };
+  assert.equal(currentSlotFor(cfg2, log, 'me', at(13, 0)).time, '12:00');
+  const log2 = { ...log, [slotKey('2026-11-22', 'me', 'b', '12:00')]: 'x' };
+  assert.equal(currentSlotFor(cfg2, log2, 'me', at(13, 0)).time, '20:00');
+  const all = { ...log2, [slotKey('2026-11-22', 'me', 'a', '20:00')]: 'x' };
+  assert.equal(currentSlotFor(cfg2, all, 'me', at(21, 0)), null);
+});
+test('snooze hides an alarm until it expires', () => {
+  const snooze = { [k8]: at(8, 10).getTime() };
+  assert.deepEqual(pendingAlarms(cfg, {}, {}, at(8, 5), snooze), []);
+  assert.equal(pendingAlarms(cfg, {}, {}, at(8, 11), snooze).length, 1);
+});
+test('7-day history', () => {
+  const log = { [slotKey('2026-11-21', 'me', 'a', '08:00')]: 'x', [slotKey('2026-11-22', 'me', 'b', '12:00')]: 'x' };
+  const h = history(cfg2, log, at(13, 0), 7);
+  assert.equal(h.length, 7);
+  assert.equal(h[0].date, '2026-11-22');
+  assert.equal(h[6].date, '2026-11-16');
+  const today = h[0].people[0];
+  assert.deepEqual([today.taken, today.total, today.due], [1, 3, 2]); // 오늘은 지난 시간만 due
+  const yday = h[1].people[0];
+  assert.deepEqual([yday.taken, yday.total, yday.due], [1, 3, 3]);
+  assert.deepEqual(yday.slots.map(s => s.done), [true, false, false]);
+});

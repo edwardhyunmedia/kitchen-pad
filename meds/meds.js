@@ -1,5 +1,5 @@
 import { icons } from '../shared/icons.js';
-import { todaySlots, toggleTaken, dateKey } from './logic.js';
+import { todaySlots, toggleTaken, dateKey, history } from './logic.js';
 import { getConfig, setConfig, getLog, setLog } from './state.js';
 
 const $ = id => document.getElementById(id);
@@ -132,6 +132,32 @@ $('settings-body').addEventListener('click', e => {
 $('open-settings').addEventListener('click', openSettings);
 $('close-settings').addEventListener('click', closeSettings);
 
-window.addEventListener('kp-meds-changed', render);
+// ---------- 기록 (최근 7일) ----------
+const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+function renderHist() {
+  const h = history(getConfig(), getLog(), new Date(), 7);
+  const people = getConfig().people;
+  $('hist').innerHTML = people.map(p => `<div class="hgrp"><h2 class="section">${esc(p.name)}</h2>` + h.map((d, i) => {
+    const me = d.people.find(x => x.id === p.id);
+    if (!me || !me.total) return '';
+    const label = i === 0 ? '오늘' : i === 1 ? '어제' : `${Number(d.date.slice(5, 7))}/${d.dom}`;
+    return `<div class="hrow"><div class="hd">${label}<small>${DAYS[d.day]}요일</small></div>
+      <div class="dots">${me.slots.map(s => `<span class="${s.done ? 'ok' : s.due ? 'miss' : ''}" title="${esc(s.time)} ${esc(s.medName)}"></span>`).join('')}</div>
+      <div class="cnt">${me.taken}/${me.total}</div></div>`;
+  }).join('') + '</div>').join('') + `<div class="legend"><span><i style="background:var(--green)"></i>먹음</span><span><i style="box-shadow:inset 0 0 0 3px var(--red)"></i>안 먹음</span><span><i style="background:#d1d1d6"></i>아직</span></div>
+    <p class="note" style="color:var(--ink-2);font-size:14px">지금 설정된 약과 시간 기준으로 보여줘요.</p>`;
+}
+function setTab(hist) {
+  $('tab-today').classList.toggle('on', !hist);
+  $('tab-hist').classList.toggle('on', hist);
+  $('people').hidden = hist;
+  $('hist').hidden = !hist;
+  if (hist) renderHist();
+}
+$('tab-today').addEventListener('click', () => setTab(false));
+$('tab-hist').addEventListener('click', () => setTab(true));
+
+window.addEventListener('kp-meds-changed', () => { render(); if (!$('hist').hidden) renderHist(); });
+window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds')) { render(); if (!$('hist').hidden) renderHist(); } });
 render();
 setInterval(render, 30000);
