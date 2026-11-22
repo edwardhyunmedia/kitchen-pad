@@ -1,4 +1,5 @@
 import { icons } from './icons.js';
+import { APP_ICONS } from './appicons.js';
 import { load, save } from './store.js';
 import { getConfig, getLog } from '../meds/state.js';
 import { medsSummary } from './summary.js';
@@ -15,9 +16,9 @@ const pad = n => String(n).padStart(2, '0');
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const APP_INFO = {
-  'app:meds': { name: '약', icon: 'pill', grad: 'linear-gradient(160deg,#ffb340,#ff8a00)', href: 'meds/' },
-  'app:coffee': { name: '커피', icon: 'cup', grad: 'linear-gradient(160deg,#c3a17a,#8f6e49)', href: 'coffee/' },
-  'app:settings': { name: '설정', icon: 'gear', grad: 'linear-gradient(160deg,#a5a5ad,#7c7c84)', href: 'settings/' },
+  'app:meds': { name: '약', icon: 'pill', svg: 'meds', grad: '#ff9500', href: 'meds/' },
+  'app:coffee': { name: '커피', icon: 'cup', svg: 'coffee', grad: '#a2845e', href: 'coffee/' },
+  'app:settings': { name: '설정', icon: 'gear', svg: 'settings', grad: '#8e8e93', href: 'settings/' },
 };
 
 let settings = getSettings();
@@ -88,7 +89,7 @@ function itemHtml(id) {
   const size = itemSize(id);
   if (size === 'app') {
     const a = APP_INFO[id];
-    return `<div class="it app" data-id="${esc(id)}" role="link" aria-label="${a.name}">${minus}<span class="ico" style="background:${a.grad}">${icons[a.icon]}</span></div>`;
+    return `<div class="it app" data-id="${esc(id)}" role="link" aria-label="${a.name}">${minus}<span class="ico glass">${APP_ICONS[a.svg]}</span></div>`;
   }
   return `<div class="it ${size}" data-id="${esc(id)}">${minus}${widgetHtml(id)}</div>`;
 }
@@ -203,7 +204,7 @@ $('done-btn').addEventListener('click', exitEdit);
 $('add-btn').addEventListener('click', openAdd);
 
 const ADD_INFO = id => {
-  if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', icon: APP_INFO[id].icon, grad: APP_INFO[id].grad };
+  if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', svg: APP_INFO[id].svg };
   if (id.startsWith('w:person:')) { const p = summary.people.find(x => `w:person:${x.id}` === id); return { title: `${p?.name || ''} 약`, sub: '위젯', icon: 'pill', grad: '#ff9500' }; }
   if (id === 'w:coffee') return { title: '커피', sub: '위젯', icon: 'cup', grad: '#a2845e' };
   return { title: '다음 약', sub: '긴 위젯', icon: 'bell', grad: '#ff9500' };
@@ -211,7 +212,7 @@ const ADD_INFO = id => {
 function openAdd() {
   const list = addable(layout, getConfig().people);
   $('add-list').innerHTML = list.length
-    ? list.map(id => { const a = ADD_INFO(id); return `<button class="addcard" type="button" data-addid="${esc(id)}"><span class="ico" style="background:${a.grad}">${icons[a.icon]}</span><span>${esc(a.title)}<small>${a.sub}</small></span></button>`; }).join('')
+    ? list.map(id => { const a = ADD_INFO(id); return `<button class="addcard" type="button" data-addid="${esc(id)}">${a.svg ? `<span class="ico glass">${APP_ICONS[a.svg]}</span>` : `<span class="ico" style="background:${a.grad}">${icons[a.icon]}</span>`}<span>${esc(a.title)}<small>${a.sub}</small></span></button>`; }).join('')
     : '<p class="empty">모두 홈 화면에 있어요</p>';
   $('add-sheet').classList.add('open');
 }
