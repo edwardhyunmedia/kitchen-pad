@@ -83,7 +83,8 @@ $('t-close').addEventListener('click', closeTimer);
 
 // ---------- 편집 ----------
 let draft = null;
-function openEdit() { draft = getRecipes(); renderEdit(); $('edit-sheet').classList.add('open'); }
+let armed = null;
+function openEdit() { draft = getRecipes(); armed = null; renderEdit(); $('edit-sheet').classList.add('open'); }
 function closeEdit() {
   draft = draft
     .map(r => ({
@@ -103,7 +104,7 @@ function renderEdit() {
   $('edit-body').innerHTML = draft.map((r, ri) => `
     <p class="group-label">레시피 ${ri + 1}</p>
     <div class="group">
-      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(r.name)}" data-f="${ri}.name" maxlength="20"></div>
+      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(r.name)}" placeholder="레시피 이름" data-f="${ri}.name" maxlength="20"></div>
       <div class="row"><span>원두(g)</span><input type="number" value="${esc(r.dose)}" data-f="${ri}.dose" style="width:100px"><span>물(g)</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:100px"></div>
       ${r.steps.map((s, si) => `
         <div class="row">
@@ -112,7 +113,7 @@ function renderEdit() {
           <input type="number" value="${esc(s.pourTo ?? '')}" data-s="${ri}.${si}.pourTo" style="width:84px" placeholder="-" aria-label="붓는 양"><span>g</span>
           <button class="icon-btn" type="button" style="width:40px" aria-label="단계 삭제" data-delstep="${ri}.${si}">${icons.close}</button>
         </div>`).join('')}
-      <div class="row"><button class="link-btn" type="button" data-addstep="${ri}">단계 추가</button><span class="grow"></span><button class="link-btn" type="button" style="color:var(--red)" data-delrecipe="${ri}">레시피 삭제</button></div>
+      <div class="row"><button class="link-btn" type="button" data-addstep="${ri}">단계 추가</button><span class="grow"></span><button class="link-btn" type="button" style="color:var(--red)" data-delrecipe="${ri}">${armed === ri ? '한 번 더 누르면 삭제' : '레시피 삭제'}</button></div>
     </div>`).join('') + `<button class="btn" type="button" data-addrecipe>레시피 추가</button>`;
 }
 $('edit-body').addEventListener('input', e => {
@@ -124,9 +125,14 @@ $('edit-body').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
   const d = b.dataset;
+  if (!d.delrecipe) armed = null;
   if (d.addstep) draft[d.addstep].steps.push({ label: '붓기', sec: 30, pourTo: '' });
   else if (d.delstep) { const [ri, si] = d.delstep.split('.'); draft[ri].steps.splice(si, 1); }
-  else if (d.delrecipe) draft.splice(d.delrecipe, 1);
+  else if (d.delrecipe) {
+    const ri = Number(d.delrecipe);
+    if (armed !== ri) { armed = ri; renderEdit(); return; }
+    draft.splice(ri, 1);
+  }
   else if ('addrecipe' in d) draft.push({ id: newId(), name: '', dose: 15, water: 250, steps: [{ label: '뜸 들이기', sec: 40, pourTo: 40 }] });
   else return;
   renderEdit();

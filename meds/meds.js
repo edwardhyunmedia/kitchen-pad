@@ -17,6 +17,11 @@ function render() {
   const now = new Date();
   const slots = todaySlots(cfg, now);
   const taken = slots.filter(s => log[s.key]).length;
+  if (!cfg.people.length) {
+    $('summary').textContent = '등록된 사람이 없어요. 오른쪽 위 설정에서 사람을 추가하세요.';
+    $('people').innerHTML = '';
+    return;
+  }
   $('summary').textContent = slots.length
     ? `오늘 ${slots.length}번 중 ${taken}번 먹었어요`
     : '아직 등록된 약이 없어요. 오른쪽 위 설정에서 추가하세요.';
@@ -52,9 +57,11 @@ $('people').addEventListener('click', e => {
 
 // ---------- 설정 ----------
 let draft = null;
+let armed = null; // 삭제 확인 대기 중인 항목
 
 function openSettings() {
   draft = getConfig();
+  armed = null;
   renderSettings();
   $('settings').classList.add('open');
 }
@@ -73,9 +80,9 @@ function closeSettings() {
 
 function renderSettings() {
   const people = draft.people.map((p, pi) => `
-    <p class="group-label">사람 ${pi + 1}</p>
+    <p class="group-label">${esc(p.name.trim() || '새 사람')}</p>
     <div class="group">
-      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(p.name)}" data-pname="${pi}" maxlength="12"></div>
+      <div class="row"><span>이름</span><input class="grow" type="text" value="${esc(p.name)}" placeholder="이름" data-pname="${pi}" maxlength="12"></div>
       ${p.meds.map((m, mi) => `
         <div class="row" style="flex-wrap:wrap">
           <input type="text" placeholder="약 이름" value="${esc(m.name)}" data-mname="${pi}.${mi}" style="flex:1 1 200px" maxlength="20">
@@ -84,10 +91,11 @@ function renderSettings() {
               <button class="icon-btn" type="button" style="width:40px" aria-label="시간 지우기" data-deltime="${pi}.${mi}.${ti}">${icons.close}</button>
             </span>`).join('')}
           <button class="link-btn" type="button" data-addtime="${pi}.${mi}">시간 추가</button>
-          <button class="link-btn" type="button" style="color:var(--red)" data-delmed="${pi}.${mi}">약 삭제</button>
+          <button class="link-btn" type="button" style="color:var(--red)" data-delmed="${pi}.${mi}">${armed === 'm' + pi + '.' + mi ? '한 번 더 누르면 삭제' : '약 삭제'}</button>
         </div>`).join('')}
-      <div class="row"><button class="link-btn" type="button" data-addmed="${pi}">약 추가</button></div>
-    </div>`).join('');
+      <div class="row"><button class="link-btn" type="button" data-addmed="${pi}">약 추가</button><span class="grow"></span>
+        <button class="link-btn" type="button" style="color:var(--red)" data-delperson="${pi}">${armed === 'p' + pi ? '한 번 더 누르면 삭제' : '사람 삭제'}</button></div>
+    </div>`).join('') + `<button class="btn" type="button" data-addperson>사람 추가</button>`;
   $('settings-body').innerHTML = people + `
     <p class="group-label">알림</p>
     <div class="group">
@@ -108,8 +116,12 @@ $('settings-body').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
   const d = b.dataset;
+  const arm = id => { if (armed === id) { armed = null; return true; } armed = id; renderSettings(); return false; };
+  if (!d.delmed && !d.delperson) armed = null;
   if (d.addmed) draft.people[d.addmed].meds.push({ id: newId(), name: '', times: ['08:00'] });
-  else if (d.delmed) { const [pi, mi] = d.delmed.split('.'); draft.people[pi].meds.splice(mi, 1); }
+  else if ('addperson' in d) draft.people.push({ id: 'p' + newId(), name: '', meds: [] });
+  else if (d.delperson) { if (!arm('p' + d.delperson)) return; draft.people.splice(d.delperson, 1); }
+  else if (d.delmed) { if (!arm('m' + d.delmed)) return; const [pi, mi] = d.delmed.split('.'); draft.people[pi].meds.splice(mi, 1); }
   else if (d.addtime) { const [pi, mi] = d.addtime.split('.'); draft.people[pi].meds[mi].times.push('20:00'); }
   else if (d.deltime) { const [pi, mi, ti] = d.deltime.split('.'); draft.people[pi].meds[mi].times.splice(ti, 1); }
   else return;
