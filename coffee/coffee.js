@@ -59,9 +59,11 @@ function openInfo(r) {
     ['물 온도', r.temp ? `${r.temp}°C` : ''], ['분쇄', r.grind || ''], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
   let t = 0;
   const steps = r.steps.map(st => { const at = t; t += st.sec; return `<li><span class="i-at">${clock(at)}</span><span class="i-lb">${esc(st.label)}</span><span class="i-to">${st.pourTo ? `${st.pourTo}g까지` : ''}</span></li>`; }).join('');
-  $('i-kind').textContent = a.kind;
+  const art = ART[a.art] || ART.v60;
+  const hb = (art.match(/fill="(#[0-9a-f]{6})"/i) || [])[1] || '#efe4d6';
   $('info-body').innerHTML = `
-    <div class="i-art">${ART[a.art] || ART.v60}</div>
+    <div class="i-hero" style="--hb:${hb}"><div class="i-glow"></div>${art}<span class="i-kind">${esc(a.kind)}</span></div>
+    <div class="i-pad">
     <h2 class="i-name">${esc(r.name)}</h2>
     <div class="i-origin">${esc(a.origin)}</div>
     <div class="i-facts">${facts.map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div>
@@ -69,12 +71,15 @@ function openInfo(r) {
     <h3 class="i-h">순서</h3>
     <ol class="i-steps">${steps}<li class="i-end"><span class="i-at">${clock(t)}</span><span class="i-lb">끝</span><span class="i-to"></span></li></ol>
     ${r.note && !ABOUT[r.id] ? `<p class="i-note">${esc(r.note)}</p>` : ''}
-    <button class="btn i-start" type="button" id="info-start">이 레시피로 시작</button>`;
+    <button class="btn i-start" type="button" id="info-start">이 레시피로 시작</button>
+    </div>`;
   $('info-start').onclick = () => { closeInfo(); openTimer(r); };
   $('info-sheet').classList.add('open');
   $('info-body').scrollTop = 0;
+  $('info-body').onscroll = () => $('info-close').classList.toggle('solid', $('info-body').scrollTop > 120);
 }
 function closeInfo() { $('info-sheet').classList.remove('open'); }
+$('info-close').innerHTML = icons.close;
 $('info-close').addEventListener('click', closeInfo);
 $('info-sheet').addEventListener('click', e => { if (e.target === e.currentTarget) closeInfo(); });
 $('recipes').addEventListener('keydown', e => { const info = e.target.closest('[data-info]'); if (info && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openInfo(getRecipes()[info.dataset.info]); } });
