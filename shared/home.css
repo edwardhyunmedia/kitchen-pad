@@ -152,3 +152,17 @@ body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px,
 .glance { bottom: max(3vh, 16px); }
 body.has-glance #face-layer .fc { padding-bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 1.5vh); }
 body.has-glance #face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
+
+/* ===== 정렬 맞춤: 한 화면에 꽉, 모든 왼쪽 선 일치 ===== */
+/* --cell, 좌우 여백은 home.js의 fitGrid가 화면 높이에 맞춰 정함 */
+#home { --wpad: calc((var(--cell) * 2 + var(--gap)) * .09); }
+.hero .t { font-variant-numeric: normal; }
+.hero .t, .hero .d, .wbig { display: block; }
+.scroll { overflow-y: auto; padding: 14px 10px 0; }
+.hgrid { gap: var(--gap); }
+.ico { width: 100%; }
+.it.app .minus { left: -8px; top: -8px; }
+.wg { padding: var(--wpad); }
+.it.wide .wg { padding: 0 var(--wpad); }
+.wplay { right: var(--wpad); bottom: var(--wpad); }
+.addslot span { width: 100%; }

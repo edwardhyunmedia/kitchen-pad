@@ -67,6 +67,38 @@ function drawHero() {
   $('h-time').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   $('h-date').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${DAYS[d.getDay()]}요일`;
   $('h-wx').innerHTML = weather ? `${WEATHER_ICONS[codeInfo(weather.code).icon]}${weather.temp}°` : '';
+  opticalLeft($('h-time')); opticalLeft($('h-date'));
+}
+
+// 큰 글자는 글자 자체의 왼쪽 여백 때문에 안쪽으로 들어가 보임 → 실제 잉크 위치에 맞춰 당김
+const inkCanvas = document.createElement('canvas').getContext('2d');
+function opticalLeft(el) {
+  if (!el || !el.textContent) return;
+  const cs = getComputedStyle(el);
+  inkCanvas.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const m = inkCanvas.measureText(el.textContent.trim()[0]);
+  el.style.marginLeft = `${Math.min(0, m.actualBoundingBoxLeft)}px`;
+}
+
+// 그리드를 화면 높이에 맞춰 줄여서 스크롤 없이 한 화면에. 좌우 여백도 같이 맞춰 시간·위젯 왼쪽 선 일치
+function fitGrid() {
+  const home = $('home'), grid = $('grid'), scroll = $('scroll');
+  const vw = document.documentElement.clientWidth, vh = innerHeight;
+  const gap = vw * 0.042, basePad = vw * 0.05;
+  const wCell = (vw - 2 * basePad - 3 * gap) / 4;
+  home.style.setProperty('--cell', `${wCell}px`);
+  home.style.paddingLeft = home.style.paddingRight = `${basePad}px`;
+  const rows = getComputedStyle(grid).gridTemplateRows.split(' ').filter(Boolean).length;
+  if (!rows) return;
+  const top = scroll.getBoundingClientRect().top + 14;
+  const bar = body.classList.contains('edit') ? (document.querySelector('.editbar')?.offsetHeight || 0) + vh * 0.03 + gap : Math.max(vh * 0.03, 16);
+  const hCell = (vh - top - bar - (rows - 1) * gap) / rows;
+  const cell = Math.max(wCell * 0.45, Math.min(wCell, hCell));
+  const pad = (vw - 4 * cell - 3 * gap) / 2;
+  home.style.setProperty('--cell', `${cell}px`);
+  home.style.paddingLeft = home.style.paddingRight = `${pad}px`;
+  grid.querySelectorAll('.wbig').forEach(opticalLeft);
+  opticalLeft($('h-time')); opticalLeft($('h-date'));
 }
 
 // ---------- 그리드 ----------
@@ -109,7 +141,10 @@ function itemHtml(id) {
 }
 function drawGrid() {
   $('grid').innerHTML = layout.map(itemHtml).join('') + `<div class="it app addslot" data-add><span>${icons.plus}</span></div>`;
+  fitGrid();
 }
+addEventListener('resize', () => fitGrid());
+document.fonts?.ready.then(() => fitGrid());
 function refreshData() {
   const cfg = getConfig();
   summary = medsSummary(cfg, getLog(), new Date());
@@ -223,6 +258,7 @@ function startCoffee() {
 // ---------- 위젯 눌러서 바로 먹음 체크 (3초 되돌리기) ----------
 let undo = null, toastTimer = null;
 function toast(text, onUndo) {
+  $('toast-undo').hidden = !onUndo;
   $('toast-text').textContent = text;
   undo = onUndo;
   $('toast').classList.add('on');
@@ -302,8 +338,8 @@ function drawGlance() {
 }
 
 // ---------- 편집 모드 ----------
-function enterEdit() { body.classList.add('edit'); clearTimeout(idleTimer); }
-function exitEdit() { body.classList.remove('edit'); save('home.layout', layout); armIdle(); }
+function enterEdit() { body.classList.add('edit'); clearTimeout(idleTimer); fitGrid(); }
+function exitEdit() { body.classList.remove('edit'); save('home.layout', layout); armIdle(); fitGrid(); }
 $('done-btn').addEventListener('click', exitEdit);
 $('add-btn').addEventListener('click', openAdd);
 
@@ -361,7 +397,16 @@ $('pstrip').addEventListener('click', e => {
 });
 $('swatches').addEventListener('click', e => { const b = e.target.closest('[data-sw]'); if (b) { pick.color = Number(b.dataset.sw); drawPicker(); } });
 $('tg-date').addEventListener('click', () => { pick.showDate = pick.showDate === false; drawPicker(); });
-$('tg-wx').addEventListener('click', () => { pick.showWeather = pick.showWeather === false; drawPicker(); });
+$('tg-wx').addEventListener('click', async () => {
+  pick.showWeather = pick.showWeather === false;
+  drawPicker();
+  if (pick.showWeather === false) return;
+  // 날씨 받아오기가 꺼져 있으면 같이 켬 (보내는 건 고정된 마포구 좌표뿐)
+  if (!settings.weather) settings = setSettings({ weather: true });
+  if (!weather) { toast('날씨 받아오는 중…'); await loadWeather(); }
+  if (weather) { toast(`날씨 ${weather.temp}°`); drawPicker(); }
+  else toast('날씨를 못 받아왔어요. 인터넷 연결을 확인하세요');
+});
 $('pick-done').addEventListener('click', () => {
   settings = setSettings({ face: pick });
   $('picker').classList.remove('open');
@@ -388,7 +433,7 @@ async function init() {
   setInterval(loadEvents, 5 * 60000);
   const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
   window.addEventListener('kp-meds-changed', onData);
-  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
   setInterval(drawGlance, 30000);
   drawGlance();
   // 알람이 울리면 깨우기

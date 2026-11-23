@@ -2,6 +2,7 @@ import { icons } from '../shared/icons.js';
 import { save, load } from '../shared/store.js';
 import { isCalUrl, getEvents } from '../shared/calendar.js';
 import { faceById } from '../shared/faces.js';
+import { getWeather, codeInfo } from '../shared/weather.js';
 import { getSettings, setSettings, savePhoto, getPhotoUrl, deletePhoto } from '../shared/settings.js';
 
 const $ = id => document.getElementById(id);
@@ -39,7 +40,16 @@ $('file2').addEventListener('change', async e => { const f = e.target.files[0]; 
 $('blur').addEventListener('input', e => setSettings({ bg: { ...getSettings().bg, blur: Number(e.target.value) } }));
 $('dim').addEventListener('input', e => setSettings({ bg: { ...getSettings().bg, dim: Number(e.target.value) } }));
 $('del-photo').addEventListener('click', async () => { await deletePhoto(); setSettings({ bg: { ...getSettings().bg, type: 'default' } }); draw(); });
-$('weather').addEventListener('click', () => { setSettings({ weather: !getSettings().weather }); draw(); });
+$('weather').addEventListener('click', () => { setSettings({ weather: !getSettings().weather }); draw(); showWeather(); });
+async function showWeather() {
+  const on = !!getSettings().weather;
+  $('wx-row').hidden = !on;
+  if (!on) return;
+  $('wx-now').textContent = '받아오는 중…';
+  const w = await getWeather();
+  $('wx-now').textContent = w ? `${w.temp}° ${codeInfo(w.code).label}` : '못 받아왔어요 (인터넷 확인)';
+}
+showWeather();
 $('idle').addEventListener('change', e => setSettings({ idleSec: Number(e.target.value) }));
 $('reset-layout').addEventListener('click', () => {
   if (!armedReset) { armedReset = true; $('reset-layout').textContent = '한 번 더 누르면 처음대로'; return; }

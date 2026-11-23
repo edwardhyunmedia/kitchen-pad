@@ -263,3 +263,24 @@ body:has(.bottombar) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px, 7v
 .alarm .a-later { background: rgba(120,120,128,.18); color: #000; }
 .alarm .a-stop { width: auto; }
 .alarm { background: rgba(255,255,255,.92); }
+
+/* 좌우 스크롤 금지: 칸이 내용 때문에 넓어지지 않게, 긴 이름은 두 줄까지 */
+html { overflow-x: hidden; }
+.page { overflow-x: hidden; }
+.grid { grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); }
+@media (orientation: portrait) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (orientation: portrait) and (max-width: 440px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tile { min-width: 0; }
+.tile .name, .tile .state { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+
+/* 오른쪽 위 작은 시간: 글자 오른쪽 끝을 내용 오른쪽 선에 맞춤 */
+:root { --page-x: 20px; }
+@media (orientation: portrait) and (min-width: 700px) { :root { --page-x: 32px; } }
+@media (orientation: portrait) and (max-width: 440px) { :root { --page-x: 14px; } }
+.page { padding-left: var(--page-x); padding-right: var(--page-x); }
+body .mini-time { background: inherit !important; right: calc(var(--page-x) - 10px) !important; }
+h2.section { margin-left: 0; margin-right: 0; }
+[hidden] { display: none !important; }
+body .mini-time { padding: 2px 6px !important; right: calc(var(--page-x) - 6px) !important; }
+/* 편집 칸: 숫자 끝선 맞추기 (단위 칸 너비 고정) */
+.row .unit { display: inline-block; min-width: 1.7em; text-align: left; }

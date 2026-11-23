@@ -82,6 +82,7 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
   <p class="group-label">날씨</p>
   <div class="group">
     <div class="row"><span class="label grow">날씨 보기</span><button class="switch" type="button" id="weather" aria-label="날씨 보기"></button></div>
+    <div class="row" id="wx-row" hidden><span class="label grow">지금 마포구</span><span id="wx-now" style="color:var(--ink-2)"></span></div>
   </div>
   <p class="note">켜면 날씨를 받아오려고 마포구 위치(좌표)만 날씨 서비스(Open-Meteo)에 보내요. 약 기록, 이름, 사진 같은 다른 정보는 보내지 않아요. 끄면 아무것도 보내지 않아요.</p>
 
