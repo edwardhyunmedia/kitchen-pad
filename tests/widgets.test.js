@@ -71,14 +71,17 @@ test('weather sky follows day/night and condition', () => {
 test('coffee: beans and water are the big numbers, last used recipe first', () => {
   const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }, { id: 'r2', name: '인디아', dose: 20, water: 180, temp: 93, grind: '11', ice: 150, steps: [{ sec: 60 }] }];
   const s = widgetBody('w:coffee', 's', { ...base, coffee: { recipes, current: recipes[1] } });
-  assert.match(s, /원두.*20<i>g<\/i>/s);
-  assert.match(s, /물.*180<i>ml<\/i>/s);
+  assert.match(s, /20<i>g<\/i>/);
+  assert.match(s, /180<i>ml<\/i>/);
+  assert.match(s, /인디아/);
   assert.match(s, /93° · 분쇄 11</);
-  assert.match(widgetBody('w:coffee', 'm', { ...base, coffee: { recipes, current: recipes[1] } }), /93° · 분쇄 11 · 얼음 150g · 1분/);
   assert.match(s, /data-play="r2"/);
+  // 온도·분쇄도가 없는 레시피는 아래 줄 없음 (숫자만 깔끔하게)
+  assert.ok(!widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }).includes('w-sub'));
   const m = widgetBody('w:coffee', 'm', { ...base, coffee: { recipes, current: recipes[1] } });
   assert.equal((m.match(/data-play=/g) || []).length, 2);
-  assert.match(m, /원두 15g · 물 250ml/);
+  assert.match(m, /15g · 250ml/);
+  assert.match(m, /93° · 분쇄 11</);
 });
 test('coffee while brewing shows the step, pour target and time left', () => {
   const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }];

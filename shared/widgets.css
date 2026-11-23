@@ -225,3 +225,14 @@ html, body, .scroll { overscroll-behavior: none; }
 .w-cside { flex-basis: 46%; }
 .w-cof { justify-content: center; }
 .w-sub.w-wrap { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* 커피 정리: 위 한 줄(기호·이름·버튼), 아래 큰 숫자 두 줄 */
+.w-chd { min-width: 0; }
+.w-chd > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.w-chd .w-play { flex: none; }
+.w-big { font-size: calc(var(--pt) * 30); font-weight: 650; letter-spacing: -.03em; line-height: 1.08; font-variant-numeric: tabular-nums; color: var(--c1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-big i { font-style: normal; font-size: .6em; font-weight: 600; margin-left: .06em; color: var(--c2); letter-spacing: 0; }
+.w-coffee .w-sub { margin-top: calc(var(--pt) * 4); }
+.w-chd { justify-content: space-between; }
+.wg .w-chd > .sym { width: calc(var(--pt) * 24); height: calc(var(--pt) * 24); }
+.w-coffee .w-cname { font-size: calc(var(--pt) * 15); margin-bottom: calc(var(--pt) * 2); }
