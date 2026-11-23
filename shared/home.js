@@ -59,7 +59,7 @@ function drawFace(force) {
   const now = new Date();
   const f = settings.face;
   const analog = f.id === 'ana' || f.id === 'mini';
-  const key = [f.id, f.color, f.showDate, f.showWeather, weather?.temp, facePhoto(), now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
+  const key = [f.id, f.color, f.showDate, f.showWeather, f.showEvents, events.length, weather?.temp, facePhoto(), now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
   if (!force && key === faceKey) return;
   faceKey = key;
   $('face-layer').dataset.face = f.id;
@@ -336,18 +336,40 @@ window.addEventListener('message', e => {
   else if (m.type === 'coffee-open') { coffeeSheetOpen = !!m.open; window.kpCoffeeOpen = coffeeSheetOpen; }
 });
 // ---------- 시계 화면 정보 (멀리서 보는 다음 약) ----------
-function drawGlance() {
-  const g = $('glance');
-  requestAnimationFrame(() => body.classList.toggle('has-glance', !!g.textContent.trim()));
+function glanceHtml() {
   const f = settings.face.id;
-  if (!summary || f === 'mod' || f === 'cal') { g.innerHTML = ''; return; }
+  if (!summary || f === 'mod' || f === 'cal') return '';
   const late = summary.people.find(p => p.late);
-  if (late) { g.innerHTML = `<span class="gl late"><i></i>${esc(late.name)} ${esc(late.lateTime)} ${esc(late.lateMed)} 아직 안 먹음</span>`; return; }
+  if (late) return `<span class="gl late"><i></i>${esc(late.name)} ${esc(late.lateTime)} ${esc(late.lateMed)} 아직 안 먹음</span>`;
   const ev = todayEvents(events, new Date()).find(e => !e.allDay && e.start > new Date());
   const n = summary.next;
-  if (ev && (!n || fmtTime(ev.start) <= n.time)) { g.innerHTML = `<span class="gl cal"><i></i>${fmtTime(ev.start)} ${esc(ev.title)}</span>`; return; }
-  g.innerHTML = n ? `<span class="gl"><i></i>다음 약 ${esc(n.time)} ${esc(n.medName)} <small>${esc(n.personName)}</small></span>` : '';
+  if (ev && (!n || fmtTime(ev.start) <= n.time)) return `<span class="gl cal"><i></i>${fmtTime(ev.start)} ${esc(ev.title)}</span>`;
+  return n ? `<span class="gl"><i></i>다음 약 ${esc(n.time)} ${esc(n.medName)} <small>${esc(n.personName)}</small></span>` : '';
 }
+// 아래로 쓸어내린 알림은 내용이 바뀔 때까지 숨김 (시계 위치는 알림이 있든 없든 그대로)
+function drawGlance() {
+  const html = glanceHtml();
+  $('glance').innerHTML = html && load('glance.hide', '') !== html ? html : '';
+}
+let glanceDrag = null;
+$('glance').addEventListener('pointerdown', e => { if (e.target.closest('.gl')) glanceDrag = { y: e.clientY }; });
+document.addEventListener('pointermove', e => {
+  if (!glanceDrag) return;
+  const gl = $('glance').querySelector('.gl');
+  if (gl) gl.style.transform = `translateY(${Math.max(0, e.clientY - glanceDrag.y)}px)`;
+});
+document.addEventListener('pointerup', e => {
+  if (!glanceDrag) return;
+  const dy = e.clientY - glanceDrag.y;
+  glanceDrag = null;
+  const gl = $('glance').querySelector('.gl');
+  if (!gl) return;
+  if (dy > 30) {
+    save('glance.hide', glanceHtml());
+    gl.classList.add('bye');
+    setTimeout(drawGlance, 250);
+  } else gl.style.transform = '';
+});
 
 // ---------- 편집 모드 ----------
 function enterEdit() { body.classList.add('edit'); clearTimeout(idleTimer); fitGrid(); }
@@ -400,6 +422,7 @@ function drawPicker() {
   $('swatches').innerHTML = f.colors.map((c, i) => `<button class="sw ${i === pick.color ? 'sel' : ''}" type="button" data-sw="${i}" aria-label="색 ${i + 1}" style="background:${c.length > 1 ? `linear-gradient(135deg,${c[0]} 50%,${c[c.length - 1]} 50%)` : c[0]}"></button>`).join('');
   $('tg-date').classList.toggle('on', pick.showDate !== false);
   $('tg-wx').classList.toggle('on', pick.showWeather !== false);
+  $('tg-ev').classList.toggle('on', pick.showEvents !== false);
 }
 $('pstrip').addEventListener('click', e => {
   const c = e.target.closest('[data-face]');
@@ -409,6 +432,11 @@ $('pstrip').addEventListener('click', e => {
 });
 $('swatches').addEventListener('click', e => { const b = e.target.closest('[data-sw]'); if (b) { pick.color = Number(b.dataset.sw); drawPicker(); } });
 $('tg-date').addEventListener('click', () => { pick.showDate = pick.showDate === false; drawPicker(); });
+$('tg-ev').addEventListener('click', () => {
+  pick.showEvents = pick.showEvents === false;
+  drawPicker();
+  if (pick.showEvents !== false && !settings.calUrl) toast('설정에서 구글 캘린더 연결 코드를 넣으면 일정이 나와요');
+});
 $('tg-wx').addEventListener('click', async () => {
   pick.showWeather = pick.showWeather === false;
   drawPicker();

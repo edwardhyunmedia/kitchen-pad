@@ -81,3 +81,11 @@
 .alb .at { font-size: 15vh; font-size: 15cqh; font-weight: 600; letter-spacing: -.04em; line-height: .9; }
 .alb .fdate { justify-content: flex-start; margin-top: 1.6vh; margin-top: 1.6cqh; font-size: 3vh; font-size: 3cqh; opacity: .95; }
 .alb .nophoto { position: absolute; left: 0; right: 0; top: 50%; text-align: center; color: #fff; opacity: .8; font-size: 2.6vh; font-size: 2.6cqh; }
+/* 일정 한 줄 */
+.fev { margin-top: 1.2vh; margin-top: 1.2cqh; font-size: 2.4vh; font-size: 2.4cqh; font-weight: 600; opacity: .75; max-width: 84vw; max-width: 84cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.corner .fw { margin-left: 2vw; margin-left: 2cqw; }
+.corner .fev { margin-top: .6vh; margin-top: .6cqh; font-size: .8em; }
+.cal .wd .fw { margin-left: 2vw; margin-left: 2cqw; color: #1d1d1f; }
+.cal .wd .fw svg { width: 1.2em; height: 1.2em; vertical-align: -.2em; }
+/* 숫자 시계 왼쪽 아래 글자: 아래 알림 알약보다 위에 */
+.corner { bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 2vh); }

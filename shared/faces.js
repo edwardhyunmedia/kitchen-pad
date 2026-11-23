@@ -17,13 +17,20 @@ export const FACES = [
   { id: 'mod', name: '홈 위젯', colors: [['#7b7ff0', '#5359d6'], ['#f4a261', '#e76f51'], ['#4fb3a5', '#2a7f8f'], ['#3a3a3c', '#1c1c1e']] },
 ];
 export const faceById = id => FACES.find(f => f.id === id) || FACES[0];
-export const DEFAULT_FACE = { id: 'big', color: 0, showDate: true, showWeather: true };
+export const DEFAULT_FACE = { id: 'big', color: 0, showDate: true, showWeather: true, showEvents: true };
 
 function dateLine(now, ctx, extraWeather = true) {
   const parts = [];
   if (ctx.opts.showDate !== false) parts.push(`${now.getMonth() + 1}월 ${now.getDate()}일 ${DAYS[now.getDay()]}요일`);
   if (extraWeather && ctx.opts.showWeather !== false && ctx.weather) parts.push(`<span class="fw">${WEATHER_ICONS[codeInfo(ctx.weather.code).icon]}${ctx.weather.temp}°</span>`);
-  return parts.length ? `<div class="fdate">${parts.join('')}</div>` : '';
+  return (parts.length ? `<div class="fdate">${parts.join('')}</div>` : '') + eventLine(now, ctx);
+}
+const wxSpan = ctx => (ctx.opts.showWeather !== false && ctx.weather ? `<span class="fw">${WEATHER_ICONS[codeInfo(ctx.weather.code).icon]}${ctx.weather.temp}°</span>` : '');
+// 다가오는 일정 한 줄 (시계 고르기에서 '일정'을 켰을 때)
+function eventLine(now, ctx) {
+  const e = ctx.opts.showEvents !== false && (ctx.nextEvents || [])[0];
+  if (!e) return '';
+  return `<div class="fev">${esc(dayLabel(e.start, now))} ${e.allDay ? '종일' : `${pad(e.start.getHours())}:${pad(e.start.getMinutes())}`} ${esc(e.title)}</div>`;
 }
 
 function analog(now, c, numerals, style) {
@@ -55,18 +62,18 @@ function calendar(now, ctx, c) {
   }
   const pad2 = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   const items = [
-    ...(ctx.events || []).map(e => ({ t: e.allDay ? '종일' : pad2(e.start), k: e.allDay ? '' : pad2(e.start), title: e.title, who: '' })),
+    ...(ctx.opts.showEvents !== false ? ctx.events || [] : []).map(e => ({ t: e.allDay ? '종일' : pad2(e.start), k: e.allDay ? '' : pad2(e.start), title: e.title, who: '' })),
     ...(ctx.summary?.slots || []).filter(s => !ctx.log?.[s.key] && s.at >= now).map(s => ({ t: s.time, k: s.time, title: s.medName, who: s.personName })),
   ].sort((a, b) => a.k.localeCompare(b.k)).slice(0, 4);
   let evs = items.map(i => `<div class="ev" style="border-color:${c[0]}">${esc(i.t)} ${esc(i.title)} ${i.who ? `<small>${esc(i.who)}</small>` : ''}</div>`).join('');
   // 오늘 남은 게 적으면 다가오는 날의 일정도 (날짜와 함께)
-  const later = (ctx.nextEvents || []).filter(e => !sameDay(e.start, now)).slice(0, Math.max(0, 4 - items.length));
+  const later = (ctx.opts.showEvents !== false ? ctx.nextEvents || [] : []).filter(e => !sameDay(e.start, now)).slice(0, Math.max(0, 4 - items.length));
   evs += later.map(e => `<div class="ev" style="border-color:${c[0]}">${esc(dayLabel(e.start, now))} ${e.allDay ? '종일' : pad2(e.start)} ${esc(e.title)}</div>`).join('');
   return `<div class="cal">
     <div class="mon" style="color:${c[0]}">${y}년 ${mo + 1}월</div>
-    <div class="day">${now.getDate()}</div><div class="wd">${DAYS[now.getDay()]}요일 <b>${pad(now.getHours())}:${pad(now.getMinutes())}</b></div>
+    <div class="day">${now.getDate()}</div><div class="wd">${DAYS[now.getDay()]}요일 <b>${pad(now.getHours())}:${pad(now.getMinutes())}</b>${wxSpan(ctx)}</div>
     <table><tr>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr><tr>${cells}</tr></table>
-    ${evs || '<div class="ev none">7일 안에 일정이 없어요</div>'}</div>`;
+    ${evs || `<div class="ev none">${ctx.opts.showEvents !== false ? '7일 안에 일정이 없어요' : '남은 약이 없어요'}</div>`}</div>`;
 }
 
 function modular(now, ctx, c) {
@@ -105,7 +112,7 @@ export function renderFace(root, now, ctx) {
       break;
     }
     case 'ana':
-      html = `<div class="fc" style="background:${c[0]};color:${c[1]}">${analog(now, c, 'big', 'big')}${ctx.opts.showDate !== false ? `<div class="corner">${DAYS[now.getDay()]} ${now.getDate()}</div>` : ''}</div>`;
+      html = `<div class="fc" style="background:${c[0]};color:${c[1]}">${analog(now, c, 'big', 'big')}<div class="corner">${ctx.opts.showDate !== false ? `${DAYS[now.getDay()]} ${now.getDate()}` : ''}${wxSpan(ctx)}${eventLine(now, ctx)}</div></div>`;
       break;
     case 'mini':
       html = `<div class="fc" style="background:${c[0]};color:${c[1]}">${analog(now, c, 'small', 'mini')}${dateLine(now, ctx)}</div>`;

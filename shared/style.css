@@ -284,3 +284,10 @@ h2.section { margin-left: 0; margin-right: 0; }
 body .mini-time { padding: 2px 6px !important; right: calc(var(--page-x) - 6px) !important; }
 /* 편집 칸: 숫자 끝선 맞추기 (단위 칸 너비 고정) */
 .row .unit { display: inline-block; min-width: 1.7em; text-align: left; }
+
+/* 오른쪽 위 작은 시간 뒤: 화면 맨 위를 배경색으로 덮어서 내려간 글자와 겹치지 않게 */
+:root { --page-bg: #fff; }
+html.dark { --page-bg: #000; }
+body:has(.mini-time)::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: calc(max(14px, 2.4vh) + clamp(36px, 5vh, 48px)); z-index: 69; pointer-events: none;
+  background: linear-gradient(to bottom, var(--page-bg) 72%, transparent); }
+body .mini-time { background: none !important; }

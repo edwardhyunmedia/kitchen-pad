@@ -150,8 +150,8 @@ body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px,
 
 /* 아래 '다음 약' 알림이 있으면 시계를 그만큼 위로 올려서 겹치지 않게 */
 .glance { bottom: max(3vh, 16px); }
-body.has-glance #face-layer .fc { padding-bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 1.5vh); }
-body.has-glance #face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
+#face-layer .fc { padding-bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 1.5vh); }
+#face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
 
 /* ===== 정렬 맞춤: 한 화면에 꽉, 모든 왼쪽 선 일치 ===== */
 /* --cell, 좌우 여백은 home.js의 fitGrid가 화면 높이에 맞춰 정함 */
@@ -187,3 +187,12 @@ html.dark .addslot span { background: #2c2c2e; }
 
 /* 숫자 잘림 방지: 그라데이션 글자는 상자 안쪽만 칠해지므로 상자를 글자보다 넉넉히 */
 .fn { padding: .1em .14em; margin: -.1em -.14em; }
+
+/* 알림 알약: 아래로 쓸어내리면 사라짐 */
+.glance .gl { pointer-events: auto; touch-action: none; transition: transform .2s, opacity .2s; }
+.glance .gl.bye { transform: translateY(120%) !important; opacity: 0; }
+
+/* 홈(앱 화면) 뒤: 시계 글자는 안 보이게, 사진 시계일 때 사진만 흐리게 깔기 */
+body:not(.idle) #face-layer :is(.bn, .pn, .fn, .fdate, .fev, .corner, .ana, .ac, .ag, .nophoto, .mt, .cal, .mg) { visibility: hidden; }
+body:not(.idle) #face-layer[data-face="photo"], body:not(.idle) #face-layer[data-face="album"] { opacity: .45 !important; filter: blur(16px) saturate(1.2); }
+body:not(.idle) #face-layer:not([data-face="photo"]):not([data-face="album"]) { opacity: 0 !important; }
