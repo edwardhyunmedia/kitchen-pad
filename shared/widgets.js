@@ -159,14 +159,16 @@ function wx(size, d) {
 }
 
 // ---------- 커피 ----------
-// 내리기 직전에 필요한 '원두 g, 물 ml'을 두 줄로 크게 (단위가 말해주니 '원두/물' 글자는 안 씀)
+// 내리기 직전에 필요한 '원두 g, 물 ml'을 한 줄로 크게 (좁으면 두 줄로 넘어감) (단위가 말해주니 '원두/물' 글자는 안 씀)
 // 위: 기호 + 레시피 이름, 오른쪽에 시작 버튼 / 아래: 숫자, 있으면 온도·분쇄도 한 줄
 const mins = r => Math.round((r.steps || []).reduce((a, s) => a + (s.sec || 0), 0) / 60);
 const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
 const extras = (r, short) => [r.temp ? `${r.temp}°` : '', r.grind ? `분쇄 ${r.grind}` : '', short ? '' : r.ice ? `얼음 ${r.ice}g` : '', short ? '' : `${mins(r)}분`].filter(Boolean).join(' · ');
 const unit = (n, u) => `${n}<i>${u}</i>`;
-// 위: 기호와 버튼만, 이름은 숫자 바로 위 한 줄 (긴 이름도 위젯 폭 전체를 써서 덜 잘리게)
-const cofHead = btn => `<div class="w-hd w-chd" style="color:${ACCENT.coffee}">${SYM.cup}${btn}</div>`;
+// 위: 큰 컵과 버튼만, 이름은 숫자 바로 위 두 줄까지
+// 머리의 컵: 버튼 높이에 맞춘 큰 컵 (선 굵기는 작은 기호와 같게 보이도록 가늘게)
+const CUP = `<svg class="sym w-cup" viewBox="2.9 7.9 18 12.2" fill="none" stroke="currentColor" stroke-width="1.26" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h12v4.5a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 4 13.5V9z"/><path d="M16 10.5h1.2a2.6 2.6 0 0 1 0 5.2H16"/></svg>`;
+const cofHead = btn => `<div class="w-hd w-chd" style="color:${ACCENT.coffee}">${CUP}${btn}</div>`;
 const cofName = name => `<div class="w-cname" style="color:${ACCENT.coffee}">${esc(name)}</div>`;
 const playBtn = r => `<button class="w-play" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button>`;
 function coffee(size, d) {
@@ -181,7 +183,7 @@ function coffee(size, d) {
       ${st.pourTo && !running.done ? `<div class="w-sub">남은 시간 ${mmss(running.remain)}</div>` : ''}`;
   }
   const ex = short => extras(r, short);
-  const main = short => `${cofName(r.name)}<div class="w-big">${r.dose ? v('cg', unit(r.dose, 'g')) : ''}</div><div class="w-big">${r.water ? v('cw', unit(r.water, 'ml')) : ''}</div>${ex(short) ? `<div class="w-sub ${short ? '' : 'w-wrap'}">${esc(ex(short))}</div>` : ''}`;
+  const main = short => `${cofName(r.name)}<div class="w-big w-cnum">${r.dose ? v('cg', unit(r.dose, 'g')) : ''}${r.water ? v('cw', unit(r.water, 'ml')) : ''}</div>${ex(short) ? `<div class="w-sub ${short ? '' : 'w-wrap'}">${esc(ex(short))}</div>` : ''}`;
   if (size === 's') return `${cofHead(playBtn(r))}<div class="w-fill"></div>${main(true)}`;
   const others = recipes.filter(x => x.id !== r.id).slice(0, 3);
   return `<div class="w-split"><div class="w-side w-cside">${cofHead(playBtn(r))}<div class="w-fill"></div>${main(true)}</div>

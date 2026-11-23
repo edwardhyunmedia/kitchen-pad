@@ -76,6 +76,10 @@ test('coffee: beans and water are the big numbers, last used recipe first', () =
   assert.match(s, /인디아/);
   assert.match(s, /93° · 분쇄 11</);
   assert.match(s, /data-play="r2"/);
+  // 원두·물은 한 줄에 (FigCraft에서 고친 모양), 머리의 컵은 큰 컵
+  assert.equal((s.match(/class="w-big/g) || []).length, 1);
+  assert.match(s, /20<i>g<\/i>.*180<i>ml<\/i>/);
+  assert.match(s, /w-cup/);
   // 온도·분쇄도가 없는 레시피는 아래 줄 없음 (숫자만 깔끔하게)
   assert.ok(!widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }).includes('w-sub'));
   const m = widgetBody('w:coffee', 'm', { ...base, coffee: { recipes, current: recipes[1] } });
