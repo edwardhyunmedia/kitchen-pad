@@ -53,3 +53,6 @@ html.dark .cal .ev { color: #c7c7cc; }
 html.dark .mod { background: #000 !important; color: #c7c7cc; }
 html.dark .mw { background: #1c1c1e; }
 html.dark .fdate { color: #aeaeb2; }
+html.dark .mcard { background: #2c2c2e; box-shadow: none; }
+html.dark .mcard.late { background: #3a1d1b; }
+html.dark .mhead b { color: #fff; }

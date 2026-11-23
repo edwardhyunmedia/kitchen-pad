@@ -105,4 +105,33 @@ export function renderFace(root, now, ctx) {
       break;
   }
   root.innerHTML = html;
+  opticalFix(root);
+}
+
+// 큰 숫자는 글자 자체의 좌우 여백(특히 1)과 자간 때문에 한쪽으로 치우쳐 보임
+// → 실제 잉크(보이는 획) 위치를 재서 가운데/왼쪽 선에 맞춤
+let ink = null;
+function inkBox(el) {
+  const text = el.textContent.trim();
+  if (!text || !el.offsetWidth || typeof document === 'undefined') return null;
+  ink = ink || document.createElement('canvas').getContext('2d');
+  const cs = getComputedStyle(el);
+  ink.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const ls = parseFloat(cs.letterSpacing) || 0;
+  let extra = 0;
+  if ('letterSpacing' in ink) ink.letterSpacing = `${ls}px`; else extra = ls * (text.length - 1);
+  const m = ink.measureText(text);
+  return { left: -m.actualBoundingBoxLeft, right: m.actualBoundingBoxRight + extra };
+}
+export function opticalFix(root) {
+  root.querySelectorAll('.bn, .pn, .fn').forEach(el => {
+    el.style.position = 'relative'; el.style.left = '0px';
+    const b = inkBox(el);
+    if (b) el.style.left = `${el.offsetWidth / 2 - (b.left + b.right) / 2}px`;
+  });
+  root.querySelectorAll('.mt, .cal .day').forEach(el => {
+    el.style.position = 'relative'; el.style.left = '0px';
+    const b = inkBox(el);
+    if (b) el.style.left = `${-b.left}px`;
+  });
 }

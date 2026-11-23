@@ -166,3 +166,18 @@ body.has-glance #face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
 .it.wide .wg { padding: 0 var(--wpad); }
 .wplay { right: var(--wpad); bottom: var(--wpad); }
 .addslot span { width: 100%; }
+
+/* 약 위젯 하나 (가로 4칸 x 2줄): 위에 다음 약, 아래 사람별 카드 — 카드 누르면 지금 약 먹음 체크 */
+.it.big { grid-column: span 4; grid-row: span 2; }
+.it.big .wg { justify-content: flex-start; gap: calc(var(--wpad) * .6); }
+.mhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; min-width: 0; }
+.mhead .wh:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mhead b { color: #000; font-weight: 700; }
+.mcards { flex: 1; min-height: 0; display: flex; gap: calc(var(--gap) * .6); }
+.mcard { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left;
+  padding: calc(var(--wpad) * .75); border-radius: calc(20px * var(--s, 1)); background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.mcard > span:last-child { display: block; min-width: 0; max-width: 100%; }
+.mcard .wbig, .mcard .wsub { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcard.late { background: #fff0ef; }
+.mcard.done .wbig { color: #34c759; }
+.mcard:active { transform: scale(.97); }

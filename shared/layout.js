@@ -1,24 +1,27 @@
 // 홈 화면 배치: 아이템 id 순서 목록
-// app:<이름> = 앱 아이콘(1칸), w:person:<id> = 사람 약 위젯(2x2), w:coffee = 커피 위젯(2x2), w:next = 다음 약(가로 4칸)
+// app:<이름> = 앱 아이콘(1칸), w:meds = 약 위젯(가로 4칸 x 2줄, 사람별 + 다음 약), w:coffee = 커피 위젯(2x2), w:cal = 오늘 일정(가로 4칸)
 export const APPS = ['app:meds', 'app:coffee', 'app:settings'];
 
-export function allItems(people) {
-  return [...APPS, ...(people || []).map(p => `w:person:${p.id}`), 'w:coffee', 'w:next', 'w:cal'];
+export function allItems() {
+  return [...APPS, 'w:meds', 'w:coffee', 'w:cal'];
 }
 
 export function itemSize(id) {
   if (id.startsWith('app:')) return 'app';
-  if (id === 'w:next' || id === 'w:cal') return 'wide';
+  if (id === 'w:meds') return 'big';
+  if (id === 'w:cal') return 'wide';
   return 'square';
 }
 
-export function defaultLayout(people) {
-  const ps = (people || []).map(p => `w:person:${p.id}`);
-  return ['app:meds', 'app:coffee', ...ps.slice(0, 1), 'app:settings', ...ps.slice(1), 'w:coffee', 'w:cal', 'w:next'];
+export function defaultLayout() {
+  return ['app:meds', 'app:coffee', 'w:coffee', 'app:settings', 'w:meds', 'w:cal'];
 }
 
+// 예전 배치(사람별 약 위젯, 다음 약 위젯)는 약 위젯 하나로 합쳐진 새 기본 배치로 바꿈
+const OLD = id => typeof id === 'string' && (id.startsWith('w:person:') || id === 'w:next');
+
 export function normalizeLayout(layout, people) {
-  if (!Array.isArray(layout)) return defaultLayout(people);
+  if (!Array.isArray(layout) || layout.some(OLD)) return defaultLayout(people);
   const ok = new Set(allItems(people));
   const seen = new Set();
   return layout.filter(id => typeof id === 'string' && ok.has(id) && !seen.has(id) && seen.add(id));

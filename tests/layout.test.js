@@ -4,21 +4,25 @@ import { allItems, itemSize, defaultLayout, normalizeLayout, moveItem, removeIte
 
 const people = [{ id: 'me', name: '나' }, { id: 'wife', name: '아내' }];
 
-test('all items include apps and widgets per person', () => {
-  const ids = allItems(people);
-  for (const id of ['app:meds', 'app:coffee', 'app:settings', 'w:person:me', 'w:person:wife', 'w:coffee', 'w:next']) assert.ok(ids.includes(id), id);
+test('all items: apps plus one meds widget, coffee, calendar', () => {
+  assert.deepEqual(allItems(people), ['app:meds', 'app:coffee', 'app:settings', 'w:meds', 'w:coffee', 'w:cal']);
 });
 test('sizes', () => {
   assert.equal(itemSize('app:meds'), 'app');
-  assert.equal(itemSize('w:person:me'), 'square');
-  assert.equal(itemSize('w:next'), 'wide');
+  assert.equal(itemSize('w:meds'), 'big');
+  assert.equal(itemSize('w:coffee'), 'square');
+  assert.equal(itemSize('w:cal'), 'wide');
+});
+test('old layout with per-person and next-dose widgets becomes the new default', () => {
+  const old = ['app:meds', 'app:coffee', 'w:person:me', 'app:settings', 'w:person:wife', 'w:coffee', 'w:cal', 'w:next'];
+  assert.deepEqual(normalizeLayout(old, people), defaultLayout(people));
 });
 test('default layout contains everything once', () => {
   const d = defaultLayout(people);
   assert.deepEqual([...d].sort(), allItems(people).sort());
 });
 test('normalize drops unknown and duplicates, keeps order', () => {
-  const out = normalizeLayout(['w:person:ghost', 'app:coffee', 'app:coffee', 'app:meds'], people);
+  const out = normalizeLayout(['w:ghost', 'app:coffee', 'app:coffee', 'app:meds'], people);
   assert.deepEqual(out, ['app:coffee', 'app:meds']);
 });
 test('normalize of missing/garbage returns default', () => {
@@ -38,7 +42,6 @@ test('remove and add back', () => {
   assert.deepEqual(addItem(l, 'w:coffee'), ['app:meds', 'w:coffee']);
   assert.deepEqual(addItem(['app:meds'], 'app:meds'), ['app:meds']);
 });
-test('a new person shows up as addable, not auto-inserted', () => {
-  const saved = normalizeLayout(['app:meds'], people);
-  assert.ok(addable(saved, [...people, { id: 'p3', name: '엄마' }]).includes('w:person:p3'));
+test('a removed meds widget can be added back', () => {
+  assert.ok(addable(['app:meds'], people).includes('w:meds'));
 });

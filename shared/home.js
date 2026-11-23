@@ -97,18 +97,22 @@ function fitGrid() {
   const pad = (vw - 4 * cell - 3 * gap) / 2;
   home.style.setProperty('--cell', `${cell}px`);
   home.style.paddingLeft = home.style.paddingRight = `${pad}px`;
-  grid.querySelectorAll('.wbig').forEach(opticalLeft);
+  grid.querySelectorAll('.wbig, .wg > .wh, .mhead > .wh:first-child, .mcard > .wh').forEach(opticalLeft);
   opticalLeft($('h-time')); opticalLeft($('h-date'));
 }
 
 // ---------- 그리드 ----------
 function widgetHtml(id) {
-  if (id.startsWith('w:person:')) {
-    const p = summary.people.find(x => `w:person:${x.id}` === id);
-    if (!p) return '';
-    const big = !p.total ? '약 없음' : p.allDone ? '다 먹었어요' : p.late ? `${p.late}번 안 먹음` : `${p.left}번 남음`;
-    const sub = p.late ? `${p.lateTime} ${p.lateMed}` : p.nextTime ? `${p.nextTime} ${p.nextMed}` : '';
-    return `<div class="wg"><div class="wh">${esc(p.name)}</div><div><div class="wbig ${p.late ? 'alert' : ''}">${esc(big)}</div>${sub ? `<div class="wsub">${esc(sub)}</div>` : ''}</div></div>`;
+  if (id === 'w:meds') {
+    const n = summary.next;
+    const head = `<div class="mhead"><div class="wh">약</div>${n ? `<div class="wh">다음 <b>${esc(n.time)}</b> ${esc(n.medName)} · ${esc(n.personName)}</div>` : ''}</div>`;
+    if (!summary.people.length) return `<div class="wg">${head}<div class="wbig">약 없음</div></div>`;
+    const cards = summary.people.map(p => {
+      const big = !p.total ? '약 없음' : p.allDone ? '다 먹었어요' : p.late ? `${p.late}번 안 먹음` : `${p.left}번 남음`;
+      const sub = p.late ? `${p.lateTime} ${p.lateMed}` : p.nextTime ? `${p.nextTime} ${p.nextMed}` : '';
+      return `<button class="mcard ${p.late ? 'late' : p.allDone ? 'done' : ''}" type="button" data-take="${esc(p.id)}" aria-label="${esc(p.name)} 지금 약 먹음 체크"><span class="wh">${esc(p.name)}</span><span><span class="wbig ${p.late ? 'alert' : ''}">${esc(big)}</span>${sub ? `<span class="wsub">${esc(sub)}</span>` : ''}</span></button>`;
+    }).join('');
+    return `<div class="wg">${head}<div class="mcards">${cards}</div></div>`;
   }
   if (id === 'w:coffee') {
     const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
@@ -123,10 +127,6 @@ function widgetHtml(id) {
       !hasCal ? '<div class="wsub">설정에서 구글 캘린더를 연결하세요</div>'
       : list.length ? list.map(e => `<div class="wcal"><b>${e.allDay ? '종일' : fmtTime(e.start)}</b>${esc(e.title)}</div>`).join('')
       : '<div class="wsub">오늘 남은 일정이 없어요</div>'}</div></div>`;
-  }
-  if (id === 'w:next') {
-    const n = summary.next;
-    return `<div class="wg"><div><div class="wh">다음 약</div><div class="wbig">${n ? esc(n.time) : '없음'}${n ? `<span class="wsub2">${esc(n.medName)} ${esc(n.personName)}</span>` : ''}</div></div></div>`;
   }
   return '';
 }
@@ -144,7 +144,7 @@ function drawGrid() {
   fitGrid();
 }
 addEventListener('resize', () => fitGrid());
-document.fonts?.ready.then(() => fitGrid());
+document.fonts?.ready.then(() => { fitGrid(); drawFace(true); });
 function refreshData() {
   const cfg = getConfig();
   summary = medsSummary(cfg, getLog(), new Date());
@@ -242,7 +242,7 @@ document.addEventListener('pointerup', e => {
   if (p.target.closest('[data-play]')) return startCoffee();
   if (!p.id) return;
   if (p.id.startsWith('app:')) openApp(APP_INFO[p.id].href, p.el);
-  else if (p.id.startsWith('w:person:')) quickTake(p.id.slice(9));
+  else if (p.target.closest('[data-take]')) quickTake(p.target.closest('[data-take]').dataset.take);
   else if (p.id === 'w:coffee') openApp('coffee/index.html', p.el);
   else openApp('meds/index.html', p.el);
 });
@@ -345,10 +345,10 @@ $('add-btn').addEventListener('click', openAdd);
 
 const ADD_INFO = id => {
   if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', svg: APP_INFO[id].svg };
-  if (id.startsWith('w:person:')) { const p = summary.people.find(x => `w:person:${x.id}` === id); return { title: `${p?.name || ''} 약`, sub: '위젯', icon: 'pill', grad: '#ff9500' }; }
+  if (id === 'w:meds') return { title: '약', sub: '큰 위젯', icon: 'pill', grad: '#ff9500' };
   if (id === 'w:coffee') return { title: '커피', sub: '위젯', icon: 'cup', grad: '#a2845e' };
   if (id === 'w:cal') return { title: '오늘 일정', sub: '긴 위젯', icon: 'bell', grad: '#0088ff' };
-  return { title: '다음 약', sub: '긴 위젯', icon: 'bell', grad: '#ff9500' };
+  return { title: id, sub: '', icon: 'bell', grad: '#8e8e93' };
 };
 function openAdd() {
   const list = addable(layout, getConfig().people);
