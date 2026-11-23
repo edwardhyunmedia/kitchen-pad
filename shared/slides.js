@@ -32,6 +32,20 @@ export function createSlides(root, { onError } = {}) {
     layer.style.backgroundPosition = `${r.x.toFixed(1)}px ${r.y.toFixed(1)}px`;
   }
   addEventListener('resize', () => layers.forEach(l => place(l, l._f)));
+  let fading = 0;
+  function fade(inEl, outEl, ms = 2000) {
+    const my = ++fading, t0 = performance.now();
+    inEl.style.opacity = 0;
+    inEl.classList.add('on');
+    const step = now => {
+      if (my !== fading) return;
+      const k = Math.min(1, (now - t0) / ms);
+      inEl.style.opacity = (k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2).toFixed(3); // 부드럽게 시작·끝
+      if (k < 1) requestAnimationFrame(step);
+      else { outEl.classList.remove('on'); outEl.style.opacity = 0; }
+    };
+    requestAnimationFrame(step);
+  }
   function show(url) {
     if (!url) { cur = null; token++; layers.forEach(l => l.classList.remove('on')); return; }
     if (url === cur) return;
@@ -45,8 +59,10 @@ export function createSlides(root, { onError } = {}) {
       size.set(back, [img.naturalWidth, img.naturalHeight]);
       back._f = savedFocus(url) || null;
       back.style.transition = 'none'; place(back, back._f); back.offsetWidth; back.style.transition = '';
-      back.classList.add('on');
-      layers[front].classList.remove('on');
+      // 새 사진을 위에 올려 2초 동안 서서히 나타나게 (CSS 애니메이션 설정과 상관없이 직접 그림)
+      const old = layers[front];
+      back.style.zIndex = 2; old.style.zIndex = 1;
+      fade(back, old);
       front = 1 - front;
       cur = url;
       if (savedFocus(url) === undefined) {
