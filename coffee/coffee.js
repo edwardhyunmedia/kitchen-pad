@@ -26,11 +26,21 @@ $('t-reset').innerHTML = icons.reset;
 // ---------- 목록 ----------
 function renderList() {
   const list = getRecipes();
-  $('recipes').innerHTML = list.map((r, i) => `
-    <button class="tile" type="button" data-i="${i}">
-      <span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>
-      <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}${r.temp ? `, ${esc(r.temp)}°C` : ''}${r.ice ? ', 아이스' : ''}</div></span>
-    </button>`).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
+  const last = load('coffee.last', null);
+  // 카드가 커져서 내리기 전에 필요한 걸 다 보여줌: 원두 g · 물 ml (크게), 온도·분쇄·얼음, 걸리는 시간·단계 수
+  $('recipes').innerHTML = list.map((r, i) => {
+    const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).join(' · ');
+    return `
+    <button class="tile ctile" type="button" data-i="${i}">
+      <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
+      <span class="t-body">
+        <div class="name">${esc(r.name)}</div>
+        <div class="t-big">${r.dose ? `${esc(r.dose)}<i>g</i>` : ''}${r.water ? ` ${esc(r.water)}<i>ml</i>` : ''}</div>
+        ${extra ? `<div class="state">${extra}</div>` : ''}
+        <div class="state">${mmss(totalSec(r))} · ${r.steps.length}단계</div>
+      </span>
+    </button>`;
+  }).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }
 $('recipes').addEventListener('click', e => {
   const t = e.target.closest('[data-i]');

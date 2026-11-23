@@ -5,6 +5,7 @@ import { getConfig, setConfig, getLog, setLog } from './state.js';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const hm = iso => { const d = new Date(iso); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const ago = m => m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? ` ${m % 60}분` : ''}` : `${Math.max(1, m)}분`;
 const newId = () => 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 $('back').innerHTML = icons.home;
@@ -26,15 +27,27 @@ function render() {
     ? `오늘 ${slots.length}번 중 ${taken}번 먹었어요`
     : '아직 등록된 약이 없어요. 아래 설정 버튼에서 추가하세요.';
 
+  const week = history(cfg, log, now, 7);
   $('people').innerHTML = cfg.people.map(p => {
     const mine = slots.filter(s => s.personId === p.id);
     const tiles = mine.map(s => {
       const done = log[s.key];
       const late = !done && now >= s.at;
-      const state = done ? `${hm(done)}에 먹음` : late ? `${s.time} 안 먹음` : `${s.time} 예정`;
-      return `<button class="tile ${done ? 'on' : ''}" type="button" data-key="${esc(s.key)}" aria-pressed="${!!done}">
-        <span class="glyph" style="${done ? 'background:var(--green)' : late ? 'background:var(--red);color:#fff' : ''}">${done ? icons.check : icons.pill}</span>
-        <span><div class="name">${esc(s.medName)}</div><div class="state ${late ? 'alert' : ''}">${esc(state)}</div></span>
+      const mins = Math.round((s.at - now) / 60000);
+      // 지금 기준으로 얼마나 남았는지/지났는지
+      const rel = done ? `${hm(done)}에 먹음` : late ? `${ago(-mins)} 지남` : `${ago(mins)} 뒤`;
+      // 지난 7일 (왼쪽이 오래된 날) — 같은 약·같은 시간
+      const days = week.map(d => (d.people.find(q => q.id === p.id)?.slots || []).find(q => q.medName === s.medName && q.time === s.time)).reverse();
+      const dots = days.map(x => `<i class="${!x ? 'none' : x.done ? 'ok' : x.due ? 'miss' : 'wait'}"></i>`).join('');
+      const due = days.filter(x => x && x.due).length, ok = days.filter(x => x && x.done).length;
+      return `<button class="tile mtile2 ${done ? 'on' : ''}" type="button" data-key="${esc(s.key)}" aria-pressed="${!!done}">
+        <span class="t-top"><span class="glyph" style="${done ? 'background:var(--green)' : late ? 'background:var(--red);color:#fff' : ''}">${done ? icons.check : icons.pill}</span></span>
+        <span class="t-body">
+          <div class="name">${esc(s.medName)}</div>
+          <div class="t-big">${esc(s.time)}</div>
+          <div class="state ${late ? 'alert' : ''}">${esc(rel)}</div>
+          <div class="t-week"><span class="t-dots">${dots}</span><span>지난 7일 ${ok}/${due}</span></div>
+        </span>
       </button>`;
     }).join('');
     const add = `<button class="tile" type="button" data-add="${esc(p.id)}">
