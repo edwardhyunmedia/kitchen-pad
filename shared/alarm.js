@@ -67,7 +67,17 @@ function ensureOverlay() {
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export const isAlarmOn = () => !!loop;
+// 소리는 5번 울리고 멈춤 (팝업은 누를 때까지 그대로)
+export const RINGS = 5;
+let ringKey = '';
+export const isAlarmOn = () => !!(overlay && overlay.classList.contains('open'));
+export const isRinging = () => !!loop;
+
+function silence() {
+  clearInterval(loop);
+  clearInterval(speakLoop);
+  loop = speakLoop = null;
+}
 
 // items: [{ title, sub }], onTaken: 먹었어요(확인), onLater: 10분 뒤 다시
 // opts: { title, primary, later, speak }
@@ -80,19 +90,21 @@ export function startAlarm(items, onTaken, onLater, opts = {}) {
   el.querySelector('ul').innerHTML = items.map(i => `<li>${esc(i.title)}<small>${esc(i.sub || '')}</small></li>`).join('');
   el.querySelector('.a-stop').onclick = () => { stopAlarm(); onTaken && onTaken(); };
   el.querySelector('.a-later').onclick = () => { stopAlarm(); onLater && onLater(); };
+  // 이미 떠 있는 같은 알람이면 소리를 다시 울리지 않음 (새 알람이 추가되면 다시 5번)
+  const key = items.map(i => i.title).join('|');
+  const same = el.classList.contains('open') && key === ringKey;
   el.classList.add('open');
-  if (loop) return;
+  ringKey = key;
+  if (same || loop) return;
   fully(f => f.turnScreenOn());
-  const say = () => fully(f => f.textToSpeech(speakText, 'ko'));
   chime();
-  say();
-  loop = setInterval(chime, 1500);
-  speakLoop = setInterval(say, 20000);
+  fully(f => f.textToSpeech(speakText, 'ko'));
+  let n = 1;
+  loop = setInterval(() => { chime(); if (++n >= RINGS) silence(); }, 1500);
 }
 
 export function stopAlarm() {
-  clearInterval(loop);
-  clearInterval(speakLoop);
-  loop = speakLoop = null;
+  silence();
+  ringKey = '';
   if (overlay) overlay.classList.remove('open');
 }

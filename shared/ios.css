@@ -222,3 +222,8 @@ body { word-break: keep-all; }
 .i-steps .i-end { border-bottom: 0; color: var(--label-2); }
 .i-note { font-size: var(--t-sub); color: var(--label-2); margin: calc(12px * var(--s)) 0 0; }
 .i-start { width: 100%; margin-top: calc(20px * var(--s)); background: var(--brown); color: #fff; }
+/* 정보 많은 카드(커피·약): 정사각 고정 대신 내용만큼 — 한 줄의 두 카드는 같은 높이로 맞춤 (실기기 533px 폭에서 넘치던 문제) */
+.grid .ctile, .grid .mtile2 { aspect-ratio: auto; min-height: calc(190px * var(--s)); }
+.tile .state .nw { white-space: nowrap; }
+.tile .t-week { flex-wrap: wrap; row-gap: calc(4px * var(--s)); }
+.tile .t-week > span:last-child { white-space: nowrap; }

@@ -30,7 +30,7 @@ function renderList() {
   const last = load('coffee.last', null);
   // 카드가 커져서 내리기 전에 필요한 걸 다 보여줌: 원두 g · 물 ml (크게), 온도·분쇄·얼음, 걸리는 시간·단계 수
   $('recipes').innerHTML = list.map((r, i) => {
-    const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).join(' · ');
+    const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(' · ');
     return `
     <button class="tile ctile" type="button" data-i="${i}">
       <span class="t-top"><span class="glyph t-info" role="button" tabindex="0" data-info="${i}" aria-label="${esc(r.name)} 설명 보기" style="background:var(--brown);color:#fff">${icons.cup}<b class="t-i">i</b></span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
