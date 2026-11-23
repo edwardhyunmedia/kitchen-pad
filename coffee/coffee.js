@@ -2,7 +2,7 @@ import { icons } from '../shared/icons.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
-import { ART, aboutOf } from './about.js';
+import { ART, ABOUT, aboutOf } from './about.js';
 import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds } from './logic.js';
 
 const $ = id => document.getElementById(id);
@@ -68,7 +68,7 @@ function openInfo(r) {
     <div class="i-text">${a.text.map(p => `<p>${esc(p)}</p>`).join('')}</div>
     <h3 class="i-h">순서</h3>
     <ol class="i-steps">${steps}<li class="i-end"><span class="i-at">${clock(t)}</span><span class="i-lb">끝</span><span class="i-to"></span></li></ol>
-    ${r.note && !a.text.join(' ').includes(r.note) ? `<p class="i-note">${esc(r.note)}</p>` : ''}
+    ${r.note && !ABOUT[r.id] ? `<p class="i-note">${esc(r.note)}</p>` : ''}
     <button class="btn i-start" type="button" id="info-start">이 레시피로 시작</button>`;
   $('info-start').onclick = () => { closeInfo(); openTimer(r); };
   $('info-sheet').classList.add('open');
