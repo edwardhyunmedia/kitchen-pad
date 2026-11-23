@@ -290,6 +290,7 @@ window.addEventListener('message', e => {
 // ---------- 시계 화면 정보 (멀리서 보는 다음 약) ----------
 function drawGlance() {
   const g = $('glance');
+  requestAnimationFrame(() => body.classList.toggle('has-glance', !!g.textContent.trim()));
   const f = settings.face.id;
   if (!summary || f === 'mod' || f === 'cal') { g.innerHTML = ''; return; }
   const late = summary.people.find(p => p.late);

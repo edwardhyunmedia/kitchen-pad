@@ -147,3 +147,8 @@ body:has(.appview.open) .live-pill { bottom: calc(max(16px, 2.4vh) + clamp(52px,
 .wcal { font-size: clamp(17px, 2.5vh, 28px); font-weight: 600; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: .3vh; }
 .wcal b { color: #0088ff; margin-right: 10px; font-variant-numeric: tabular-nums; }
 .gl.cal i { background: #0088ff; }
+
+/* 아래 '다음 약' 알림이 있으면 시계를 그만큼 위로 올려서 겹치지 않게 */
+.glance { bottom: max(3vh, 16px); }
+body.has-glance #face-layer .fc { padding-bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 1.5vh); }
+body.has-glance #face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
