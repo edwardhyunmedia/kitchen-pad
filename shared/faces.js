@@ -1,5 +1,6 @@
 // 시계 페이스 7종. 모든 크기는 cqw/cqh(담는 상자 기준)라 미리보기에서도 그대로 줄어듦
 import { WEATHER_ICONS, codeInfo } from './weather.js';
+import { dayLabel, sameDay } from './calendar.js';
 
 const pad = n => String(n).padStart(2, '0');
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -47,7 +48,8 @@ function calendar(now, ctx, c) {
   let cells = '';
   for (let i = 0; i < first; i++) cells += '<td></td>';
   for (let d = 1; d <= days; d++) {
-    cells += `<td class="${d === now.getDate() ? 't' : ''}"><span ${d === now.getDate() ? `style="background:${c[0]}"` : ''}>${d}</span></td>`;
+    const has = (ctx.eventDays || []).includes(`${y}-${mo}-${d}`);
+    cells += `<td class="${d === now.getDate() ? 't' : ''}${has ? ' has' : ''}"><span ${d === now.getDate() ? `style="background:${c[0]}"` : ''}>${d}</span>${has ? `<i style="background:${c[0]}"></i>` : ''}</td>`;
     if ((first + d) % 7 === 0) cells += '</tr><tr>';
   }
   const pad2 = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -55,12 +57,15 @@ function calendar(now, ctx, c) {
     ...(ctx.events || []).map(e => ({ t: e.allDay ? '종일' : pad2(e.start), k: e.allDay ? '' : pad2(e.start), title: e.title, who: '' })),
     ...(ctx.summary?.slots || []).filter(s => !ctx.log?.[s.key] && s.at >= now).map(s => ({ t: s.time, k: s.time, title: s.medName, who: s.personName })),
   ].sort((a, b) => a.k.localeCompare(b.k)).slice(0, 4);
-  const evs = items.map(i => `<div class="ev" style="border-color:${c[0]}">${esc(i.t)} ${esc(i.title)} ${i.who ? `<small>${esc(i.who)}</small>` : ''}</div>`).join('');
+  let evs = items.map(i => `<div class="ev" style="border-color:${c[0]}">${esc(i.t)} ${esc(i.title)} ${i.who ? `<small>${esc(i.who)}</small>` : ''}</div>`).join('');
+  // 오늘 남은 게 적으면 다가오는 날의 일정도 (날짜와 함께)
+  const later = (ctx.nextEvents || []).filter(e => !sameDay(e.start, now)).slice(0, Math.max(0, 4 - items.length));
+  evs += later.map(e => `<div class="ev" style="border-color:${c[0]}">${esc(dayLabel(e.start, now))} ${e.allDay ? '종일' : pad2(e.start)} ${esc(e.title)}</div>`).join('');
   return `<div class="cal">
     <div class="mon" style="color:${c[0]}">${y}년 ${mo + 1}월</div>
     <div class="day">${now.getDate()}</div><div class="wd">${DAYS[now.getDay()]}요일 <b>${pad(now.getHours())}:${pad(now.getMinutes())}</b></div>
     <table><tr>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr><tr>${cells}</tr></table>
-    ${evs || '<div class="ev none">오늘 남은 일정이 없어요</div>'}</div>`;
+    ${evs || '<div class="ev none">7일 안에 일정이 없어요</div>'}</div>`;
 }
 
 function modular(now, ctx, c) {

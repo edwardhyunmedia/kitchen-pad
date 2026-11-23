@@ -38,3 +38,17 @@ test('only accepts apps script urls', () => {
   assert.equal(isCalUrl('https://evil.example.com/x'), false);
   assert.equal(isCalUrl('javascript:alert(1)'), false);
 });
+
+import { dayLabel, nextEvents } from '../shared/calendar.js';
+test('day label: today, tomorrow, then date with weekday', () => {
+  const now = new Date(2026, 10, 23, 16, 0);
+  assert.equal(dayLabel(new Date(2026, 10, 23, 20, 0), now), '오늘');
+  assert.equal(dayLabel(new Date(2026, 10, 24, 9, 0), now), '내일');
+  assert.equal(dayLabel(new Date(2026, 10, 26, 9, 0), now), '11/26(목)');
+});
+test('next events skip finished ones and keep order', () => {
+  const now = new Date(2026, 10, 23, 16, 0);
+  const ev = (h, d = 23, end) => ({ title: 't' + d + h, start: new Date(2026, 10, d, h), end: new Date(2026, 10, d, end ?? h + 1), allDay: false });
+  const out = nextEvents([ev(10), ev(15, 23, 17), ev(9, 25), ev(20)], now, 2);
+  assert.deepEqual(out.map(e => e.title), ['t2315', 't2320']);
+});

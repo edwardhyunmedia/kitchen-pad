@@ -64,3 +64,7 @@
 .bn, .pn, .fn, .mod .mt { font-variant-numeric: normal; }
 /* 앨범 사진이 바뀔 때 부드럽게 */
 .fc.swap { animation: fade .9s ease; }
+/* 달력: 칸 너비 균일, 일정 있는 날 점 */
+.cal table { table-layout: fixed; }
+.cal td { position: relative; }
+.cal td i { position: absolute; left: 50%; bottom: .2vh; bottom: .2cqh; width: .8vh; width: .8cqh; aspect-ratio: 1; border-radius: 50%; transform: translateX(-50%); }

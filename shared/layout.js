@@ -1,5 +1,5 @@
 // 홈 화면 배치: 아이템 id 순서 목록
-// app:<이름> = 앱 아이콘(1칸), w:meds = 약 위젯(가로 4칸 x 2줄, 사람별 + 다음 약), w:coffee = 커피 위젯(2x2), w:cal = 오늘 일정(가로 4칸)
+// app:<이름> = 앱 아이콘(1칸), w:meds = 약 위젯(가로 4칸 x 2줄, 사람별 + 다음 약), w:coffee = 커피 위젯(2x2), w:cal = 다가오는 일정(가로 4칸)
 export const APPS = ['app:meds', 'app:coffee', 'app:settings'];
 
 export function allItems() {

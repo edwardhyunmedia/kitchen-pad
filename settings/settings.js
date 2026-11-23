@@ -92,7 +92,7 @@ $('cal-url').addEventListener('change', e => {
   if (v && !isCalUrl(v)) { $('cal-status').textContent = 'script.google.com 주소만 넣을 수 있어요'; return; }
   setSettings({ calUrl: v });
   save('cal.cache', null);
-  // 처음 연결하면 홈에 "오늘 일정" 위젯 추가
+  // 처음 연결하면 홈에 "일정" 위젯 추가
   if (v) { const l = load('home.layout', null); if (Array.isArray(l) && !l.includes('w:cal')) save('home.layout', [...l, 'w:cal']); }
   drawCal(true);
 });

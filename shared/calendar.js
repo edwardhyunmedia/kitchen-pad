@@ -14,6 +14,16 @@ export function normalizeEvents(raw) {
 // 아직 안 끝난 일정 (종일 일정은 그날 끝날 때까지)
 export const upcoming = (events, now) => events.filter(e => e.end > now);
 export const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+// 오늘 / 내일 / 11/26(목)
+export function dayLabel(d, now) {
+  if (sameDay(d, now)) return '오늘';
+  const t = new Date(now); t.setDate(t.getDate() + 1);
+  if (sameDay(d, t)) return '내일';
+  return `${d.getMonth() + 1}/${d.getDate()}(${WD[d.getDay()]})`;
+}
+// 다가오는 일정 n개 (오늘이 아니어도)
+export const nextEvents = (events, now, n) => upcoming(events, now).sort((a, b) => a.start - b.start).slice(0, n);
 export const todayEvents = (events, now) => upcoming(events, now).filter(e => sameDay(e.start, now) || (e.allDay && e.start <= now));
 
 // 시작 minutes분 전부터 시작 후 5분까지 한 번 울림 (종일 일정 제외)

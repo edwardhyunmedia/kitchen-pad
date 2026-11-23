@@ -8,7 +8,7 @@ import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
 import { getAlbum, pickPhoto } from './album.js';
-import { getEvents, todayEvents, upcoming, fmtTime } from './calendar.js';
+import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
 import { currentSlotFor, toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
@@ -52,7 +52,7 @@ let faceKey = '';
 let lastPhoto = null;
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo: facePhoto(), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()) };
+  return { opts, weather, photo: facePhoto(), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`) };
 }
 function drawFace(force) {
   const now = new Date();
@@ -131,12 +131,13 @@ function widgetHtml(id) {
   }
   if (id === 'w:cal') {
     const now = new Date();
-    const list = todayEvents(events, now).slice(0, 2);
+    // 오늘 것만이 아니라 다가오는 일정 (7일 안)
+    const list = nextEvents(events, now, 2);
     const hasCal = !!settings.calUrl;
-    return `<div class="wg"><div style="min-width:0;flex:1"><div class="wh">오늘 일정</div>${
+    return `<div class="wg"><div style="min-width:0;flex:1"><div class="wh">일정</div>${
       !hasCal ? '<div class="wsub">설정에서 구글 캘린더를 연결하세요</div>'
-      : list.length ? list.map(e => `<div class="wcal"><b>${e.allDay ? '종일' : fmtTime(e.start)}</b>${esc(e.title)}</div>`).join('')
-      : '<div class="wsub">오늘 남은 일정이 없어요</div>'}</div></div>`;
+      : list.length ? list.map(e => `<div class="wcal"><b>${dayLabel(e.start, now)} ${e.allDay ? '종일' : fmtTime(e.start)}</b>${esc(e.title)}</div>`).join('')
+      : '<div class="wsub">7일 안에 일정이 없어요</div>'}</div></div>`;
   }
   return '';
 }
@@ -357,7 +358,7 @@ const ADD_INFO = id => {
   if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', svg: APP_INFO[id].svg };
   if (id === 'w:meds') return { title: '약', sub: '큰 위젯', icon: 'pill', grad: '#ff9500' };
   if (id === 'w:coffee') return { title: '커피', sub: '위젯', icon: 'cup', grad: '#a2845e' };
-  if (id === 'w:cal') return { title: '오늘 일정', sub: '긴 위젯', icon: 'bell', grad: '#0088ff' };
+  if (id === 'w:cal') return { title: '일정', sub: '긴 위젯', icon: 'bell', grad: '#0088ff' };
   return { title: id, sub: '', icon: 'bell', grad: '#8e8e93' };
 };
 function openAdd() {
