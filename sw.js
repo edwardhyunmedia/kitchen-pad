@@ -1,5 +1,5 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v29';
+const VERSION = 'kp-v30';
 const FILES = [
   "./",
   "meds/",
@@ -22,6 +22,7 @@ const FILES = [
   "shared/dark.css",
   "shared/faces.css",
   "shared/faces.js",
+  "shared/focus.js",
   "shared/fonts/LICENSE-Pretendard.txt",
   "shared/fonts/PretendardVariable.woff2",
   "shared/home.css",
@@ -34,9 +35,12 @@ const FILES = [
   "shared/night-logic.js",
   "shared/night.js",
   "shared/settings.js",
+  "shared/slides.js",
   "shared/store.js",
   "shared/style.css",
   "shared/summary.js",
+  "shared/vendor/facefinder.bin",
+  "shared/vendor/pico.mjs",
   "shared/watch.js",
   "shared/weather.js"
 ];

@@ -61,9 +61,10 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
   <div class="group">
     <div class="row"><span class="label grow">아이폰 공유 앨범</span><button class="switch" type="button" id="album" aria-label="아이폰 공유 앨범 사진 쓰기"></button></div>
     <div class="row" id="album-row" hidden><span class="label grow">앨범 상태</span><span id="album-status" style="color:var(--ink-2)"></span></div>
+    <div class="row"><span class="label grow">사진 바뀌는 간격</span><select id="album-sec"><option value="15">15초</option><option value="30">30초</option><option value="60">1분</option><option value="300">5분</option><option value="600">10분</option></select></div>
     <div class="row"><span class="label grow">태블릿에 넣은 사진 한 장</span><label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer">사진 고르기<input type="file" accept="image/*" id="file2" hidden></label></div>
   </div>
-  <p class="note">공유 앨범을 켜면 "사진" 시계에 앨범 사진이 5분마다 바뀌어 나와요. 아래 구글 캘린더에 넣은 연결 코드로 내 구글 스크립트에서 사진 목록을 받고, 사진은 애플 서버에서 바로 받아요. 끄면 태블릿에 넣은 사진 한 장을 써요.</p>
+  <p class="note">공유 앨범을 켜면 "공유 앨범"·"사진" 시계에 앨범 사진이 정한 간격마다 천천히 바뀌어 나와요. 사진은 얼굴이 가운데 오게 맞춰져요(얼굴 찾기는 태블릿 안에서만 해요). 아래 구글 캘린더에 넣은 연결 코드로 내 구글 스크립트에서 사진 목록을 받고, 사진은 애플 서버에서 바로 받아요. 끄면 태블릿에 넣은 사진 한 장을 써요.</p>
 
   <p class="group-label">야간 모드</p>
   <div class="group">

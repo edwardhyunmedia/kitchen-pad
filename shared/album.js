@@ -21,12 +21,17 @@ export function cleanPhotos(list) {
   });
 }
 
-// 사진 주소는 몇 시간 뒤 만료되므로 25분마다 새로 받음
+// 애플 사진 주소는 20분쯤 뒤 만료됨 → 가장 빨리 만료되는 것보다 3분 앞서 새로 받음
+export function freshUntil(photos, at) {
+  const exp = Math.min(...(photos || []).map(p => { try { return Number(new URL(p.url).searchParams.get('e')) * 1000 || Infinity; } catch { return Infinity; } }));
+  return Math.min(at + 25 * 60000, exp - 3 * 60000);
+}
+
 export async function getAlbum(force = false) {
   const st = load('settings', {});
   if (!st.album || !st.calUrl || !isCalUrl(st.calUrl)) return { photos: [] };
   const cache = load('album.cache', null);
-  if (!force && cache && Date.now() - cache.at < 25 * 60000) return { photos: cleanPhotos(cache.photos) };
+  if (!force && cache && Date.now() < freshUntil(cache.photos, cache.at)) return { photos: cleanPhotos(cache.photos) };
   try {
     const res = await fetch(albumUrl(st.calUrl), { credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-store', redirect: 'follow' });
     const data = await res.json();

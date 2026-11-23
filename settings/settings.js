@@ -51,6 +51,8 @@ async function showWeather() {
   $('wx-now').textContent = w ? `${w.temp}° ${codeInfo(w.code).label}` : '못 받아왔어요 (인터넷 확인)';
 }
 showWeather();
+$('album-sec').value = String(getSettings().albumSec || 60);
+$('album-sec').addEventListener('change', e => setSettings({ albumSec: Number(e.target.value) }));
 $('album').addEventListener('click', () => { setSettings({ album: !getSettings().album }); showAlbum(true); });
 async function showAlbum(force) {
   const st = getSettings();

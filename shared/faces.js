@@ -98,15 +98,15 @@ export function renderFace(root, now, ctx) {
       html = `<div class="fc" style="background:${c[0]};color:${c[1]}"><div class="bn">${hh}</div><div class="bn" style="color:${c[2]}">${mm}</div>${dateLine(now, ctx)}</div>`;
       break;
     case 'photo':
-      html = `<div class="fc ph ${c[0] === '#fff' ? 'light' : 'dark'}" style="${ctx.photo ? `background-image:url('${ctx.photo}')` : ''}">
+      html = `<div class="fc ph ${c[0] === '#fff' ? 'light' : 'dark'} ${ctx.noPhoto ? 'slid' : ''}" style="${ctx.photo && !ctx.noPhoto ? `background-image:url('${String(ctx.photo).replace(/'/g, '%27')}')` : ''}">
         ${ctx.photo ? '' : '<div class="nophoto">설정에서 사진을 고르세요</div>'}<div class="pn">${hh}</div><div class="pn">${mm}</div>${dateLine(now, ctx)}</div>`;
       break;
     case 'album': {
       // 공유 앨범 사진을 화면 가득, 위에 작은 시계·날짜·날씨. 가로 사진은 잘리지 않게 통째로 + 뒤에 흐린 같은 사진
       const u = ctx.photo ? String(ctx.photo).replace(/'/g, '%27') : '';
       const bg = u ? `background-image:url('${u}')` : '';
-      html = `<div class="fc alb ${c[0] === '#fff' ? '' : 'darktext'}" style="--t:${c[0]}">
-        ${u ? `<div class="ab" style="${bg}"></div><div class="af ${ctx.photoWide ? 'wide' : ''}" style="${bg}"></div>` : '<div class="nophoto">설정에서 아이폰 공유 앨범을 켜주세요</div>'}
+      html = `<div class="fc alb ${c[0] === '#fff' ? '' : 'darktext'} ${ctx.noPhoto ? 'slid' : ''}" style="--t:${c[0]}">
+        ${!u ? '<div class="nophoto">설정에서 아이폰 공유 앨범을 켜주세요</div>' : ctx.noPhoto ? '' : `<div class="ab" style="${bg}"></div><div class="af ${ctx.photoWide ? 'wide' : ''}" style="${bg}"></div>`}
         <div class="ag"></div>
         <div class="ac"><div class="at">${hh}:${mm}</div>${dateLine(now, ctx)}</div></div>`;
       break;

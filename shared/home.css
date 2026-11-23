@@ -196,3 +196,12 @@ html.dark .addslot span { background: #2c2c2e; }
 body:not(.idle) #face-layer :is(.bn, .pn, .fn, .fdate, .fev, .corner, .ana, .ac, .ag, .nophoto, .mt, .cal, .mg) { visibility: hidden; }
 body:not(.idle) #face-layer[data-face="photo"], body:not(.idle) #face-layer[data-face="album"] { opacity: .45 !important; filter: blur(16px) saturate(1.2); }
 body:not(.idle) #face-layer:not([data-face="photo"]):not([data-face="album"]) { opacity: 0 !important; }
+
+/* 사진 슬라이드 층: 시계 글자 아래. 두 장을 겹쳐서 천천히 바꿈 */
+.slides { position: fixed; inset: 0; z-index: 1; background: #111; display: none; transition: opacity .45s, filter .45s, transform .45s; }
+.slides.on { display: block; }
+.slides .sl { position: absolute; inset: 0; background-size: cover; background-position: 50% 40%; background-repeat: no-repeat; opacity: 0; transition: opacity 1.8s ease, background-position 1.2s ease; }
+.slides .sl.on { opacity: 1; }
+#face-layer .ph.slid, #face-layer .alb.slid { background: transparent !important; }
+body:not(.idle) .slides { opacity: .45; filter: blur(16px) saturate(1.2); transform: scale(1.06); }
+@media (prefers-reduced-motion: reduce) { .slides .sl { transition: none; } }

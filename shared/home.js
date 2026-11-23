@@ -8,6 +8,8 @@ import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
 import { getAlbum, pickPhoto } from './album.js';
+import { createSlides } from './slides.js';
+import { findFocus, savedFocus } from './focus.js';
 import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
 import { currentSlotFor, toggleTaken } from '../meds/logic.js';
@@ -30,7 +32,9 @@ let weather = null;
 let photo = null;
 let album = [];
 // 사진 시계: 공유 앨범이 켜져 있고 사진이 있으면 5분마다 다음 사진, 아니면 태블릿에 넣은 사진 한 장
-const albumNow = () => (settings.album && album.length ? pickPhoto(album, Date.now(), 5) : null);
+// 사진 바뀌는 간격 (설정, 기본 1분)
+const slideMin = () => Math.max(0.25, (settings.albumSec || 60) / 60);
+const albumNow = (t = Date.now()) => (settings.album && album.length ? pickPhoto(album, t, slideMin()) : null);
 const facePhoto = () => albumNow()?.url || photo;
 let layout = [];
 let summary = null;
@@ -50,7 +54,6 @@ async function applyBg() {
 
 // ---------- 시계 페이스 ----------
 let faceKey = '';
-let lastPhoto = null;
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
   return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`) };
@@ -59,15 +62,13 @@ function drawFace(force) {
   const now = new Date();
   const f = settings.face;
   const analog = f.id === 'ana' || f.id === 'mini';
-  const key = [f.id, f.color, f.showDate, f.showWeather, f.showEvents, events.length, weather?.temp, facePhoto(), now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
+  const key = [f.id, f.color, f.showDate, f.showWeather, f.showEvents, events.length, weather?.temp, !!facePhoto(), now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
   if (!force && key === faceKey) return;
   faceKey = key;
   $('face-layer').dataset.face = f.id;
-  const ph = facePhoto();
   try {
-    renderFace($('face-layer'), now, faceCtx(f));
-    if ((f.id === 'photo' || f.id === 'album') && lastPhoto && ph !== lastPhoto) $('face-layer').querySelector('.fc')?.classList.add('swap');
-    lastPhoto = ph;
+    // 사진은 아래 슬라이드 층이 따로 보여줌 (시계 글자를 다시 그려도 사진이 깜빡이지 않게)
+    renderFace($('face-layer'), now, { ...faceCtx(f), noPhoto: true });
   }
   catch { $('face-layer').innerHTML = `<div class="fc fallback"><div class="bn">${pad(now.getHours())}</div><div class="bn">${pad(now.getMinutes())}</div></div>`; }
 }
@@ -454,14 +455,48 @@ $('pick-done').addEventListener('click', () => {
 });
 
 // ---------- 시작 ----------
-async function loadAlbum() {
-  album = (await getAlbum()).photos;
-  // 다음 사진 미리 받아 두기 (바뀔 때 빈 화면 안 보이게)
-  const next = pickPhoto(album, Date.now() + 5 * 60000, 5);
-  if (next) new Image().src = next.url;
+async function loadAlbum(force = false) {
+  album = (await getAlbum(force)).photos;
   drawFace(true);
+  tickSlides();
+  findFaces();
 }
-setInterval(() => { const n = pickPhoto(album, Date.now() + 60000, 5); if (n) new Image().src = n.url; }, 60000);
+// ---------- 사진 슬라이드 (디졸브, 얼굴 중심) ----------
+let retryAt = 0;
+const bad = new Set();
+const slides = createSlides($('slides'), {
+  // 못 받은 사진은 건너뛰고 바로 다음 사진, 목록은 새로 받기 (1분에 한 번까지)
+  onError: url => { bad.add(url); tickSlides(); if (Date.now() > retryAt) { retryAt = Date.now() + 60000; bad.clear(); bad.add(url); loadAlbum(true); } },
+});
+function slideUrl() {
+  const first = facePhoto();
+  if (!first || !bad.has(first) || !album.length) return first;
+  const i = album.findIndex(p => p.url === first);
+  for (let k = 1; k <= album.length; k++) { const p = album[(i + k) % album.length]; if (!bad.has(p.url)) return p.url; }
+  return photo;
+}
+function tickSlides() {
+  const id = settings.face.id;
+  const url = id === 'photo' || id === 'album' ? slideUrl() : null;
+  $('slides').classList.toggle('on', !!url);
+  slides.show(url);
+  // 다음 사진 미리 받아 두기
+  const next = albumNow(Date.now() + (settings.albumSec || 60) * 1000);
+  if (next && next.url !== url) new Image().src = next.url;
+}
+setInterval(tickSlides, 1000);
+// 얼굴 위치는 처음 한 번만 찾아서 저장 (태블릿 안에서만 계산)
+let finding = false;
+async function findFaces() {
+  if (finding) return;
+  finding = true;
+  for (const p of album) {
+    if (savedFocus(p.url) !== undefined) continue;
+    try { await findFocus(p.url); } catch {}
+    await new Promise(r => setTimeout(r, 800));
+  }
+  finding = false;
+}
 async function loadWeather() { weather = await getWeather(); drawHero(); drawFace(); }
 async function loadEvents() { events = await getEvents(); if (!body.classList.contains('edit')) drawGrid(); drawGlance(); drawFace(true); }
 
@@ -483,7 +518,7 @@ async function init() {
   setInterval(loadAlbum, 25 * 60000);
   const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
   window.addEventListener('kp-meds-changed', onData);
-  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); loadAlbum(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); loadAlbum(); tickSlides(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
   setInterval(drawGlance, 30000);
   drawGlance();
   // 알람이 울리면 깨우기
