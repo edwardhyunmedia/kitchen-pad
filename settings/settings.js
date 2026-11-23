@@ -3,6 +3,7 @@ import { save, load } from '../shared/store.js';
 import { isCalUrl, getEvents } from '../shared/calendar.js';
 import { faceById } from '../shared/faces.js';
 import { getWeather, codeInfo } from '../shared/weather.js';
+import { getAlbum } from '../shared/album.js';
 import { getSettings, setSettings, savePhoto, getPhotoUrl, deletePhoto } from '../shared/settings.js';
 
 const $ = id => document.getElementById(id);
@@ -50,6 +51,19 @@ async function showWeather() {
   $('wx-now').textContent = w ? `${w.temp}° ${codeInfo(w.code).label}` : '못 받아왔어요 (인터넷 확인)';
 }
 showWeather();
+$('album').addEventListener('click', () => { setSettings({ album: !getSettings().album }); showAlbum(true); });
+async function showAlbum(force) {
+  const st = getSettings();
+  $('album').classList.toggle('on', !!st.album);
+  $('album').setAttribute('aria-pressed', !!st.album);
+  $('album-row').hidden = !st.album;
+  if (!st.album) return;
+  if (!st.calUrl) { $('album-status').textContent = '먼저 아래 구글 캘린더 주소를 넣어주세요'; return; }
+  $('album-status').textContent = '확인하는 중…';
+  const r = await getAlbum(force);
+  $('album-status').textContent = r.photos.length ? `사진 ${r.photos.length}장` : '앨범을 못 읽었어요';
+}
+showAlbum(false);
 $('idle').addEventListener('change', e => setSettings({ idleSec: Number(e.target.value) }));
 $('reset-layout').addEventListener('click', () => {
   if (!armedReset) { armedReset = true; $('reset-layout').textContent = '한 번 더 누르면 처음대로'; return; }

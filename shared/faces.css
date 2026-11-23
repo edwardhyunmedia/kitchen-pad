@@ -62,3 +62,5 @@
 @media (prefers-reduced-motion: reduce) { .flow, .fn { animation: none; } }
 /* 잉크 기준 정렬을 위해 숫자 폭을 글자 그대로 (고정폭 숫자는 1 양옆이 비어 치우쳐 보임) */
 .bn, .pn, .fn, .mod .mt { font-variant-numeric: normal; }
+/* 앨범 사진이 바뀔 때 부드럽게 */
+.fc.swap { animation: fade .9s ease; }

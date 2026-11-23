@@ -7,6 +7,7 @@ import { normalizeLayout, itemSize, moveItem, removeItem, addItem, addable } fro
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
+import { getAlbum, pickPhoto } from './album.js';
 import { getEvents, todayEvents, upcoming, fmtTime } from './calendar.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
 import { currentSlotFor, toggleTaken } from '../meds/logic.js';
@@ -27,6 +28,9 @@ const APP_INFO = {
 let settings = getSettings();
 let weather = null;
 let photo = null;
+let album = [];
+// 사진 시계: 공유 앨범이 켜져 있고 사진이 있으면 5분마다 다음 사진, 아니면 태블릿에 넣은 사진 한 장
+const facePhoto = () => (settings.album && album.length ? pickPhoto(album, Date.now(), 5).url : photo);
 let layout = [];
 let summary = null;
 let events = [];
@@ -45,19 +49,25 @@ async function applyBg() {
 
 // ---------- 시계 페이스 ----------
 let faceKey = '';
+let lastPhoto = null;
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo, summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()) };
+  return { opts, weather, photo: facePhoto(), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()) };
 }
 function drawFace(force) {
   const now = new Date();
   const f = settings.face;
   const analog = f.id === 'ana' || f.id === 'mini';
-  const key = [f.id, f.color, f.showDate, f.showWeather, weather?.temp, photo, now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
+  const key = [f.id, f.color, f.showDate, f.showWeather, weather?.temp, facePhoto(), now.getHours(), now.getMinutes(), analog ? now.getSeconds() : '', summary?.slots.length].join('|');
   if (!force && key === faceKey) return;
   faceKey = key;
   $('face-layer').dataset.face = f.id;
-  try { renderFace($('face-layer'), now, faceCtx(f)); }
+  const ph = facePhoto();
+  try {
+    renderFace($('face-layer'), now, faceCtx(f));
+    if (f.id === 'photo' && lastPhoto && ph !== lastPhoto) $('face-layer').querySelector('.fc')?.classList.add('swap');
+    lastPhoto = ph;
+  }
   catch { $('face-layer').innerHTML = `<div class="fc fallback"><div class="bn">${pad(now.getHours())}</div><div class="bn">${pad(now.getMinutes())}</div></div>`; }
 }
 
@@ -414,6 +424,14 @@ $('pick-done').addEventListener('click', () => {
 });
 
 // ---------- 시작 ----------
+async function loadAlbum() {
+  album = (await getAlbum()).photos;
+  // 다음 사진 미리 받아 두기 (바뀔 때 빈 화면 안 보이게)
+  const next = pickPhoto(album, Date.now() + 5 * 60000, 5);
+  if (next) new Image().src = next.url;
+  drawFace(true);
+}
+setInterval(() => { const n = pickPhoto(album, Date.now() + 60000, 5); if (n) new Image().src = n.url; }, 60000);
 async function loadWeather() { weather = await getWeather(); drawHero(); drawFace(); }
 async function loadEvents() { events = await getEvents(); if (!body.classList.contains('edit')) drawGrid(); drawGlance(); drawFace(true); }
 
@@ -431,9 +449,11 @@ async function init() {
   setInterval(loadWeather, 10 * 60000);
   loadEvents();
   setInterval(loadEvents, 5 * 60000);
+  loadAlbum();
+  setInterval(loadAlbum, 25 * 60000);
   const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
   window.addEventListener('kp-meds-changed', onData);
-  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); loadAlbum(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
   setInterval(drawGlance, 30000);
   drawGlance();
   // 알람이 울리면 깨우기

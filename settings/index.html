@@ -58,8 +58,12 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
   <p class="note">사진은 이 태블릿 안에만 저장돼요. 인터넷으로 보내지 않아요. 사진 시계 모양도 이 사진을 써요.</p>
   </div>
   <p class="group-label">사진 시계</p>
-  <div class="group"><div class="row"><span class="label grow">사진 시계에 쓸 사진</span><label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer">사진 고르기<input type="file" accept="image/*" id="file2" hidden></label></div></div>
-  <p class="note">배경은 지금은 흰색으로만 써요. 사진은 "사진" 시계 모양에서만 쓰이고, 이 태블릿 안에만 저장돼요.</p>
+  <div class="group">
+    <div class="row"><span class="label grow">아이폰 공유 앨범</span><button class="switch" type="button" id="album" aria-label="아이폰 공유 앨범 사진 쓰기"></button></div>
+    <div class="row" id="album-row" hidden><span class="label grow">앨범 상태</span><span id="album-status" style="color:var(--ink-2)"></span></div>
+    <div class="row"><span class="label grow">태블릿에 넣은 사진 한 장</span><label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer">사진 고르기<input type="file" accept="image/*" id="file2" hidden></label></div>
+  </div>
+  <p class="note">공유 앨범을 켜면 "사진" 시계에 앨범 사진이 5분마다 바뀌어 나와요. 아래 구글 캘린더 칸에 넣은 내 스크립트 주소로 사진 목록을 받고, 사진은 애플 서버에서 바로 받아요. 끄면 태블릿에 넣은 사진 한 장을 써요.</p>
 
   <p class="group-label">야간 모드</p>
   <div class="group">

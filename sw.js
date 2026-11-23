@@ -1,5 +1,5 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v23';
+const VERSION = 'kp-v24';
 const FILES = [
   "./",
   "meds/",
@@ -13,10 +13,10 @@ const FILES = [
   "meds/logic.js",
   "meds/meds.js",
   "meds/state.js",
-  "robots.txt",
   "settings/index.html",
   "settings/settings.js",
   "shared/alarm.js",
+  "shared/album.js",
   "shared/appicons.js",
   "shared/calendar.js",
   "shared/dark.css",
@@ -38,7 +38,7 @@ const FILES = [
   "shared/style.css",
   "shared/summary.js",
   "shared/watch.js",
-  "shared/weather.js",
+  "shared/weather.js"
 ];
 
 self.addEventListener('install', e => {
