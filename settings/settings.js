@@ -95,6 +95,17 @@ $('cal-url').addEventListener('change', e => {
 });
 $('cal-min').addEventListener('change', e => setSettings({ calAlertMin: Number(e.target.value) }));
 $('cal-test').addEventListener('click', () => drawCal(true));
+// 연결 링크 한 번에 넣기: 설정 주소 뒤에 #cal=<스크립트 주소> 를 붙여 열면 저장 (# 뒤는 서버로 안 감)
+(() => {
+  const m = location.hash.match(/^#cal=(.+)$/);
+  if (!m) return;
+  history.replaceState(null, '', location.pathname);
+  let v = '';
+  try { v = decodeURIComponent(m[1]).trim(); } catch {}
+  if (!isCalUrl(v)) { $('cal-status').textContent = '연결 링크가 올바르지 않아요'; return; }
+  setSettings({ calUrl: v, album: true });
+  showAlbum(true);
+})();
 drawCal(false);
 
 // ---------- 야간 모드 ----------
