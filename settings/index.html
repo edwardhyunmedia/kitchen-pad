@@ -63,7 +63,7 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
     <div class="row" id="album-row" hidden><span class="label grow">앨범 상태</span><span id="album-status" style="color:var(--ink-2)"></span></div>
     <div class="row"><span class="label grow">태블릿에 넣은 사진 한 장</span><label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer">사진 고르기<input type="file" accept="image/*" id="file2" hidden></label></div>
   </div>
-  <p class="note">공유 앨범을 켜면 "사진" 시계에 앨범 사진이 5분마다 바뀌어 나와요. 아래 구글 캘린더 칸에 넣은 내 스크립트 주소로 사진 목록을 받고, 사진은 애플 서버에서 바로 받아요. 끄면 태블릿에 넣은 사진 한 장을 써요.</p>
+  <p class="note">공유 앨범을 켜면 "사진" 시계에 앨범 사진이 5분마다 바뀌어 나와요. 아래 구글 캘린더에 넣은 연결 코드로 내 구글 스크립트에서 사진 목록을 받고, 사진은 애플 서버에서 바로 받아요. 끄면 태블릿에 넣은 사진 한 장을 써요.</p>
 
   <p class="group-label">야간 모드</p>
   <div class="group">
@@ -76,12 +76,13 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
 
   <p class="group-label">구글 캘린더</p>
   <div class="group">
+    <div class="row"><span class="label">연결 코드</span><input class="grow" type="text" id="cal-code" placeholder="8자리" maxlength="16" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
     <div class="row"><span class="label">주소</span><input class="grow" type="text" id="cal-url" placeholder="https://script.google.com/macros/s/…/exec?t=…" autocomplete="off" spellcheck="false"></div>
     <div class="row"><span class="label grow">일정 알림</span>
       <select id="cal-min"><option value="0">끄기</option><option value="5">5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option></select></div>
     <div class="row"><span class="label grow" id="cal-status">연결 안 됨</span><button class="row-btn" style="width:auto" type="button" id="cal-test">지금 확인</button></div>
   </div>
-  <p class="note">내 구글 계정의 Apps Script로 일정을 읽기만 해요. 주소를 넣으면 15분마다 그 주소에서 7일 치 일정을 받아와요. 주소를 지우면 아무것도 받지 않아요.</p>
+  <p class="note">연결 코드만 넣으면 돼요. 내 구글 스크립트에서 15분마다 7일 치 일정을 읽기만 하고, 공유 앨범 사진 목록도 같이 받아요. 코드를 지우면 아무것도 받지 않아요.</p>
 
   <p class="group-label">날씨</p>
   <div class="group">

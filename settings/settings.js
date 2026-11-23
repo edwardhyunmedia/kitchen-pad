@@ -58,7 +58,7 @@ async function showAlbum(force) {
   $('album').setAttribute('aria-pressed', !!st.album);
   $('album-row').hidden = !st.album;
   if (!st.album) return;
-  if (!st.calUrl) { $('album-status').textContent = '먼저 아래 구글 캘린더 주소를 넣어주세요'; return; }
+  if (!st.calUrl) { $('album-status').textContent = '먼저 아래 구글 캘린더에 연결 코드를 넣어주세요'; return; }
   $('album-status').textContent = '확인하는 중…';
   const r = await getAlbum(force);
   $('album-status').textContent = r.photos.length ? `사진 ${r.photos.length}장` : '앨범을 못 읽었어요';
@@ -74,9 +74,12 @@ $('reset-layout').addEventListener('click', () => {
 draw();
 
 // ---------- 구글 캘린더 ----------
+// 내 구글 스크립트 주소 (이 주소만으로는 아무것도 못 받음, 연결 코드가 있어야 일정·사진을 돌려줌)
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEVTgOpJ76tNHBYecl5WtJ0bEsRq1bkcTyzF7sJCiNCaqTfQAN5-yBCuTiu9PmsfDGFQ/exec';
 async function drawCal(force) {
   const st = getSettings();
   $('cal-url').value = st.calUrl || '';
+  $('cal-code').value = st.calUrl && st.calUrl.startsWith(SCRIPT_URL) ? (new URL(st.calUrl).searchParams.get('t') || '') : '';
   $('cal-min').value = String(st.calAlertMin ?? 10);
   if (!st.calUrl) { $('cal-status').textContent = '연결 안 됨'; return; }
   $('cal-status').textContent = '확인하는 중…';
@@ -92,6 +95,16 @@ $('cal-url').addEventListener('change', e => {
   // 처음 연결하면 홈에 "오늘 일정" 위젯 추가
   if (v) { const l = load('home.layout', null); if (Array.isArray(l) && !l.includes('w:cal')) save('home.layout', [...l, 'w:cal']); }
   drawCal(true);
+});
+// 연결 코드만 넣으면 캘린더·공유 앨범 둘 다 연결
+$('cal-code').addEventListener('change', e => {
+  const code = e.target.value.trim().toLowerCase();
+  if (!code) return;
+  if (!/^[a-z0-9]{6,16}$/.test(code)) { $('cal-status').textContent = '연결 코드는 영문 소문자와 숫자예요'; return; }
+  setSettings({ calUrl: `${SCRIPT_URL}?t=${code}`, album: true });
+  save('cal.cache', null); save('album.cache', null);
+  const l = load('home.layout', null); if (Array.isArray(l) && !l.includes('w:cal')) save('home.layout', [...l, 'w:cal']);
+  drawCal(true); showAlbum(true);
 });
 $('cal-min').addEventListener('change', e => setSettings({ calAlertMin: Number(e.target.value) }));
 $('cal-test').addEventListener('click', () => drawCal(true));
