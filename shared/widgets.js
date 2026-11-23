@@ -158,18 +158,18 @@ function wx(size, d) {
 
 // ---------- 커피 ----------
 const mins = r => Math.round((r.steps || []).reduce((a, s) => a + (s.sec || 0), 0) / 60);
-const meta = r => [`${mins(r)}분`, r.dose ? `${r.dose}g` : '', r.water ? `${r.water}ml` : ''].filter(Boolean).join(' · ');
+const meta = (r, short = false) => [`${mins(r)}분`, r.dose ? `${r.dose}g` : '', r.water && !short ? `${r.water}ml` : ''].filter(Boolean).join(' · ');
 function coffee(size, d) {
   const { recipes = [], running = null } = d.coffee || {};
   if (!recipes.length) return `${head('coffee', '커피')}<div class="w-fill"></div>${note('커피 앱에서 레시피를 넣으세요')}`;
   if (running) {
-    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-cap" style="color:${ACCENT.coffee}">내리는 중</div><div class="w-name">${esc(running)}</div>
-      <button class="w-play" type="button" data-open-coffee aria-label="커피 타이머 보기">${SYM.open}</button>`;
+    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-cbot"><div class="w-ct"><div class="w-cap" style="color:${ACCENT.coffee}">내리는 중</div><div class="w-name">${esc(running)}</div></div>
+      <button class="w-play" type="button" data-open-coffee aria-label="커피 타이머 보기">${SYM.open}</button></div>`;
   }
   if (size === 's') {
     const r = recipes[0];
-    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-name">${esc(r.name)}</div><div class="w-sub">${esc(meta(r))}</div>
-      <button class="w-play" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button>`;
+    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-cbot"><div class="w-ct"><div class="w-name">${esc(r.name)}</div><div class="w-sub">${esc(meta(r, true))}</div></div>
+      <button class="w-play" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button></div>`;
   }
   return `${head('coffee', '커피')}<div class="w-list w-cof">${recipes.slice(0, 3).map(r => `<div class="w-crow"><div class="w-rt"><b>${esc(r.name)}</b><small>${esc(meta(r))}</small></div>
     <button class="w-play sm" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button></div>`).join('')}</div>`;

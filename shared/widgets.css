@@ -35,7 +35,7 @@ html.dark .wg { --c1: #fff; --c2: rgba(235,235,245,.6); --c3: rgba(235,235,245,.
 /* 중간 위젯: 왼쪽 요약 / 오른쪽 목록 */
 .w-split { flex: 1; min-height: 0; display: flex; gap: calc(var(--pt) * 16); }
 .w-side { flex: 0 0 34%; min-width: 0; display: flex; flex-direction: column; }
-.w-list { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: calc(var(--pt) * 8); }
+.w-list { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: calc(var(--pt) * 8); }
 
 /* 약 줄: 동그라미 체크(누르면 바로 먹음) + 시간·약 / 사람 */
 .w-row { display: flex; align-items: center; gap: calc(var(--pt) * 10); min-width: 0; }
@@ -202,3 +202,14 @@ body[data-look="tint"] .addslot span { background: rgba(255,255,255,.1); color: 
 .mtile .w-day { color: #fff !important; opacity: .85; }
 .mtile .w-play { background: rgba(255,255,255,.25); }
 .mtile .w-ev { --ec: #fff !important; }
+
+/* 정렬: 목록은 왼쪽 머리(요일·약)와 같은 윗선에서 시작, 커피 버튼은 글자 묶음과 같은 아랫선 */
+.w-cbot { display: flex; align-items: flex-end; justify-content: space-between; gap: calc(var(--pt) * 8); min-width: 0; }
+.w-ct { min-width: 0; }
+.w-cbot .w-name { padding-right: 0; }
+.w-cbot .w-play { position: static; flex: none; }
+.w-sub { line-height: 1.2; }
+.w-cof { margin-top: calc(var(--pt) * 10); }
+/* 화면 끝에서 튕기며 생기는 가장자리 줄 없게 */
+html, body, .scroll { overscroll-behavior: none; }
+.w-sub, .w-rt small, .w-cap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

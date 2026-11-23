@@ -105,14 +105,27 @@ function fitGrid() {
   home.style.paddingLeft = home.style.paddingRight = `${basePad}px`;
   const rows = getComputedStyle(grid).gridTemplateRows.split(' ').filter(Boolean).length;
   if (!rows) return;
-  const top = scroll.getBoundingClientRect().top + 14;
-  const bar = body.classList.contains('edit') ? (document.querySelector('.editbar')?.offsetHeight || 0) + vh * 0.03 + gap : Math.max(vh * 0.03, 16);
-  const hCell = (vh - top - bar - (rows - 1) * gap) / rows;
+  // 잠든 화면에선 #home이 살짝 확대돼 있어서 getBoundingClientRect가 틀림 → 확대와 무관한 offset 값으로 잼
+  const top = scroll.offsetTop + 14;
+  const bar = body.classList.contains('edit') ? (document.querySelector('.editbar')?.offsetHeight || 0) + vh * 0.03 + gap : basePad; // 아래 여백 = 좌우 여백 (위젯이 화면 아래 끝에 붙지 않게)
+  let hCell = (vh - top - bar - (rows - 1) * gap) / rows;
+  // 높이에 맞춰 줄어들면 좌우 여백이 커지므로, 아래 여백도 그 좌우 여백과 똑같아지게 칸 크기를 정함
+  if (!body.classList.contains('edit') && rows > 2) hCell = Math.min(hCell, (vh - top - (rows - 1) * gap - vw / 2 + 1.5 * gap) / (rows - 2));
   const cell = Math.max(wCell * 0.45, Math.min(wCell, hCell));
   const pad = (vw - 4 * cell - 3 * gap) / 2;
   home.style.setProperty('--cell', `${cell}px`);
   home.style.setProperty('--pt', `${(2 * cell + gap) / 170}px`); // 작은 위젯 한 변 = 170pt
   home.style.paddingLeft = home.style.paddingRight = `${pad}px`;
+  // 실제로 그려진 아래 여백을 재서 좌우 여백과 다르면 한 번 더 맞춤
+  if (!body.classList.contains('edit') && rows > 2 && cell < wCell) {
+    const diff = pad - (vh - Math.max(...[...grid.querySelectorAll('.it:not(.addslot)')].map(e => e.offsetTop + e.offsetHeight - scroll.scrollTop), 0));
+    if (Math.abs(diff) > 1) {
+      const c2 = Math.max(wCell * 0.45, Math.min(wCell, cell - diff / (rows - 2)));
+      home.style.setProperty('--cell', `${c2}px`);
+      home.style.setProperty('--pt', `${(2 * c2 + gap) / 170}px`);
+      home.style.paddingLeft = home.style.paddingRight = `${(vw - 4 * c2 - 3 * gap) / 2}px`;
+    }
+  }
   grid.querySelectorAll('.w-temp, .w-date, .w-t28').forEach(opticalLeft);
   opticalLeft($('h-time')); opticalLeft($('h-date'));
 }

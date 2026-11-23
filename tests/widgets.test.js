@@ -71,7 +71,8 @@ test('weather sky follows day/night and condition', () => {
 test('coffee: start button per recipe, running shows open button', () => {
   const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }, { id: 'r2', name: '진하게', steps: [{ sec: 60 }] }];
   assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }), /data-play="r1"/);
-  assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }), /3분 · 15g · 250ml/);
+  assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }), /3분 · 15g</);
+  assert.match(widgetBody('w:coffee', 'm', { ...base, coffee: { recipes } }), /3분 · 15g · 250ml/);
   assert.equal((widgetBody('w:coffee', 'm', { ...base, coffee: { recipes } }).match(/data-play=/g) || []).length, 2);
   assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes, running: '기본' } }), /data-open-coffee/);
 });
