@@ -181,3 +181,9 @@ body.has-glance #face-layer .fdate { margin-top: 2.5vh; margin-top: 2.5cqh; }
 .mcard.late { background: #fff0ef; }
 .mcard.done .wbig { color: #34c759; }
 .mcard:active { transform: scale(.97); }
+/* 편집 모드 빈칸도 점선 대신 옅은 칸 */
+.addslot span, body.plain .addslot span { border: 0; background: #f2f2f7; border-radius: 24%; }
+html.dark .addslot span { background: #2c2c2e; }
+
+/* 숫자 잘림 방지: 그라데이션 글자는 상자 안쪽만 칠해지므로 상자를 글자보다 넉넉히 */
+.fn { padding: .1em .14em; margin: -.1em -.14em; }

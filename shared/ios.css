@@ -126,3 +126,18 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: cal
 #timer-sheet .sheet { height: 100%; }
 /* 작은 시간이 스크롤되는 내용과 겹치지 않게 바탕 */
 .mini-time { background: var(--bg, #fff); padding: 2px 10px; border-radius: 999px; right: 12px !important; }
+
+/* ===== 선·구분선 없음 ===== */
+/* 알림 카드: 세 조각을 한 장처럼 (반투명 조각끼리 겹치는 줄 제거) */
+.alarm .a-top, .alarm .a-mid, .alarm .a-btns { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.alarm .a-mid, .alarm .a-btns { margin-top: -1px; }
+/* 목록 줄 사이 선 → 간격으로만 구분 */
+.row + .row::before { content: none !important; }
+/* 카드·버튼 테두리 선 → 그림자만 */
+:root { --glass-s-shadow: inset 0 1px 1px rgba(255,255,255,.95), 0 8px 15px rgba(0,0,0,.04); --glass-l-shadow: 0 18px 46px rgba(0,0,0,.14); }
+.tile.on { box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+.seg button.on { box-shadow: 0 3px 8px rgba(0,0,0,.12) !important; }
+.minus { box-shadow: none; }
+/* 알림: 시각은 한 번만 (약 이름 아래 '몇 시에 먹을 약') */
+.alarm li { font-size: calc(26px * var(--s)) !important; font-weight: 700 !important; letter-spacing: -.02em; }
+.alarm li small { font-size: calc(16px * var(--s)) !important; margin-top: 4px; }

@@ -9,7 +9,7 @@ function check() {
   const due = pendingAlarms(getConfig(), getLog(), getAcks(), new Date(), getSnooze());
   if (!due.length) return;
   startAlarm(
-    due.map(d => ({ title: `${d.personName} ${d.medName}`, sub: d.round ? `${d.time} 지남` : d.time })),
+    due.map(d => ({ title: `${d.personName} ${d.medName}`, sub: d.round ? `${d.time}에 먹을 약, 아직 안 먹었어요` : `${d.time}에 먹을 약` })),
     () => {
       // 먹었어요: 바로 체크
       const log = getLog();
@@ -43,7 +43,7 @@ async function checkCal() {
   for (const [k, v] of Object.entries(snooze)) if (v.until <= Date.now() && !due.find(d => d.ackKey === k)) due.push({ ackKey: k, title: v.title, start: new Date(v.start) });
   if (!due.length) return;
   startAlarm(
-    due.map(e => ({ title: e.title, sub: fmtTime(new Date(e.start)) })),
+    due.map(e => ({ title: e.title, sub: `${fmtTime(new Date(e.start))} 시작` })),
     () => { const a = load('cal.acks', {}); const sn = load('cal.snooze', {}); for (const e of due) { a[e.ackKey] = true; delete sn[e.ackKey]; } save('cal.acks', a); save('cal.snooze', sn); },
     () => { const a = load('cal.acks', {}); const sn = load('cal.snooze', {}); for (const e of due) { a[e.ackKey] = true; sn[e.ackKey] = { until: Date.now() + 10 * 60000, title: e.title, start: new Date(e.start).toISOString() }; } save('cal.acks', a); save('cal.snooze', sn); },
     { title: '곧 일정이 있어요', primary: '확인', later: '10분 뒤 다시', speak: '곧 일정이 있어요' },

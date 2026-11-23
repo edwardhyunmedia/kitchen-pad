@@ -57,7 +57,7 @@ function ensureOverlay() {
   overlay.className = 'alarm';
   overlay.innerHTML = `
       <div class="a-top">${icons.bell}<span>약 먹을 시간이에요</span></div>
-      <div class="a-mid"><div class="a-time"></div><ul></ul></div>
+      <div class="a-mid"><ul></ul></div>
       <div class="a-btns"><button class="a-later" type="button">10분 뒤 다시</button><button class="a-stop" type="button">먹었어요</button></div>`;
   document.body.appendChild(overlay);
   return overlay;
@@ -79,8 +79,6 @@ export function startAlarm(items, onTaken, onLater, opts = {}) {
   el.querySelector('.a-stop').onclick = () => { stopAlarm(); onTaken && onTaken(); };
   el.querySelector('.a-later').onclick = () => { stopAlarm(); onLater && onLater(); };
   el.classList.add('open');
-  const now = new Date();
-  el.querySelector('.a-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   if (loop) return;
   fully(f => f.turnScreenOn());
   const say = () => fully(f => f.textToSpeech(speakText, 'ko'));

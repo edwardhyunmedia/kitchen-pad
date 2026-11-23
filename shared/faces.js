@@ -127,7 +127,8 @@ export function opticalFix(root) {
   root.querySelectorAll('.bn, .pn, .fn').forEach(el => {
     el.style.position = 'relative'; el.style.left = '0px';
     const b = inkBox(el);
-    if (b) el.style.left = `${el.offsetWidth / 2 - (b.left + b.right) / 2}px`;
+    const pl = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+    if (b) el.style.left = `${el.offsetWidth / 2 - pl - (b.left + b.right) / 2}px`;
   });
   root.querySelectorAll('.mt, .cal .day').forEach(el => {
     el.style.position = 'relative'; el.style.left = '0px';
