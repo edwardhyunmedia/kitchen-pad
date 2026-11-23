@@ -11,8 +11,7 @@ export function focusFromDets(dets, w, h, q = 5) {
   let sx = 0, sy = 0, sw = 0;
   for (const [r, c, s, score] of faces) { const wt = s * s * Math.min(score, 50); sx += c * wt; sy += r * wt; sw += wt; }
   const clamp = v => Math.max(0, Math.min(1, v));
-  // 얼굴 중심보다 살짝 아래 (어깨까지 보이게)
-  return [clamp(sx / sw / w), clamp((sy / sw) / h + 0.04)];
+  return [clamp(sx / sw / w), clamp(sy / sw / h)];
 }
 
 export const photoKey = url => { try { const u = new URL(url, location.href); return u.protocol === 'blob:' ? '' : u.pathname; } catch { return ''; } };
