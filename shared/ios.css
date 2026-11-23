@@ -184,3 +184,8 @@ body { word-break: keep-all; }
 
 .tile .t-week { display: flex; align-items: center; gap: calc(8px * var(--s)); margin-top: calc(10px * var(--s)); font-size: var(--t-foot); color: var(--label-2); }
 .tile .t-week .t-dots { padding-top: 0; }
+
+/* 원두 g · 물 ml: 공백 글자 대신 칸 간격으로 띄움 (어디서 그려도 같은 위치), 고정된 숫자라 고정폭 숫자 안 씀 */
+.tile .t-pair { display: flex; align-items: baseline; column-gap: .3em; }
+.tile .t-big { font-variant-numeric: normal; }
+.tile .t-big i { margin-left: .06em; }

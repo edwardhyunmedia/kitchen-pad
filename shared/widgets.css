@@ -252,3 +252,6 @@ html, body, .scroll { overscroll-behavior: none; }
 /* 일정 중간 크기: 요일 + 아주 큰 날짜, 세로 가운데 */
 .w-calm .w-day { font-size: calc(var(--pt) * 23.4); letter-spacing: -.005em; }
 .w-calm .w-date { font-size: calc(var(--pt) * 87.6); letter-spacing: -.012em; line-height: 1; }
+
+/* 커피 위젯 숫자도 고정폭 숫자 안 씀 (FigCraft와 같은 간격) */
+.w-cnum { font-variant-numeric: normal; }

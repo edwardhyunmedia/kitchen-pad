@@ -35,7 +35,7 @@ function renderList() {
       <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
       <span class="t-body">
         <div class="name">${esc(r.name)}</div>
-        <div class="t-big">${r.dose ? `${esc(r.dose)}<i>g</i>` : ''}${r.water ? ` ${esc(r.water)}<i>ml</i>` : ''}</div>
+        <div class="t-big t-pair">${r.dose ? `<span>${esc(r.dose)}<i>g</i></span>` : ''}${r.water ? `<span>${esc(r.water)}<i>ml</i></span>` : ''}</div>
         ${extra ? `<div class="state">${extra}</div>` : ''}
         <div class="state">${mmss(totalSec(r))} · ${r.steps.length}단계</div>
       </span>
