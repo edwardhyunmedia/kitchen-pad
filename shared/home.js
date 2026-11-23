@@ -7,7 +7,7 @@ import { normalizeLayout, itemSize, nextSize, moveItem, removeItem, addItem, add
 import { widgetBox, widgetBody, WIDGET_INFO, SYM } from './widgets.js';
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
-import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
+import { getWeather } from './weather.js';
 import { getAlbum, pickPhoto } from './album.js';
 import { createSlides } from './slides.js';
 import { findFocus, savedFocus } from './focus.js';
@@ -78,12 +78,11 @@ function drawFace(force) {
   catch { $('face-layer').innerHTML = `<div class="fc fallback"><div class="bn">${pad(now.getHours())}</div><div class="bn">${pad(now.getMinutes())}</div></div>`; }
 }
 
-// ---------- 상단 시간·날짜·날씨 ----------
+// ---------- 상단 시간·날짜 (날씨는 위젯·시계 화면에서만) ----------
 function drawHero() {
   const d = new Date();
   $('h-time').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   $('h-date').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${DAYS[d.getDay()]}요일`;
-  $('h-wx').innerHTML = weather ? `${WEATHER_ICONS[codeInfo(weather.code).icon]}${weather.temp}°` : '';
   opticalLeft($('h-time')); opticalLeft($('h-date'));
 }
 
@@ -98,6 +97,7 @@ function opticalLeft(el) {
 }
 
 // 그리드를 화면 높이에 맞춰 줄여서 스크롤 없이 한 화면에. 좌우 여백도 같이 맞춰 시간·위젯 왼쪽 선 일치
+const FIT_MIN = 0.85; // 한 화면에 맞추려고 줄일 수 있는 한도 (원래 크기의 85%)
 function fitGrid() {
   const home = $('home'), grid = $('grid'), scroll = $('scroll');
   const vw = document.documentElement.clientWidth, vh = innerHeight;
@@ -113,16 +113,20 @@ function fitGrid() {
   let hCell = (vh - top - bar - (rows - 1) * gap) / rows;
   // 높이에 맞춰 줄어들면 좌우 여백이 커지므로, 아래 여백도 그 좌우 여백과 똑같아지게 칸 크기를 정함
   if (!body.classList.contains('edit') && rows > 2) hCell = Math.min(hCell, (vh - top - (rows - 1) * gap - vw / 2 + 1.5 * gap) / (rows - 2));
-  const cell = Math.max(wCell * 0.45, Math.min(wCell, hCell));
+  // 조금만 넘치면 살짝 줄여서 한 화면에, 많이 넘치면 줄이지 않고 원래 크기로 아래로 스크롤
+  // (크게 줄이면 좌우 여백만 휑하게 커짐)
+  const over = hCell < wCell * FIT_MIN;
+  const cell = over ? wCell : Math.min(wCell, hCell);
   const pad = (vw - 4 * cell - 3 * gap) / 2;
+  scroll.style.paddingBottom = over ? `${basePad}px` : '';
   home.style.setProperty('--cell', `${cell}px`);
   home.style.setProperty('--pt', `${(2 * cell + gap) / 170}px`); // 작은 위젯 한 변 = 170pt
   home.style.paddingLeft = home.style.paddingRight = `${pad}px`;
   // 실제로 그려진 아래 여백을 재서 좌우 여백과 다르면 한 번 더 맞춤
-  if (!body.classList.contains('edit') && rows > 2 && cell < wCell) {
+  if (!over && !body.classList.contains('edit') && rows > 2 && cell < wCell) {
     const diff = pad - (vh - Math.max(...[...grid.querySelectorAll('.it:not(.addslot)')].map(e => e.offsetTop + e.offsetHeight - scroll.scrollTop), 0));
     if (Math.abs(diff) > 1) {
-      const c2 = Math.max(wCell * 0.45, Math.min(wCell, cell - diff / (rows - 2)));
+      const c2 = Math.max(wCell * FIT_MIN, Math.min(wCell, cell - diff / (rows - 2)));
       home.style.setProperty('--cell', `${c2}px`);
       home.style.setProperty('--pt', `${(2 * c2 + gap) / 170}px`);
       home.style.paddingLeft = home.style.paddingRight = `${(vw - 4 * c2 - 3 * gap) / 2}px`;

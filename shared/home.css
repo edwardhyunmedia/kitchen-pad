@@ -27,8 +27,6 @@ body.idle #home { opacity: 0; transform: scale(1.03); pointer-events: none; }
 body.plain .hero { text-shadow: none; }
 .hero .t { font-size: clamp(40px, 7vh, 90px); font-weight: 600; letter-spacing: -.05em; line-height: .95; font-variant-numeric: tabular-nums; }
 .hero .d { font-size: clamp(15px, 2.2vh, 26px); font-weight: 500; opacity: .88; margin-top: .6vh; }
-.hero .wx { display: flex; align-items: center; gap: 8px; font-size: clamp(30px, 5vh, 64px); font-weight: 400; letter-spacing: -.04em; line-height: 1; }
-.hero .wx svg { width: clamp(30px, 4.6vh, 58px); height: auto; }
 
 .scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 14px 10px 14vh; margin: -14px -10px 0; scrollbar-width: none; }
 .scroll::-webkit-scrollbar { display: none; }

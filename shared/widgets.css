@@ -248,3 +248,7 @@ html, body, .scroll { overscroll-behavior: none; }
 .wg, .mtile { word-break: keep-all; overflow-wrap: anywhere; }
 /* 시계 화면 타일에선 커피 이름도 흰 글씨 (색 배경 위 갈색 글씨는 안 보임) */
 .mtile .w-cname { color: #fff !important; opacity: .85; }
+
+/* 일정 중간 크기: 요일 + 아주 큰 날짜, 세로 가운데 */
+.w-calm .w-day { font-size: calc(var(--pt) * 23.4); letter-spacing: -.005em; }
+.w-calm .w-date { font-size: calc(var(--pt) * 87.6); letter-spacing: -.012em; line-height: 1; }

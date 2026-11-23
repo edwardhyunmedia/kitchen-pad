@@ -27,8 +27,8 @@ $('t-reset').innerHTML = icons.reset;
 function renderList() {
   const list = getRecipes();
   $('recipes').innerHTML = list.map((r, i) => `
-    <button class="tile on" type="button" data-i="${i}">
-      <span class="glyph" style="background:var(--brown)">${icons.cup}</span>
+    <button class="tile" type="button" data-i="${i}">
+      <span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>
       <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}${r.temp ? `, ${esc(r.temp)}°C` : ''}${r.ice ? ', 아이스' : ''}</div></span>
     </button>`).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }

@@ -13,7 +13,7 @@
 <style>
 .chead { display: flex; align-items: flex-end; justify-content: space-between; margin-top: calc(40px * var(--s)); }
 .chead h1 { margin: 0; }
-.chead .yr { color: #ff3b30; font-weight: 600; font-size: calc(17px * var(--s)); }
+.chead .subtitle { margin-top: 2px; }
 .mnav { display: flex; gap: calc(10px * var(--s)); }
 .mnav button { width: calc(44px * var(--s)); height: calc(44px * var(--s)); border-radius: 50%; background: #f2f2f7; display: grid; place-items: center; color: #ff3b30; }
 .mnav button svg { width: 50%; height: 50%; }
@@ -30,22 +30,22 @@ html.dark .day.sel b { background: #fff; color: #000; }
 .day i { width: calc(6px * var(--s)); height: calc(6px * var(--s)); border-radius: 50%; background: transparent; }
 .day.has i { background: var(--label-3); }
 .agenda { margin-top: calc(22px * var(--s)); }
-.agenda h2 { font-size: calc(20px * var(--s)); font-weight: 700; margin: 0 0 calc(12px * var(--s)); }
+.agenda h2 { font-size: var(--t-section); font-weight: 700; margin: 0 0 calc(12px * var(--s)); }
 .ev { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(14px * var(--s)) calc(16px * var(--s)) calc(14px * var(--s)) calc(26px * var(--s)); background: #f2f2f7; border-radius: calc(18px * var(--s)); margin-bottom: calc(8px * var(--s)); }
 html.dark .ev { background: #1c1c1e; }
 .ev::before { content: ""; position: absolute; left: calc(12px * var(--s)); top: calc(12px * var(--s)); bottom: calc(12px * var(--s)); width: calc(4px * var(--s)); border-radius: 9px; background: #0a84ff; }
-.ev b { font-size: calc(17px * var(--s)); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ev span { color: var(--label-2); font-size: calc(15px * var(--s)); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
-.ev span small { display: block; font-size: calc(13px * var(--s)); }
+.ev b { font-size: var(--t-body); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev span { color: var(--label-2); font-size: var(--t-sub); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+.ev span small { display: block; font-size: var(--t-sub); }
 .empty2 { color: var(--label-2); font-size: calc(17px * var(--s)); padding: calc(12px * var(--s)) 0; }
-.foot { color: var(--label-2); font-size: calc(13px * var(--s)); margin-top: calc(14px * var(--s)); }
+.foot { color: var(--label-2); font-size: var(--t-foot); margin-top: calc(14px * var(--s)); }
 .connect { display: inline-grid; place-items: center; height: calc(50px * var(--s)); padding: 0 calc(22px * var(--s)); border-radius: 99px; background: #007aff; color: #fff; font-weight: 600; font-size: calc(17px * var(--s)); margin-top: calc(8px * var(--s)); text-decoration: none; }
 </style>
 <script type="module" src="../shared/night.js"></script>
 </head>
 <body>
 <main class="page">
-  <div class="chead"><div><div class="yr" id="yr"></div><h1 class="title" id="mon"></h1></div>
+  <div class="chead"><div><h1 class="title" id="mon"></h1><div class="subtitle" id="yr"></div></div>
     <div class="mnav"><button type="button" id="prev" aria-label="이전 달"></button><button type="button" id="next" aria-label="다음 달"></button></div></div>
   <div class="mgrid" id="grid"></div>
   <section class="agenda" id="agenda"></section>
