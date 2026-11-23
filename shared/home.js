@@ -19,9 +19,9 @@ const pad = n => String(n).padStart(2, '0');
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const APP_INFO = {
-  'app:meds': { name: '약', icon: 'pill', svg: 'meds', grad: '#ff9500', href: 'meds/' },
-  'app:coffee': { name: '커피', icon: 'cup', svg: 'coffee', grad: '#a2845e', href: 'coffee/' },
-  'app:settings': { name: '설정', icon: 'gear', svg: 'settings', grad: '#8e8e93', href: 'settings/' },
+  'app:meds': { name: '약', icon: 'pill', svg: 'meds', grad: '#ff9500', href: 'meds/index.html' },
+  'app:coffee': { name: '커피', icon: 'cup', svg: 'coffee', grad: '#a2845e', href: 'coffee/index.html' },
+  'app:settings': { name: '설정', icon: 'gear', svg: 'settings', grad: '#8e8e93', href: 'settings/index.html' },
 };
 
 let settings = getSettings();
@@ -208,8 +208,8 @@ document.addEventListener('pointerup', e => {
   if (!p.id) return;
   if (p.id.startsWith('app:')) openApp(APP_INFO[p.id].href, p.el);
   else if (p.id.startsWith('w:person:')) quickTake(p.id.slice(9));
-  else if (p.id === 'w:coffee') openApp('coffee/', p.el);
-  else openApp('meds/', p.el);
+  else if (p.id === 'w:coffee') openApp('coffee/index.html', p.el);
+  else openApp('meds/index.html', p.el);
 });
 document.addEventListener('pointercancel', () => { if (press?.el) { press.el.classList.remove('dragging'); press.el.style.transform = ''; } press = null; });
 
@@ -217,7 +217,7 @@ function startCoffee() {
   const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
   if (!r) return;
   save('coffee.run', startRun(null, r.id, Date.now()));
-  openApp('coffee/?run', document.querySelector('.it[data-id="w:coffee"]'));
+  openApp('coffee/index.html?run', document.querySelector('.it[data-id="w:coffee"]'));
 }
 
 // ---------- 위젯 눌러서 바로 먹음 체크 (3초 되돌리기) ----------

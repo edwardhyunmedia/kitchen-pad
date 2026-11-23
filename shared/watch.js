@@ -28,7 +28,7 @@ function check() {
   );
 }
 
-const inner = window !== window.top;
+const inner = (() => { try { return window.frameElement?.id === 'appframe'; } catch { return false; } })();
 
 // 구글 캘린더 일정 알림 (설정에서 주소를 넣었을 때만)
 async function checkCal() {

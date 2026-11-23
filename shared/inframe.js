@@ -1,5 +1,5 @@
 // 앱 화면이 홈 위에 겹쳐 열렸을 때: 홈과 신호 주고받기 (혼자 열렸으면 아무것도 안 함)
-export const inner = window !== window.top;
+export const inner = (() => { try { return window.frameElement?.id === 'appframe'; } catch { return false; } })();
 const send = msg => window.parent.postMessage({ kp: true, ...msg }, location.origin);
 
 if (inner) {

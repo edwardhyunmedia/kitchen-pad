@@ -2,7 +2,7 @@
 import { load } from './store.js';
 import { isNight } from './night-logic.js';
 
-const top = window === window.top;
+const top = !(() => { try { return window.frameElement?.id === 'appframe'; } catch { return false; } })();
 let wasNight = null;
 let savedBrightness = null;
 
