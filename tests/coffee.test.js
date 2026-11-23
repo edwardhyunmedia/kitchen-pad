@@ -42,12 +42,25 @@ test('deep blue lake recipe timing', () => {
   assert.equal(totalSec(r), 160); // 2:40에 끝
   assert.equal(timerState(r, 85).stepIndex, 3); // 1:25 = 2차 붓기
 });
-test('seed added once to saved recipes, not again after delete', () => {
+test('seeds added once, deep blue lake first, not re-added after delete', () => {
   const saved = [{ id: 'mine', name: '내 것', dose: 15, water: 250, steps: [{ label: 'a', sec: 10 }] }];
   const a = mergeSeeds(saved, [], SEED_RECIPES);
-  assert.deepEqual(a.recipes.map(r => r.id), ['mine', 'dbl-india']);
-  assert.deepEqual(a.seeded, ['dbl-india']);
-  const b = mergeSeeds([saved[0]], a.seeded, SEED_RECIPES); // 사용자가 지운 뒤
-  assert.deepEqual(b.recipes.map(r => r.id), ['mine']);
+  assert.equal(a.recipes[0].id, 'dbl-india');
+  assert.deepEqual(a.recipes.map(r => r.id).sort(), ['mine', ...SEED_RECIPES.map(r => r.id)].sort());
+  const b = mergeSeeds(a.recipes.filter(r => r.id !== 'kasuya-46'), a.seeded, SEED_RECIPES); // 사용자가 지운 뒤
+  assert.ok(!b.recipes.some(r => r.id === 'kasuya-46'));
   assert.equal(b.changed, false);
+  // 사용자가 순서를 바꿔도 다시 정렬하지 않음
+  const moved = [a.recipes[1], a.recipes[0], ...a.recipes.slice(2)];
+  assert.equal(mergeSeeds(moved, a.seeded, SEED_RECIPES).recipes[0].id, a.recipes[1].id);
+});
+test('online recipes: pours add up and end at the brew water', () => {
+  for (const r of SEED_RECIPES) {
+    const pours = r.steps.filter(s => s.pourTo).map(s => s.pourTo);
+    assert.deepEqual(pours, [...pours].sort((x, y) => x - y), r.id);
+    assert.equal(pours.at(-1), r.water, r.id);
+  }
+  assert.equal(totalSec(SEED_RECIPES.find(r => r.id === 'hoffmann-v60')), 210); // 3:30
+  assert.equal(totalSec(SEED_RECIPES.find(r => r.id === 'hoffmann-1cup')), 180); // 3:00
+  assert.equal(totalSec(SEED_RECIPES.find(r => r.id === 'kasuya-46')), 210); // 3:30
 });

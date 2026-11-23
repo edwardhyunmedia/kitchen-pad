@@ -12,9 +12,11 @@ import { getAlbum, pickPhoto } from './album.js';
 import { createSlides } from './slides.js';
 import { findFocus, savedFocus } from './focus.js';
 import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
-import { DEFAULT_RECIPES, startRun, timerState, runElapsed } from '../coffee/logic.js';
+import { DEFAULT_RECIPES, startRun, timerState, runElapsed, mergeSeeds } from '../coffee/logic.js';
 import { toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
+// 새 커피 레시피를 홈에서도 바로 반영 (커피 앱을 안 열어도 위젯에 나오게)
+{ const m = mergeSeeds(load('coffee.recipes', DEFAULT_RECIPES), load('coffee.seeded', [])); if (m.changed) { save('coffee.recipes', m.recipes); save('coffee.seeded', m.seeded); } }
 
 const $ = id => document.getElementById(id);
 const body = document.body;
