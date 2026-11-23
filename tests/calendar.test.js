@@ -52,3 +52,21 @@ test('next events skip finished ones and keep order', () => {
   const out = nextEvents([ev(10), ev(15, 23, 17), ev(9, 25), ev(20)], now, 2);
   assert.deepEqual(out.map(e => e.title), ['t2315', 't2320']);
 });
+
+import { monthCells, eventsOn } from '../shared/calendar.js';
+test('month grid starts on sunday and covers whole weeks', () => {
+  const c = monthCells(2026, 10); // 2026년 11월: 1일이 일요일, 30일
+  assert.equal(c.length, 35);
+  assert.equal(c[0].date.getDate(), 1);
+  assert.equal(c[0].out, false);
+  assert.equal(c[30].date.getMonth(), 11);
+  assert.equal(c[30].out, true);
+  const f = monthCells(2026, 1); // 2026년 2월: 1일 일요일, 28일 → 4주
+  assert.equal(f.length, 28);
+});
+test('events on a day include multi-day all-day events, all-day first', () => {
+  const ev = (id, s, e, allDay = false) => ({ id, title: id, start: new Date(s), end: new Date(e), allDay });
+  const list = [ev('trip', '2026-11-22T00:00:00', '2026-11-25T00:00:00', true), ev('dentist', '2026-11-23T10:00:00', '2026-11-23T11:00:00'), ev('late', '2026-11-24T09:00:00', '2026-11-24T10:00:00')];
+  assert.deepEqual(eventsOn(list, new Date(2026, 10, 23)).map(e => e.id), ['trip', 'dentist']);
+  assert.deepEqual(eventsOn(list, new Date(2026, 10, 25)).map(e => e.id), []);
+});

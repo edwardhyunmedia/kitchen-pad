@@ -5,7 +5,7 @@ import { allItems, itemSize, nextSize, defaultLayout, normalizeLayout, moveItem,
 const people = [{ id: 'me', name: '나' }, { id: 'wife', name: '아내' }];
 
 test('all items: apps plus meds, coffee, calendar, weather widgets', () => {
-  assert.deepEqual(allItems(people), ['app:meds', 'app:coffee', 'app:settings', 'w:meds', 'w:coffee', 'w:cal', 'w:wx']);
+  assert.deepEqual(allItems(people), ['app:meds', 'app:coffee', 'app:cal', 'app:wx', 'app:settings', 'w:meds', 'w:coffee', 'w:cal', 'w:wx']);
 });
 test('default sizes follow apple widget families', () => {
   assert.equal(itemSize('app:meds'), 'app');
@@ -31,7 +31,7 @@ test('old layout with per-person and next-dose widgets becomes the new default',
 });
 test('default layout contains everything once (weather is optional, top already shows it)', () => {
   const d = defaultLayout(people);
-  assert.deepEqual([...d].sort(), allItems(people).filter(i => i !== 'w:wx').sort());
+  assert.deepEqual([...d].sort(), allItems(people).filter(i => i !== 'w:wx' && i !== 'app:wx').sort());
 });
 test('normalize drops unknown and duplicates, keeps order', () => {
   const out = normalizeLayout(['w:ghost', 'app:coffee', 'app:coffee', 'app:meds'], people);

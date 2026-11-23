@@ -101,8 +101,10 @@ function meds(size, d) {
 // ---------- 일정 ----------
 const SPECIAL = /생일|생신|기념일|birthday|anniversary/i;
 const evTime = (e, now, withDay) => `${withDay ? `${esc(dayLabel(e.start, now))} ` : ''}${e.allDay ? '종일' : fmtTime(e.start)}`;
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// 일정 줄을 누르면 달력 앱의 그날로
 const evRow = (e, now, withDay = true) =>
-  `<div class="w-ev" style="--ec:${EVENT_COLOR}"><b>${esc(e.title)}</b><small>${evTime(e, now, withDay)}</small></div>`;
+  `<div class="w-ev" data-day="${ymd(e.start < now && e.allDay ? now : e.start)}" style="--ec:${EVENT_COLOR}"><b>${esc(e.title)}</b><small>${evTime(e, now, withDay)}</small></div>`;
 function dateBlock(now, special) {
   return `<div class="w-day" style="color:${ACCENT.cal}">${DAYS[now.getDay()]}${special ? `<span class="w-cake">${SYM.cake}</span>` : ''}</div>${v('cd', String(now.getDate()), 'w-date')}`;
 }

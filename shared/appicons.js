@@ -32,4 +32,18 @@ export const APP_ICONS = {
   settings: shell('settings', '#6e6e78', `<defs>${grad('#d9dbe2', '#8e909c')}${grad('#ffffff', '#d5d8e0')}</defs>
     ${glass('<path d="M460.7 333.2L467.0 280.3L557.0 280.3L563.3 333.2A186 186 0 0 1 602.2 349.3L644.0 316.3L707.7 380.0L674.7 421.8A186 186 0 0 1 690.8 460.7L743.7 467.0L743.7 557.0L690.8 563.3A186 186 0 0 1 674.7 602.2L707.7 644.0L644.0 707.7L602.2 674.7A186 186 0 0 1 563.3 690.8L557.0 743.7L467.0 743.7L460.7 690.8A186 186 0 0 1 421.8 674.7L380.0 707.7L316.3 644.0L349.3 602.2A186 186 0 0 1 333.2 563.3L280.3 557.0L280.3 467.0L333.2 460.7A186 186 0 0 1 349.3 421.8L316.3 380.0L380.0 316.3L421.8 349.3A186 186 0 0 1 460.7 333.2Z"/>', '#d9dbe2', '#8e909c', 0.92)}
     ${glass('<circle cx="512" cy="512" r="80"/>', '#ffffff', '#d5d8e0', 0.98)}`),
+  // 달력: 애플 캘린더 아이콘처럼 빨간 요일 + 큰 날짜 (오늘 날짜로 그때그때 그림)
+  get cal() {
+    const d = new Date();
+    const wd = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'][d.getDay()];
+    return `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">${defs('cal', '#ff3b30')}
+  <g clip-path="url(#sq-cal)"><rect width="1024" height="1024" fill="url(#base-cal)"/>
+    <text x="512" y="318" text-anchor="middle" font-family="Pretendard, sans-serif" font-weight="600" font-size="150" fill="#ff3b30">${wd}</text>
+    <text x="512" y="810" text-anchor="middle" font-family="Pretendard, sans-serif" font-weight="300" font-size="500" letter-spacing="-20" fill="#1d1d1f">${d.getDate()}</text></g>
+  <path d="${SQ}" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="10"/>
+  <path d="${SQ}" fill="none" stroke="rgba(0,0,0,.06)" stroke-width="2"/></svg>`;
+  },
+  wx: shell('wx', '#2f7fd8', `<defs>${grad('#ffe27a', '#ffb800')}${grad('#ffffff', '#d6e6fb')}</defs>
+    ${glass('<circle cx="400" cy="400" r="150"/>', '#ffe27a', '#ffb800', 0.95)}
+    ${glass('<path d="M330 740h360a120 120 0 0 0 0-240 170 170 0 0 0-320 40 100 100 0 0 0-40 200z"/>', '#ffffff', '#d6e6fb', 0.95)}`),
 };

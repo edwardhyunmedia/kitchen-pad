@@ -52,3 +52,22 @@ export async function getEvents(force = false) {
     return cache ? normalizeEvents(cache.data) : [];
   }
 }
+
+// 달력 앱: 그 달을 일요일부터 6주(42칸) 또는 필요한 만큼(주 단위)으로. 칸마다 Date (다른 달은 out: true)
+export function monthCells(year, month) {
+  const first = new Date(year, month, 1);
+  const start = new Date(year, month, 1 - first.getDay());
+  const days = new Date(year, month + 1, 0).getDate();
+  const weeks = Math.ceil((first.getDay() + days) / 7);
+  return Array.from({ length: weeks * 7 }, (_, i) => {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    return { date: d, out: d.getMonth() !== month };
+  });
+}
+// 그날에 걸친 일정 (여러 날 종일 일정 포함). 시간 순, 종일 먼저
+export function eventsOn(events, day) {
+  const s = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+  const e = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 1);
+  return events.filter(x => x.start < e && (x.end > s || (+x.end === +x.start && x.start >= s)))
+    .sort((a, b) => (b.allDay - a.allDay) || (a.start - b.start));
+}

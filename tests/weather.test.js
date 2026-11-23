@@ -18,7 +18,7 @@ test('url sends only fixed area coordinates', () => {
 });
 test('parse', () => {
   const w = parse({ current: { temperature_2m: 11.6, weather_code: 2 }, daily: { temperature_2m_max: [15.2], temperature_2m_min: [5.9] } }, 1000);
-  assert.deepEqual(w, { temp: 12, code: 2, max: 15, min: 6, at: 1000, hours: [] });
+  assert.deepEqual(w, { temp: 12, code: 2, max: 15, min: 6, at: 1000, hours: [], days: [] });
   assert.equal(parse({}, 1), null);
 });
 test('parse keeps the next 6 hours after now (Seoul local time)', () => {
@@ -27,12 +27,17 @@ test('parse keeps the next 6 hours after now (Seoul local time)', () => {
   const now = new Date('2026-11-23T20:10:00+09:00').getTime();
   const w = parse({ current: { temperature_2m: 5, weather_code: 2 }, daily: { temperature_2m_max: [8], temperature_2m_min: [1] },
     hourly: { time: days, temperature_2m: days.map((_, i) => i), weather_code: days.map(() => 3) } }, now);
-  assert.deepEqual(w.hours.map(h => h.h), [21, 22, 23, 0, 1, 2]);
-  assert.deepEqual(w.hours.map(h => h.temp), [21, 22, 23, 24, 25, 26]);
+  assert.deepEqual(w.hours.slice(0, 6).map(h => h.h), [21, 22, 23, 0, 1, 2]);
+  assert.deepEqual(w.hours.slice(0, 6).map(h => h.temp), [21, 22, 23, 24, 25, 26]);
+  assert.equal(w.hours.length, 9); // 30개 중 지금 이후
   assert.equal(w.hours[0].code, 3);
 });
 test('freshness 30 min', () => {
   assert.equal(isFresh({ at: 0 }, 29 * 60000), true);
   assert.equal(isFresh({ at: 0 }, 31 * 60000), false);
   assert.equal(isFresh(null, 0), false);
+});
+test('parse keeps daily forecast', () => {
+  const w = parse({ current: { temperature_2m: 5, weather_code: 2 }, daily: { time: ['2026-11-23', '2026-11-24'], temperature_2m_max: [8.4, 10], temperature_2m_min: [1, 2.6], weather_code: [2, 61] } }, 1);
+  assert.deepEqual(w.days, [{ date: '2026-11-23', max: 8, min: 1, code: 2 }, { date: '2026-11-24', max: 10, min: 3, code: 61 }]);
 });

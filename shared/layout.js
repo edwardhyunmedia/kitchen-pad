@@ -1,6 +1,6 @@
 // 홈 화면 배치: 아이템 id 순서 목록
 // app:<이름> = 앱 아이콘(1칸). 위젯은 애플 위젯 크기 그대로: 작게 s(2x2), 중간 m(4x2), 크게 l(4x4)
-export const APPS = ['app:meds', 'app:coffee', 'app:settings'];
+export const APPS = ['app:meds', 'app:coffee', 'app:cal', 'app:wx', 'app:settings'];
 export const WIDGETS = ['w:meds', 'w:coffee', 'w:cal', 'w:wx'];
 // 위젯마다 쓸모 있는 크기만 (애플 지침: 유용한 경우에만 여러 크기)
 export const WIDGET_SIZES = { 'w:meds': ['s', 'm', 'l'], 'w:cal': ['s', 'm', 'l'], 'w:wx': ['s', 'm'], 'w:coffee': ['s', 'm'] };
@@ -23,7 +23,7 @@ export function nextSize(id, sizes = {}) {
 }
 
 export function defaultLayout() {
-  return ['app:meds', 'app:coffee', 'w:coffee', 'app:settings', 'w:meds', 'w:cal'];
+  return ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:meds', 'w:cal'];
 }
 
 // 예전 배치(사람별 약 위젯, 다음 약 위젯)는 약 위젯 하나로 합쳐진 새 기본 배치로 바꿈

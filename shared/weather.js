@@ -17,30 +17,37 @@ export function buildUrl() {
   u.searchParams.set('latitude', LOCATION.lat);
   u.searchParams.set('longitude', LOCATION.lon);
   u.searchParams.set('current', 'temperature_2m,weather_code');
-  u.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min');
+  u.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,weather_code');
   u.searchParams.set('hourly', 'temperature_2m,weather_code');
   u.searchParams.set('timezone', 'Asia/Seoul');
-  u.searchParams.set('forecast_days', '2');
+  u.searchParams.set('forecast_days', '7');
   return u.toString();
 }
 
-// 시간별 예보에서 지금 이후 6시간 (시간 문자열은 서울 시각)
+// 시간별 예보에서 지금 이후 24시간 (시간 문자열은 서울 시각). 위젯은 앞 6개만 씀
 function hoursAfter(h, now) {
   if (!h || !Array.isArray(h.time)) return [];
   const seoulNow = new Date(now + 9 * 3600000).toISOString().slice(0, 13); // 'YYYY-MM-DDTHH'
   const out = [];
   h.time.forEach((t, i) => {
-    if (out.length < 6 && String(t).slice(0, 13) > seoulNow && h.temperature_2m?.[i] != null)
+    if (out.length < 24 && String(t).slice(0, 13) > seoulNow && h.temperature_2m?.[i] != null)
       out.push({ h: Number(String(t).slice(11, 13)), temp: Math.round(h.temperature_2m[i]), code: h.weather_code?.[i] ?? 3 });
   });
   return out;
+}
+
+// 날짜별 예보 (최대 7일)
+function daysOf(d) {
+  if (!d || !Array.isArray(d.time)) return [];
+  return d.time.map((t, i) => ({ date: String(t), max: Math.round(d.temperature_2m_max[i]), min: Math.round(d.temperature_2m_min[i]), code: d.weather_code?.[i] ?? 3 }))
+    .filter(x => !Number.isNaN(x.max) && !Number.isNaN(x.min)).slice(0, 7);
 }
 
 export function parse(j, now) {
   try {
     const c = j.current, d = j.daily;
     if (c.temperature_2m == null) return null;
-    return { temp: Math.round(c.temperature_2m), code: c.weather_code, max: Math.round(d.temperature_2m_max[0]), min: Math.round(d.temperature_2m_min[0]), at: now, hours: hoursAfter(j.hourly, now) };
+    return { temp: Math.round(c.temperature_2m), code: c.weather_code, max: Math.round(d.temperature_2m_max[0]), min: Math.round(d.temperature_2m_min[0]), at: now, hours: hoursAfter(j.hourly, now), days: daysOf(d) };
   } catch { return null; }
 }
 

@@ -25,6 +25,8 @@ const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const APP_INFO = {
   'app:meds': { name: '약', icon: 'pill', svg: 'meds', grad: '#ff9500', href: 'meds/index.html' },
   'app:coffee': { name: '커피', icon: 'cup', svg: 'coffee', grad: '#a2845e', href: 'coffee/index.html' },
+  'app:cal': { name: '달력', icon: 'bell', svg: 'cal', grad: '#ff3b30', href: 'calendar/index.html' },
+  'app:wx': { name: '날씨', icon: 'bell', svg: 'wx', grad: '#0a84ff', href: 'weather/index.html' },
   'app:settings': { name: '설정', icon: 'gear', svg: 'settings', grad: '#8e8e93', href: 'settings/index.html' },
 };
 
@@ -299,8 +301,9 @@ document.addEventListener('pointerup', e => {
   else if (slot) takeSlot(slot.dataset.slot);
   else if (p.id === 'w:coffee') openApp('coffee/index.html', p.el);
   else if (p.id === 'w:meds') openApp('meds/index.html', p.el);
-  // 일정·날씨: 아직 연결 안 했으면 설정으로 (연결돼 있으면 위젯이 이미 다 보여줌)
-  else if ((p.id === 'w:cal' && !settings.calUrl) || (p.id === 'w:wx' && !settings.weather)) openApp('settings/index.html', p.el);
+  // 위젯을 누르면 그 앱으로 (일정 → 달력, 날씨 → 날씨). 아직 연결 안 했으면 앱 안에서 안내
+  else if (p.id === 'w:cal') { const dd = p.target.closest('[data-day]')?.dataset.day; openApp(`calendar/index.html${dd ? `?d=${dd}` : ''}`, p.el); }
+  else if (p.id === 'w:wx') openApp('weather/index.html', p.el);
 });
 document.addEventListener('pointercancel', () => { if (press?.el) { press.el.classList.remove('dragging'); press.el.style.transform = ''; } press = null; });
 
