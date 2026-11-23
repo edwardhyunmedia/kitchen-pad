@@ -32,3 +32,22 @@ test('persisted run survives page change', () => {
   assert.equal(startRun(r, 'strong', 30000).recipeId, 'strong');
   assert.equal(runElapsed(startRun(r, 'strong', 30000), 30000), 0);
 });
+
+import { SEED_RECIPES, mergeSeeds } from '../coffee/logic.js';
+test('deep blue lake recipe timing', () => {
+  const r = SEED_RECIPES.find(x => x.id === 'dbl-india');
+  assert.equal(r.dose, 20); assert.equal(r.water, 180); assert.equal(r.temp, 93); assert.equal(r.ice, 150);
+  assert.deepEqual(r.steps.map(s => s.sec), [40, 20, 20, 30, 50]);
+  assert.deepEqual(r.steps.map(s => s.pourTo ?? null), [40, 110, null, 180, null]);
+  assert.equal(totalSec(r), 160); // 2:40에 끝
+  assert.equal(timerState(r, 85).stepIndex, 3); // 1:25 = 2차 붓기
+});
+test('seed added once to saved recipes, not again after delete', () => {
+  const saved = [{ id: 'mine', name: '내 것', dose: 15, water: 250, steps: [{ label: 'a', sec: 10 }] }];
+  const a = mergeSeeds(saved, [], SEED_RECIPES);
+  assert.deepEqual(a.recipes.map(r => r.id), ['mine', 'dbl-india']);
+  assert.deepEqual(a.seeded, ['dbl-india']);
+  const b = mergeSeeds([saved[0]], a.seeded, SEED_RECIPES); // 사용자가 지운 뒤
+  assert.deepEqual(b.recipes.map(r => r.id), ['mine']);
+  assert.equal(b.changed, false);
+});

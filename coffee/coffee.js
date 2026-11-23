@@ -2,12 +2,20 @@ import { icons } from '../shared/icons.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
-import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed } from './logic.js';
+import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds } from './logic.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const newId = () => 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 const getRecipes = () => load('coffee.recipes', DEFAULT_RECIPES);
+// 새로 받은 레시피를 기존 목록에 한 번만 추가
+{
+  const m = mergeSeeds(getRecipes(), load('coffee.seeded', []));
+  if (m.changed) { save('coffee.recipes', m.recipes); save('coffee.seeded', m.seeded); }
+}
+const info = r => [
+  `원두 ${r.dose}g`, `물 ${r.water}g`, r.temp ? `${r.temp}°C` : '', r.grind ? `분쇄 ${r.grind}` : '', r.ice ? `얼음 ${r.ice}g` : '', r.ratio ? `비율 ${r.ratio}` : '',
+].filter(Boolean).join(', ');
 const mmss = s => `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`;
 
 $('back').innerHTML = icons.home;
@@ -21,7 +29,7 @@ function renderList() {
   $('recipes').innerHTML = list.map((r, i) => `
     <button class="tile on" type="button" data-i="${i}">
       <span class="glyph" style="background:var(--brown)">${icons.cup}</span>
-      <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}</div></span>
+      <span><div class="name">${esc(r.name)}</div><div class="state">${mmss(totalSec(r))}${r.temp ? `, ${esc(r.temp)}°C` : ''}${r.ice ? ', 아이스' : ''}</div></span>
     </button>`).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }
 $('recipes').addEventListener('click', e => {
@@ -43,7 +51,7 @@ function openTimer(r) {
   recipe = r;
   lastStep = timerState(recipe, runElapsed(myRun(), Date.now())).stepIndex;
   $('t-title').textContent = r.name;
-  $('t-sub').textContent = `원두 ${r.dose}g, 물 ${r.water}g`;
+  $('t-sub').textContent = info(r);
   $('timer-sheet').classList.add('open');
   window.kpCoffeeOpen = true;
   tellParent({ type: 'coffee-open', open: true });
@@ -74,7 +82,7 @@ function draw() {
   $('t-cap').classList.toggle('done', st.done);
   $('t-step').textContent = st.done ? '추출 완료' : step.label;
   $('t-pour').textContent = !st.done && step.pourTo ? `${step.pourTo}g까지 붓기` : '';
-  $('t-next').textContent = st.done ? '' : next ? `다음: ${next.label}` : `남은 시간 ${mmss(st.totalRemaining)}`;
+  $('t-next').textContent = st.done ? (recipe.note || '') : el === 0 && recipe.note ? recipe.note : next ? `다음: ${next.label}` : `남은 시간 ${mmss(st.totalRemaining)}`;
   $('t-dots').innerHTML = recipe.steps.map((_, i) => `<span class="${st.done || i < st.stepIndex ? 'done' : i === st.stepIndex ? 'now' : ''}"></span>`).join('');
   $('t-play').innerHTML = running() ? icons.pause : icons.play;
   $('t-play').setAttribute('aria-label', running() ? '일시정지' : '시작');
@@ -114,6 +122,11 @@ function closeEdit() {
       name: String(r.name).trim() || '이름 없는 레시피',
       dose: Math.max(0, Number(r.dose) || 0),
       water: Math.max(0, Number(r.water) || 0),
+      temp: Number(r.temp) > 0 ? Number(r.temp) : undefined,
+      ice: Number(r.ice) > 0 ? Number(r.ice) : undefined,
+      grind: String(r.grind ?? '').trim() || undefined,
+      ratio: String(r.ratio ?? '').trim() || undefined,
+      note: String(r.note ?? '').trim() || undefined,
       steps: r.steps
         .map(s => ({ label: String(s.label).trim() || '단계', sec: Math.max(1, Math.round(Number(s.sec) || 0)), ...(Number(s.pourTo) > 0 ? { pourTo: Number(s.pourTo) } : {}) })),
     }))
@@ -129,6 +142,11 @@ function renderEdit() {
       <div class="row"><span class="label">이름</span><input class="grow" type="text" value="${esc(r.name)}" placeholder="레시피 이름" data-f="${ri}.name" maxlength="20"></div>
       <div class="row"><span class="label grow">원두</span><input type="number" value="${esc(r.dose)}" data-f="${ri}.dose" style="width:70px"><span class="unit">g</span></div>
       <div class="row"><span class="label grow">물</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:70px"><span class="unit">g</span></div>
+      <div class="row"><span class="label grow">물 온도</span><input type="number" value="${esc(r.temp ?? '')}" placeholder="-" data-f="${ri}.temp" style="width:70px"><span class="unit">°C</span></div>
+      <div class="row"><span class="label grow">얼음</span><input type="number" value="${esc(r.ice ?? '')}" placeholder="-" data-f="${ri}.ice" style="width:70px"><span class="unit">g</span></div>
+      <div class="row"><span class="label">분쇄</span><input class="grow" type="text" value="${esc(r.grind ?? '')}" placeholder="예: 11~11.3" data-f="${ri}.grind" maxlength="20"></div>
+      <div class="row"><span class="label">비율</span><input class="grow" type="text" value="${esc(r.ratio ?? '')}" placeholder="예: 1:10" data-f="${ri}.ratio" maxlength="10"></div>
+      <div class="row"><span class="label">메모</span><input class="grow" type="text" value="${esc(r.note ?? '')}" placeholder="예: 얼음 컵 위에 서빙" data-f="${ri}.note" maxlength="60"></div>
     </div>
     <p class="group-label">단계</p>
     <div class="group">

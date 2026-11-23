@@ -20,6 +20,33 @@ export const DEFAULT_RECIPES = [
   },
 ];
 
+// 사용자가 준 레시피 (기존 저장 목록에도 한 번만 추가됨)
+export const SEED_RECIPES = [
+  {
+    id: 'dbl-india', name: '딥블루레이크 인디아 블랜드', dose: 20, water: 180, temp: 93, grind: '11~11.3', ice: 150, ratio: '1:10',
+    note: '3분 타겟 (2:50까지 OK). 얼음 컵 위에 서빙',
+    steps: [
+      { label: '뜸 들이기', sec: 40, pourTo: 40 },
+      { label: '1차 붓기', sec: 20, pourTo: 110 },
+      { label: '기다리기', sec: 20 },
+      { label: '2차 붓기', sec: 30, pourTo: 180 },
+      { label: '기다리기', sec: 50 },
+    ],
+  },
+];
+export function mergeSeeds(recipes, seeded, seeds = SEED_RECIPES) {
+  const out = [...recipes];
+  const done = [...seeded];
+  let changed = false;
+  for (const r of seeds) {
+    if (done.includes(r.id)) continue;
+    if (!out.some(x => x.id === r.id)) out.push(JSON.parse(JSON.stringify(r)));
+    done.push(r.id);
+    changed = true;
+  }
+  return { recipes: out, seeded: done, changed };
+}
+
 export const totalSec = r => r.steps.reduce((a, s) => a + s.sec, 0);
 
 export function timerState(recipe, elapsedSec) {
