@@ -95,6 +95,7 @@ $('t-play').addEventListener('click', () => {
     let r = myRun();
     if (r && timerState(recipe, runElapsed(r, now)).done) r = null;
     save('coffee.run', startRun(r || null, recipe.id, now));
+    save('coffee.last', recipe.id); // 홈 위젯이 마지막으로 내린 레시피를 먼저 보여줌
     lastStep = timerState(recipe, runElapsed(getRun(), now)).stepIndex;
   }
   draw();

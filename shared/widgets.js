@@ -157,22 +157,32 @@ function wx(size, d) {
 }
 
 // ---------- 커피 ----------
+// 내리기 직전에 제일 필요한 건 '원두 몇 g, 물 몇 ml' → 이걸 크게. 시간은 작게
+// 내리는 중에는 '지금 단계, 몇 ml까지 붓기, 남은 시간'
 const mins = r => Math.round((r.steps || []).reduce((a, s) => a + (s.sec || 0), 0) / 60);
-const meta = (r, short = false) => [`${mins(r)}분`, r.dose ? `${r.dose}g` : '', r.water && !short ? `${r.water}ml` : ''].filter(Boolean).join(' · ');
+const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+// 작은 위젯은 온도·분쇄도까지만 (잘리지 않게), 중간은 얼음·시간까지
+const extras = (r, short) => [r.temp ? `${r.temp}°` : '', r.grind ? `분쇄 ${r.grind}` : '', short ? '' : r.ice ? `얼음 ${r.ice}g` : '', short && (r.temp || r.grind) ? '' : `${mins(r)}분`].filter(Boolean).join(' · ');
+const stats = r => `<div class="w-stats">${r.dose ? `<div><small>원두</small>${v('cg', `${r.dose}<i>g</i>`)}</div>` : ''}${r.water ? `<div><small>물</small>${v('cw', `${r.water}<i>ml</i>`)}</div>` : ''}</div>`;
+const playBtn = r => `<button class="w-play" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button>`;
 function coffee(size, d) {
-  const { recipes = [], running = null } = d.coffee || {};
-  if (!recipes.length) return `${head('coffee', '커피')}<div class="w-fill"></div>${note('커피 앱에서 레시피를 넣으세요')}`;
+  const { recipes = [], current = null, running = null } = d.coffee || {};
+  const r = current || recipes[0];
+  if (!r) return `${head('coffee', '커피')}<div class="w-fill"></div>${note('커피 앱에서 레시피를 넣으세요')}`;
   if (running) {
-    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-cbot"><div class="w-ct"><div class="w-cap" style="color:${ACCENT.coffee}">내리는 중</div><div class="w-name">${esc(running)}</div></div>
-      <button class="w-play" type="button" data-open-coffee aria-label="커피 타이머 보기">${SYM.open}</button></div>`;
+    const st = running.step;
+    const big = st?.pourTo ? `${st.pourTo}<i>ml까지</i>` : esc(st?.label || '');
+    const now = `<div class="w-cap" style="color:${ACCENT.coffee}">${esc(st?.pourTo ? st.label : '내리는 중')}</div>
+      <div class="w-big">${big}</div><div class="w-sub">${running.done ? '다 됐어요' : `남은 시간 ${mmss(running.remain)}`}</div>`;
+    return `<div class="w-hd" style="color:${ACCENT.coffee}">${SYM.cup}<span>커피</span><button class="w-play" type="button" data-open-coffee aria-label="커피 타이머 보기">${SYM.open}</button></div><div class="w-fill"></div>${now}`;
   }
-  if (size === 's') {
-    const r = recipes[0];
-    return `${head('coffee', '커피')}<div class="w-fill"></div><div class="w-cbot"><div class="w-ct"><div class="w-name">${esc(r.name)}</div><div class="w-sub">${esc(meta(r, true))}</div></div>
-      <button class="w-play" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button></div>`;
-  }
-  return `${head('coffee', '커피')}<div class="w-list w-cof">${recipes.slice(0, 3).map(r => `<div class="w-crow"><div class="w-rt"><b>${esc(r.name)}</b><small>${esc(meta(r))}</small></div>
-    <button class="w-play sm" type="button" data-play="${esc(r.id)}" aria-label="${esc(r.name)} 타이머 시작">${SYM.play}</button></div>`).join('')}</div>`;
+  const top = `<div class="w-hd" style="color:${ACCENT.coffee}">${SYM.cup}<span>커피</span>${playBtn(r)}</div>`;
+  const main = short => `<div class="w-cname">${esc(r.name)}</div>${stats(r)}<div class="w-sub ${short ? '' : 'w-wrap'}">${esc(extras(r, short))}</div>`;
+  if (size === 's') return `${top}<div class="w-fill"></div>${main(true)}`;
+  const others = recipes.filter(x => x.id !== r.id).slice(0, 3);
+  return `<div class="w-split"><div class="w-side w-cside">${top}<div class="w-fill"></div>${main(false)}</div>
+    <div class="w-list w-cof">${others.map(x => `<div class="w-crow"><div class="w-rt"><b>${esc(x.name)}</b><small>${[x.dose ? `원두 ${x.dose}g` : '', x.water ? `물 ${x.water}ml` : ''].filter(Boolean).join(' · ')}</small></div>
+      <button class="w-play sm" type="button" data-play="${esc(x.id)}" aria-label="${esc(x.name)} 타이머 시작">${SYM.play}</button></div>`).join('')}</div></div>`;
 }
 
 const RENDER = { 'w:meds': meds, 'w:cal': cal, 'w:wx': wx, 'w:coffee': coffee };

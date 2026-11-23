@@ -12,7 +12,7 @@ import { getAlbum, pickPhoto } from './album.js';
 import { createSlides } from './slides.js';
 import { findFocus, savedFocus } from './focus.js';
 import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
-import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
+import { DEFAULT_RECIPES, startRun, timerState, runElapsed } from '../coffee/logic.js';
 import { toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
 
@@ -140,8 +140,22 @@ function wdata() {
     meds: { summary, log: getLog() },
     cal: { state: !settings.calUrl ? 'off' : eventsLoaded ? 'ok' : 'loading', events, at: load('cal.cache', null)?.at || null },
     wx: { state: !settings.weather ? 'off' : weather ? 'ok' : wxTried ? 'off' : 'loading', w: weather },
-    coffee: { recipes, running: run && run.since != null ? recipes.find(r => r.id === run.recipeId)?.name || '커피' : null },
+    coffee: coffeeData(recipes, run),
   };
+}
+// 커피: 마지막으로 내린 레시피를 먼저, 내리는 중이면 지금 단계·남은 시간
+function coffeeData(recipes, run) {
+  const last = load('coffee.last', null);
+  const current = recipes.find(r => r.id === (run?.recipeId || last)) || recipes[0] || null;
+  let running = null;
+  if (run && run.since != null) {
+    const r = recipes.find(x => x.id === run.recipeId);
+    if (r) {
+      const t = timerState(r, runElapsed(run, Date.now()));
+      running = { name: r.name, step: r.steps[t.stepIndex], remain: t.totalRemaining, done: t.done };
+    }
+  }
+  return { recipes, current, running };
 }
 // 시계 '홈 위젯' 페이스에 올릴 위젯 4개: 홈 화면 순서대로, 모자라면 나머지로 채움
 function modIds() {
@@ -295,6 +309,7 @@ function startCoffee(id) {
   const r = list.find(x => x.id === id) || list[0];
   if (!r) return;
   save('coffee.run', startRun(null, r.id, Date.now()));
+  save('coffee.last', r.id);
   openApp('coffee/index.html?run', document.querySelector('.it[data-id="w:coffee"]'));
 }
 
@@ -605,6 +620,8 @@ async function init() {
   if (new URLSearchParams(location.search).has('pick')) { history.replaceState(null, '', location.pathname); openPicker(); }
   setInterval(() => { drawHero(); drawFace(); }, 1000);
   setInterval(() => { if (!body.classList.contains('edit')) { refreshData(); drawGrid(); } }, 30000);
+  // 커피 내리는 중엔 위젯의 단계·남은 시간을 1초마다
+  setInterval(() => { const r = load('coffee.run', null); if (r && r.since != null && layout.includes('w:coffee') && !body.classList.contains('edit') && !body.classList.contains('idle')) drawGrid(); }, 1000);
   setInterval(loadWeather, 10 * 60000);
   loadEvents();
   setInterval(loadEvents, 5 * 60000);

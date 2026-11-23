@@ -213,3 +213,15 @@ body[data-look="tint"] .addslot span { background: rgba(255,255,255,.1); color: 
 /* 화면 끝에서 튕기며 생기는 가장자리 줄 없게 */
 html, body, .scroll { overscroll-behavior: none; }
 .w-sub, .w-rt small, .w-cap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 커피: 원두 g · 물 ml을 크게 */
+.w-hd .w-play { position: static; margin-left: auto; width: calc(var(--pt) * 34); height: calc(var(--pt) * 34); }
+.w-cname { font-size: calc(var(--pt) * 14); font-weight: 600; color: var(--c2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-stats { display: flex; gap: calc(var(--pt) * 14); margin-top: calc(var(--pt) * 2); }
+.w-stats > div { display: flex; flex-direction: column; min-width: 0; }
+.w-stats small { font-size: calc(var(--pt) * 12); font-weight: 600; color: var(--c2); }
+.w-stats span, .w-big { font-size: calc(var(--pt) * 28); font-weight: 650; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--c1); white-space: nowrap; }
+.w-stats i, .w-big i { font-style: normal; font-size: .55em; font-weight: 600; margin-left: .08em; color: var(--c2); letter-spacing: 0; }
+.w-cside { flex-basis: 46%; }
+.w-cof { justify-content: center; }
+.w-sub.w-wrap { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }

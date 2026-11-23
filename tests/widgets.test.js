@@ -68,13 +68,25 @@ test('weather sky follows day/night and condition', () => {
   assert.equal(skyOf(3, 3), 'sky-ncloud');
   assert.match(widgetBox('w:wx', 's', { ...base, wx: { state: 'ok', w: { temp: 1, code: 0, max: 2, min: 0 } } }), /sky-night/);
 });
-test('coffee: start button per recipe, running shows open button', () => {
-  const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }, { id: 'r2', name: '진하게', steps: [{ sec: 60 }] }];
-  assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }), /data-play="r1"/);
-  assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes } }), /3분 · 15g</);
-  assert.match(widgetBody('w:coffee', 'm', { ...base, coffee: { recipes } }), /3분 · 15g · 250ml/);
-  assert.equal((widgetBody('w:coffee', 'm', { ...base, coffee: { recipes } }).match(/data-play=/g) || []).length, 2);
-  assert.match(widgetBody('w:coffee', 's', { ...base, coffee: { recipes, running: '기본' } }), /data-open-coffee/);
+test('coffee: beans and water are the big numbers, last used recipe first', () => {
+  const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }, { id: 'r2', name: '인디아', dose: 20, water: 180, temp: 93, grind: '11', ice: 150, steps: [{ sec: 60 }] }];
+  const s = widgetBody('w:coffee', 's', { ...base, coffee: { recipes, current: recipes[1] } });
+  assert.match(s, /원두.*20<i>g<\/i>/s);
+  assert.match(s, /물.*180<i>ml<\/i>/s);
+  assert.match(s, /93° · 분쇄 11</);
+  assert.match(widgetBody('w:coffee', 'm', { ...base, coffee: { recipes, current: recipes[1] } }), /93° · 분쇄 11 · 얼음 150g · 1분/);
+  assert.match(s, /data-play="r2"/);
+  const m = widgetBody('w:coffee', 'm', { ...base, coffee: { recipes, current: recipes[1] } });
+  assert.equal((m.match(/data-play=/g) || []).length, 2);
+  assert.match(m, /원두 15g · 물 250ml/);
+});
+test('coffee while brewing shows the step, pour target and time left', () => {
+  const recipes = [{ id: 'r1', name: '기본', dose: 15, water: 250, steps: [{ sec: 180 }] }];
+  const h = widgetBody('w:coffee', 's', { ...base, coffee: { recipes, running: { name: '기본', step: { label: '1차 붓기', pourTo: 150 }, remain: 130, done: false } } });
+  assert.match(h, /150<i>ml까지/);
+  assert.match(h, /1차 붓기/);
+  assert.match(h, /남은 시간 2:10/);
+  assert.match(h, /data-open-coffee/);
 });
 test('names are escaped', () => {
   const evil = { people: [{ id: 'x', name: '<b>', meds: [{ id: 'm', name: '<img>', times: ['21:00'] }] }] };
