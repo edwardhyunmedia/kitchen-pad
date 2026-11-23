@@ -56,9 +56,11 @@ function ensureOverlay() {
   overlay = document.createElement('div');
   overlay.className = 'alarm';
   overlay.innerHTML = `
+      <div class="a-card">
       <div class="a-top">${icons.bell}<span>약 먹을 시간이에요</span></div>
       <div class="a-mid"><ul></ul></div>
-      <div class="a-btns"><button class="a-later" type="button">10분 뒤 다시</button><button class="a-stop" type="button">먹었어요</button></div>`;
+      <div class="a-btns"><button class="a-later" type="button">10분 뒤 다시</button><button class="a-stop" type="button">먹었어요</button></div>
+      </div>`;
   document.body.appendChild(overlay);
   return overlay;
 }
