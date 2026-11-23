@@ -12,9 +12,11 @@
 <link rel="stylesheet" href="shared/home.css">
 <link rel="stylesheet" href="shared/ios.css">
 <link rel="stylesheet" href="shared/dark.css">
+<link rel="stylesheet" href="shared/widgets.css">
 <script type="module" src="shared/night.js"></script>
 </head>
 <body class="homeview idle">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="kp-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".45 .45 .2 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter></svg>
 <div class="bgl" id="bgl"></div>
 <div id="slides" class="slides"><div class="sl"></div><div class="sl"></div></div>
 <div id="face-layer" class="face-root"></div>
@@ -32,12 +34,19 @@
 <div class="appview" id="appview"><iframe id="appframe" title="앱" src="about:blank"></iframe></div>
 <div class="toast" id="toast"><span id="toast-text"></span><button type="button" id="toast-undo">되돌리기</button></div>
 
-<div class="editbar"><button class="pillbtn" type="button" id="add-btn">+ 추가</button><button class="pillbtn done" type="button" id="done-btn">완료</button></div>
+<div class="editbar"><button class="pillbtn" type="button" id="add-btn">+ 추가</button><button class="pillbtn" type="button" id="look-btn">사용자화</button><button class="pillbtn done" type="button" id="done-btn">완료</button></div>
 
 <div class="sheet-back" id="add-sheet">
   <div class="sheet" role="dialog" aria-label="추가">
     <div class="navbar"><span></span><h3>홈 화면에 추가</h3><button class="nav-right" type="button" id="add-close">닫기</button></div>
-    <div class="sheet-body"><div class="addlist" id="add-list"></div></div>
+    <div class="sheet-body"><div class="wgal" id="add-list"></div></div>
+  </div>
+</div>
+
+<div class="sheet-back" id="look-sheet">
+  <div class="sheet" role="dialog" aria-label="위젯 모양">
+    <div class="navbar"><span></span><h3>위젯 모양</h3><button class="nav-right" type="button" id="look-close">완료</button></div>
+    <div class="sheet-body"><div class="looks" id="looks"></div><div class="tints" id="tints"></div></div>
   </div>
 </div>
 

@@ -1,16 +1,25 @@
 // 홈 화면 배치: 아이템 id 순서 목록
-// app:<이름> = 앱 아이콘(1칸), w:meds = 약 위젯(가로 4칸 x 2줄, 사람별 + 다음 약), w:coffee = 커피 위젯(2x2), w:cal = 다가오는 일정(가로 4칸)
+// app:<이름> = 앱 아이콘(1칸). 위젯은 애플 위젯 크기 그대로: 작게 s(2x2), 중간 m(4x2), 크게 l(4x4)
 export const APPS = ['app:meds', 'app:coffee', 'app:settings'];
+export const WIDGETS = ['w:meds', 'w:coffee', 'w:cal', 'w:wx'];
+// 위젯마다 쓸모 있는 크기만 (애플 지침: 유용한 경우에만 여러 크기)
+export const WIDGET_SIZES = { 'w:meds': ['s', 'm', 'l'], 'w:cal': ['s', 'm', 'l'], 'w:wx': ['s', 'm'], 'w:coffee': ['s', 'm'] };
+export const DEFAULT_SIZES = { 'w:meds': 'm', 'w:cal': 'm', 'w:wx': 's', 'w:coffee': 's' };
 
 export function allItems() {
-  return [...APPS, 'w:meds', 'w:coffee', 'w:cal'];
+  return [...APPS, ...WIDGETS];
 }
 
-export function itemSize(id) {
+export function itemSize(id, sizes = {}) {
   if (id.startsWith('app:')) return 'app';
-  if (id === 'w:meds') return 'big';
-  if (id === 'w:cal') return 'wide';
-  return 'square';
+  const ok = WIDGET_SIZES[id] || ['s'];
+  return ok.includes(sizes?.[id]) ? sizes[id] : DEFAULT_SIZES[id] || ok[0];
+}
+// 편집 모드에서 크기 바꾸기: 다음 크기로 (마지막이면 처음으로)
+export function nextSize(id, sizes = {}) {
+  const ok = WIDGET_SIZES[id];
+  if (!ok) return 'app';
+  return ok[(ok.indexOf(itemSize(id, sizes)) + 1) % ok.length];
 }
 
 export function defaultLayout() {

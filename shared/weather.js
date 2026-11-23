@@ -18,16 +18,29 @@ export function buildUrl() {
   u.searchParams.set('longitude', LOCATION.lon);
   u.searchParams.set('current', 'temperature_2m,weather_code');
   u.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min');
+  u.searchParams.set('hourly', 'temperature_2m,weather_code');
   u.searchParams.set('timezone', 'Asia/Seoul');
-  u.searchParams.set('forecast_days', '1');
+  u.searchParams.set('forecast_days', '2');
   return u.toString();
+}
+
+// 시간별 예보에서 지금 이후 6시간 (시간 문자열은 서울 시각)
+function hoursAfter(h, now) {
+  if (!h || !Array.isArray(h.time)) return [];
+  const seoulNow = new Date(now + 9 * 3600000).toISOString().slice(0, 13); // 'YYYY-MM-DDTHH'
+  const out = [];
+  h.time.forEach((t, i) => {
+    if (out.length < 6 && String(t).slice(0, 13) > seoulNow && h.temperature_2m?.[i] != null)
+      out.push({ h: Number(String(t).slice(11, 13)), temp: Math.round(h.temperature_2m[i]), code: h.weather_code?.[i] ?? 3 });
+  });
+  return out;
 }
 
 export function parse(j, now) {
   try {
     const c = j.current, d = j.daily;
     if (c.temperature_2m == null) return null;
-    return { temp: Math.round(c.temperature_2m), code: c.weather_code, max: Math.round(d.temperature_2m_max[0]), min: Math.round(d.temperature_2m_min[0]), at: now };
+    return { temp: Math.round(c.temperature_2m), code: c.weather_code, max: Math.round(d.temperature_2m_max[0]), min: Math.round(d.temperature_2m_min[0]), at: now, hours: hoursAfter(j.hourly, now) };
   } catch { return null; }
 }
 
@@ -49,6 +62,8 @@ export async function getWeather() {
 
 export const WEATHER_ICONS = {
   sun: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="10" fill="#ffcc33"/></svg>',
+  moon: '<svg viewBox="0 0 48 48"><path d="M30 10a14 14 0 1 0 8 23 12 12 0 0 1-8-23z" fill="#f2f2f7"/></svg>',
+  pmoon: '<svg viewBox="0 0 48 48"><path d="M24 8a10 10 0 1 0 6 16.5A8.5 8.5 0 0 1 24 8z" fill="#f2f2f7"/><path d="M14 38h22a8 8 0 0 0 0-16 11 11 0 0 0-21 3 6.5 6.5 0 0 0-1 13z" fill="#fff" stroke="rgba(0,0,0,.08)"/></svg>',
   partly: '<svg viewBox="0 0 48 48"><circle cx="20" cy="18" r="8" fill="#ffcc33"/><path d="M14 38h22a8 8 0 0 0 0-16 11 11 0 0 0-21 3 6.5 6.5 0 0 0-1 13z" fill="#fff" stroke="rgba(0,0,0,.08)"/></svg>',
   cloud: '<svg viewBox="0 0 48 48"><path d="M12 36h24a9 9 0 0 0 0-18 12 12 0 0 0-23 3 7.5 7.5 0 0 0-1 15z" fill="#e9ecf2" stroke="rgba(0,0,0,.1)"/></svg>',
   fog: '<svg viewBox="0 0 48 48" stroke="#c7ccd6" stroke-width="4" stroke-linecap="round"><path d="M8 18h32M12 26h28M8 34h26"/></svg>',

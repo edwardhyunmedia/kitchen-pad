@@ -1,4 +1,5 @@
 // 시계 페이스 8종. 모든 크기는 cqw/cqh(담는 상자 기준)라 미리보기에서도 그대로 줄어듦
+import { widgetBody } from './widgets.js';
 import { WEATHER_ICONS, codeInfo } from './weather.js';
 import { dayLabel, sameDay } from './calendar.js';
 
@@ -14,7 +15,7 @@ export const FACES = [
   { id: 'mini', name: '미니멀', colors: [['#ead7d4', '#5b2b2b', '#e84c9a'], ['#dfe7ef', '#22364d', '#ff9500'], ['#ecebe4', '#2b2b2e', '#34c759'], ['#2b2b2e', '#f2f2f2', '#ff6a3d']] },
   { id: 'flow', name: '플로우', colors: [['#ff9ad5', '#7aa7ff', '#c79bff'], ['#ffd27a', '#ff8a7a', '#ffb3c7'], ['#7ae0c3', '#6fb8ff', '#b4f0a0'], ['#c3c7d1', '#8e9bb5', '#e6e8ee']] },
   { id: 'cal', name: '달력', colors: [['#ff3b30'], ['#007aff'], ['#34c759'], ['#af52de']] },
-  { id: 'mod', name: '홈 위젯', colors: [['#7b7ff0', '#5359d6'], ['#f4a261', '#e76f51'], ['#4fb3a5', '#2a7f8f'], ['#3a3a3c', '#1c1c1e']] },
+  { id: 'mod', name: '모듈', colors: [['#7b7ff0', '#5359d6'], ['#f4a261', '#e76f51'], ['#4fb3a5', '#2a7f8f'], ['#3a3a3c', '#1c1c1e']] },
 ];
 export const faceById = id => FACES.find(f => f.id === id) || FACES[0];
 export const DEFAULT_FACE = { id: 'big', color: 0, showDate: true, showWeather: true, showEvents: true };
@@ -76,15 +77,14 @@ function calendar(now, ctx, c) {
     ${evs || `<div class="ev none">${ctx.opts.showEvents !== false ? '7일 안에 일정이 없어요' : '남은 약이 없어요'}</div>`}</div>`;
 }
 
+// 애플 홈뷰 '모듈' 페이스처럼: 시계 + 위젯 최대 4개를 배경 없이 크게 (밤에는 CSS가 빨간 단색으로)
 function modular(now, ctx, c) {
-  const ps = (ctx.summary?.people || []).filter(p => p.total).slice(0, 2);
-  const tile = p => `<div class="mw"><span>${esc(p.name)}</span><div><b class="${p.late ? 'late' : ''}">${p.allDone ? '다 먹음' : p.late ? `${p.late}번 안 먹음` : `${p.left}번 남음`}</b>${p.nextTime ? `<small>${esc(p.nextTime)} ${esc(p.nextMed)}</small>` : ''}</div></div>`;
-  const nx = ctx.summary?.next;
+  const data = ctx.wdata;
+  const ids = (ctx.modIds || []).slice(0, 4);
+  const tiles = data ? ids.map(id => `<div class="mtile"><div class="wg w-${id.slice(2)} w-s nobg">${widgetBody(id, 's', { ...data, now })}</div></div>`).join('') : '';
   return `<div class="mod" style="background:linear-gradient(160deg,${c[0]},${c[1]})">
     <div class="mt">${pad(now.getHours())}:${pad(now.getMinutes())}</div>${dateLine(now, ctx)}
-    <div class="mg">${ps.map(tile).join('')}
-      <div class="mw"><span>다음 약</span><b>${nx ? esc(nx.time) : '없음'}</b></div>
-      <div class="mw"><span>커피</span><b>${esc(ctx.coffeeName || '기본')}</b></div></div></div>`;
+    <div class="mtiles">${tiles}</div></div>`;
 }
 
 // root에 페이스를 그림. ctx: { opts, weather, photo(URL), summary, log, coffeeName }

@@ -3,7 +3,8 @@ import { APP_ICONS } from './appicons.js';
 import { load, save } from './store.js';
 import { getConfig, getLog } from '../meds/state.js';
 import { medsSummary } from './summary.js';
-import { normalizeLayout, itemSize, moveItem, removeItem, addItem, addable } from './layout.js';
+import { normalizeLayout, itemSize, nextSize, moveItem, removeItem, addItem, addable, WIDGET_SIZES } from './layout.js';
+import { widgetBox, widgetBody, WIDGET_INFO, SYM } from './widgets.js';
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
 import { getWeather, WEATHER_ICONS, codeInfo } from './weather.js';
@@ -12,7 +13,7 @@ import { createSlides } from './slides.js';
 import { findFocus, savedFocus } from './focus.js';
 import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
 import { DEFAULT_RECIPES, startRun } from '../coffee/logic.js';
-import { currentSlotFor, toggleTaken } from '../meds/logic.js';
+import { toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
 
 const $ = id => document.getElementById(id);
@@ -39,6 +40,8 @@ const facePhoto = () => albumNow()?.url || photo;
 let layout = [];
 let summary = null;
 let events = [];
+let eventsLoaded = false, wxTried = false;
+let sizes = load('home.sizes', {});
 
 // ---------- 배경 ----------
 async function applyBg() {
@@ -56,7 +59,7 @@ async function applyBg() {
 let faceKey = '';
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`) };
+  return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`), wdata: wdata(), modIds: modIds() };
 }
 function drawFace(force) {
   const now = new Date();
@@ -108,54 +111,60 @@ function fitGrid() {
   const cell = Math.max(wCell * 0.45, Math.min(wCell, hCell));
   const pad = (vw - 4 * cell - 3 * gap) / 2;
   home.style.setProperty('--cell', `${cell}px`);
+  home.style.setProperty('--pt', `${(2 * cell + gap) / 170}px`); // 작은 위젯 한 변 = 170pt
   home.style.paddingLeft = home.style.paddingRight = `${pad}px`;
-  grid.querySelectorAll('.wbig, .wg > .wh, .mhead > .wh:first-child, .mcard > .wh').forEach(opticalLeft);
+  grid.querySelectorAll('.w-temp, .w-date, .w-t28').forEach(opticalLeft);
   opticalLeft($('h-time')); opticalLeft($('h-date'));
 }
 
 // ---------- 그리드 ----------
-function widgetHtml(id) {
-  if (id === 'w:meds') {
-    const n = summary.next;
-    const head = `<div class="mhead"><div class="wh">약</div>${n ? `<div class="wh">다음 <b>${esc(n.time)}</b> ${esc(n.medName)} · ${esc(n.personName)}</div>` : ''}</div>`;
-    if (!summary.people.length) return `<div class="wg">${head}<div class="wbig">약 없음</div></div>`;
-    const cards = summary.people.map(p => {
-      const big = !p.total ? '약 없음' : p.allDone ? '다 먹었어요' : p.late ? `${p.late}번 안 먹음` : `${p.left}번 남음`;
-      const sub = p.late ? `${p.lateTime} ${p.lateMed}` : p.nextTime ? `${p.nextTime} ${p.nextMed}` : '';
-      return `<button class="mcard ${p.late ? 'late' : p.allDone ? 'done' : ''}" type="button" data-take="${esc(p.id)}" aria-label="${esc(p.name)} 지금 약 먹음 체크"><span class="wh">${esc(p.name)}</span><span><span class="wbig ${p.late ? 'alert' : ''}">${esc(big)}</span>${sub ? `<span class="wsub">${esc(sub)}</span>` : ''}</span></button>`;
-    }).join('');
-    return `<div class="wg">${head}<div class="mcards">${cards}</div></div>`;
-  }
-  if (id === 'w:coffee') {
-    const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
-    const min = r ? Math.round(r.steps.reduce((a, s) => a + s.sec, 0) / 60) : 0;
-    return `<div class="wg"><div class="wh">커피</div><div><div class="wbig">${esc(r?.name || '레시피 없음')}</div>${r ? `<div class="wsub">${min}분</div>` : ''}</div>${r ? `<button class="wplay" type="button" data-play aria-label="커피 타이머 시작">${icons.play}</button>` : ''}</div>`;
-  }
-  if (id === 'w:cal') {
-    const now = new Date();
-    // 오늘 것만이 아니라 다가오는 일정 (7일 안)
-    const list = nextEvents(events, now, 2);
-    const hasCal = !!settings.calUrl;
-    return `<div class="wg"><div style="min-width:0;flex:1"><div class="wh">일정</div>${
-      !hasCal ? '<div class="wsub">설정에서 구글 캘린더를 연결하세요</div>'
-      : list.length ? list.map(e => `<div class="wcal"><b>${dayLabel(e.start, now)} ${e.allDay ? '종일' : fmtTime(e.start)}</b>${esc(e.title)}</div>`).join('')
-      : '<div class="wsub">7일 안에 일정이 없어요</div>'}</div></div>`;
-  }
-  return '';
+// 위젯이 그릴 데이터 (못 받았으면 'loading', 연결 안 했으면 'off')
+function wdata() {
+  const run = load('coffee.run', null);
+  const recipes = load('coffee.recipes', DEFAULT_RECIPES);
+  return {
+    now: new Date(),
+    meds: { summary, log: getLog() },
+    cal: { state: !settings.calUrl ? 'off' : eventsLoaded ? 'ok' : 'loading', events, at: load('cal.cache', null)?.at || null },
+    wx: { state: !settings.weather ? 'off' : weather ? 'ok' : wxTried ? 'off' : 'loading', w: weather },
+    coffee: { recipes, running: run && run.since != null ? recipes.find(r => r.id === run.recipeId)?.name || '커피' : null },
+  };
+}
+// 시계 '홈 위젯' 페이스에 올릴 위젯 4개: 홈 화면 순서대로, 모자라면 나머지로 채움
+function modIds() {
+  const on = layout.filter(id => id.startsWith('w:'));
+  return [...on, ...['w:meds', 'w:cal', 'w:wx', 'w:coffee'].filter(id => !on.includes(id))].slice(0, 4);
+}
+const RESIZE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5"/></svg>';
+function widgetHtml(id, data) {
+  return widgetBox(id, itemSize(id, sizes), data);
 }
 function itemHtml(id) {
+  if (!data) data = wdata();
   const minus = `<button class="minus" type="button" data-remove="${esc(id)}" aria-label="홈 화면에서 빼기">${icons.minus}</button>`;
-  const size = itemSize(id);
+  const size = itemSize(id, sizes);
   if (size === 'app') {
     const a = APP_INFO[id];
     return `<div class="it app" data-id="${esc(id)}" role="link" aria-label="${a.name}">${minus}<span class="ico glass">${APP_ICONS[a.svg]}</span></div>`;
   }
-  return `<div class="it ${size}" data-id="${esc(id)}">${minus}${widgetHtml(id)}</div>`;
+  const rs = (WIDGET_SIZES[id] || []).length > 1 ? `<button class="rs" type="button" data-resize="${esc(id)}" aria-label="위젯 크기 바꾸기">${RESIZE}</button>` : '';
+  return `<div class="it ${size}" data-id="${esc(id)}">${minus}${widgetHtml(id, data)}${rs}</div>`;
 }
+// 바뀐 값은 살짝 굴러 들어오게 (처음 그릴 땐 그대로)
+let shown = null;
 function drawGrid() {
+  data = wdata();
   $('grid').innerHTML = layout.map(itemHtml).join('') + `<div class="it app addslot" data-add><span>${icons.plus}</span></div>`;
+  const now = {};
+  $('grid').querySelectorAll('.it[data-id] [data-k]').forEach(el => {
+    const k = `${el.closest('.it').dataset.id}|${el.dataset.k}`;
+    now[k] = el.textContent;
+    if (shown && k in shown && shown[k] !== el.textContent) el.classList.add('roll');
+  });
+  shown = now;
   fitGrid();
 }
+let data = null;
 addEventListener('resize', () => fitGrid());
 document.fonts?.ready.then(() => { fitGrid(); drawFace(true); });
 function refreshData() {
@@ -249,20 +258,28 @@ document.addEventListener('pointerup', e => {
   if (body.classList.contains('edit')) {
     const rm = p.target.closest('[data-remove]');
     if (rm) { layout = removeItem(layout, rm.dataset.remove); drawGrid(); return; }
+    const rsz = p.target.closest('[data-resize]');
+    if (rsz) { const id = rsz.dataset.resize; sizes = { ...sizes, [id]: nextSize(id, sizes) }; save('home.sizes', sizes); drawGrid(); return; }
     if (p.target.closest('[data-add]')) openAdd();
     return;
   }
-  if (p.target.closest('[data-play]')) return startCoffee();
+  const play = p.target.closest('[data-play]');
+  if (play) return startCoffee(play.dataset.play);
+  if (p.target.closest('[data-open-coffee]')) return openApp('coffee/index.html?run', p.el);
   if (!p.id) return;
+  const slot = p.target.closest('[data-slot]');
   if (p.id.startsWith('app:')) openApp(APP_INFO[p.id].href, p.el);
-  else if (p.target.closest('[data-take]')) quickTake(p.target.closest('[data-take]').dataset.take);
+  else if (slot) takeSlot(slot.dataset.slot);
   else if (p.id === 'w:coffee') openApp('coffee/index.html', p.el);
-  else openApp('meds/index.html', p.el);
+  else if (p.id === 'w:meds') openApp('meds/index.html', p.el);
+  // 일정·날씨: 아직 연결 안 했으면 설정으로 (연결돼 있으면 위젯이 이미 다 보여줌)
+  else if ((p.id === 'w:cal' && !settings.calUrl) || (p.id === 'w:wx' && !settings.weather)) openApp('settings/index.html', p.el);
 });
 document.addEventListener('pointercancel', () => { if (press?.el) { press.el.classList.remove('dragging'); press.el.style.transform = ''; } press = null; });
 
-function startCoffee() {
-  const r = load('coffee.recipes', DEFAULT_RECIPES)[0];
+function startCoffee(id) {
+  const list = load('coffee.recipes', DEFAULT_RECIPES);
+  const r = list.find(x => x.id === id) || list[0];
   if (!r) return;
   save('coffee.run', startRun(null, r.id, Date.now()));
   openApp('coffee/index.html?run', document.querySelector('.it[data-id="w:coffee"]'));
@@ -279,14 +296,13 @@ function toast(text, onUndo) {
   toastTimer = setTimeout(() => { $('toast').classList.remove('on'); undo = null; }, 3000);
 }
 $('toast-undo').addEventListener('click', () => { if (undo) undo(); $('toast').classList.remove('on'); undo = null; });
-function quickTake(personId) {
-  const cfg = getConfig();
-  const slot = currentSlotFor(cfg, getLog(), personId, new Date());
-  const name = cfg.people.find(p => p.id === personId)?.name || '';
-  if (!slot) { toast(`${name} 오늘 약은 다 먹었어요`, null); $('toast-undo').hidden = true; return; }
-  $('toast-undo').hidden = false;
-  setLog(toggleTaken(getLog(), slot.key, new Date()));
-  toast(`${name} ${slot.time} ${slot.medName} 먹음`, () => setLog(toggleTaken(getLog(), slot.key, new Date())));
+// 위젯의 동그라미: 그 약 하나만 먹음/취소 (되돌리기 가능)
+function takeSlot(key) {
+  const s = summary?.slots.find(x => x.key === key);
+  if (!s) return;
+  const was = !!getLog()[key];
+  setLog(toggleTaken(getLog(), key, new Date()));
+  toast(`${s.personName} ${s.time} ${s.medName} ${was ? '먹음 취소' : '먹음'}`, () => setLog(toggleTaken(getLog(), key, new Date())));
 }
 
 // ---------- 앱 열기: 아이콘에서 커지며 열림, 새로고침 없음 ----------
@@ -378,28 +394,92 @@ function exitEdit() { body.classList.remove('edit'); save('home.layout', layout)
 $('done-btn').addEventListener('click', exitEdit);
 $('add-btn').addEventListener('click', openAdd);
 
-const ADD_INFO = id => {
-  if (APP_INFO[id]) return { title: APP_INFO[id].name, sub: '앱', svg: APP_INFO[id].svg };
-  if (id === 'w:meds') return { title: '약', sub: '큰 위젯', icon: 'pill', grad: '#ff9500' };
-  if (id === 'w:coffee') return { title: '커피', sub: '위젯', icon: 'cup', grad: '#a2845e' };
-  if (id === 'w:cal') return { title: '일정', sub: '긴 위젯', icon: 'bell', grad: '#0088ff' };
-  return { title: id, sub: '', icon: 'bell', grad: '#8e8e93' };
-};
+// ---------- 위젯 고르기 (애플 위젯 갤러리처럼: 실제 미리보기 + 크기 고르기 + 한 줄 설명) ----------
+const SIZE_NAME = { s: '작게', m: '중간', l: '크게' };
+const gsize = {};
+function galleryPrev(id, size, width) {
+  const pt = Math.min(width, 560) / 364;
+  const w = (size === 's' ? 170 : 364) * pt, h = (size === 'l' ? 382 : 170) * pt;
+  return `<div class="gprev" style="width:${w}px;height:${h}px;--pt:${pt}px">${widgetBox(id, size, wdata())}</div>`;
+}
 function openAdd() {
   const list = addable(layout, getConfig().people);
-  $('add-list').innerHTML = list.length
-    ? list.map(id => { const a = ADD_INFO(id); return `<button class="addcard" type="button" data-addid="${esc(id)}">${a.svg ? `<span class="ico glass">${APP_ICONS[a.svg]}</span>` : `<span class="ico" style="background:${a.grad}">${icons[a.icon]}</span>`}<span>${esc(a.title)}<small>${a.sub}</small></span></button>`; }).join('')
-    : '<p class="empty">모두 홈 화면에 있어요</p>';
+  const wids = list.filter(id => id.startsWith('w:')), apps = list.filter(id => id.startsWith('app:'));
+  const width = Math.max(240, ($('add-sheet').querySelector('.sheet')?.clientWidth || innerWidth) - 32 - 36);
+  const cards = wids.map(id => {
+    const info = WIDGET_INFO[id], ok = WIDGET_SIZES[id];
+    const sz = ok.includes(gsize[id]) ? gsize[id] : itemSize(id, {});
+    return `<div class="gcard" data-gid="${esc(id)}">
+      <div class="gtitle" style="color:${info.accent}">${SYM[info.sym]}<span style="color:var(--label, #000)">${esc(info.name)}</span></div>
+      <div class="gdesc">${esc(info.desc)}</div>
+      ${galleryPrev(id, sz, width)}
+      ${ok.length > 1 ? `<div class="gsizes">${ok.map(k => `<button type="button" data-gsize="${k}" class="${k === sz ? 'on' : ''}">${SIZE_NAME[k]}</button>`).join('')}</div>` : ''}
+      <button class="gadd" type="button" data-addid="${esc(id)}" data-size="${sz}">위젯 추가</button></div>`;
+  }).join('');
+  const appCards = apps.map(id => `<button class="addcard" type="button" data-addid="${esc(id)}"><span class="ico glass">${APP_ICONS[APP_INFO[id].svg]}</span><span>${esc(APP_INFO[id].name)}<small>앱</small></span></button>`).join('');
+  $('add-list').innerHTML = (cards ? `<h4>위젯</h4>${cards}` : '') + (appCards ? `<h4>앱</h4><div class="gapps">${appCards}</div>` : '') || '<p class="empty">모두 홈 화면에 있어요</p>';
   $('add-sheet').classList.add('open');
 }
 $('add-list').addEventListener('click', e => {
+  const sb = e.target.closest('[data-gsize]');
+  if (sb) { gsize[sb.closest('[data-gid]').dataset.gid] = sb.dataset.gsize; const top = $('add-list').parentElement.scrollTop; openAdd(); $('add-list').parentElement.scrollTop = top; return; }
   const b = e.target.closest('[data-addid]');
   if (!b) return;
-  layout = addItem(layout, b.dataset.addid);
+  const id = b.dataset.addid;
+  if (b.dataset.size) { sizes = { ...sizes, [id]: b.dataset.size }; save('home.sizes', sizes); }
+  layout = addItem(layout, id);
   drawGrid();
   $('add-sheet').classList.remove('open');
 });
 $('add-close').addEventListener('click', () => $('add-sheet').classList.remove('open'));
+
+// ---------- 위젯 모양: 기본(밝게/어둡게 자동) / 투명 / 틴트 ----------
+const TINTS = ['#ff9500', '#ff3b30', '#ff2d55', '#af52de', '#5856d6', '#007aff', '#30b0c7', '#34c759', '#a2845e'];
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(v * t + y[i] * (1 - t))).join(',')})`; };
+function hueOf(h) {
+  const [r, g, b] = hex(h).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  if (!d) return 0;
+  const x = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (x * 60 + 360) % 360;
+}
+function applyLook() {
+  const lk = settings.look || {};
+  const mode = ['clear', 'tint'].includes(lk.mode) ? lk.mode : '';
+  if (mode) body.dataset.look = mode; else delete body.dataset.look;
+  if (mode === 'tint') {
+    const t = TINTS.includes(lk.tint) ? lk.tint : TINTS[0];
+    const st = body.style;
+    st.setProperty('--tint', t);
+    st.setProperty('--tbg', mix(t, '#151517', .2));
+    st.setProperty('--tfg', mix(t, '#ffffff', .32));
+    st.setProperty('--tfg2', mix(t, '#8e8e93', .45));
+    st.setProperty('--tfg3', mix(t, '#3a3a3c', .35));
+    st.setProperty('--tpage', mix(t, '#0b0b0c', .1));
+    // 색 있는 그림·기호를 회색으로 만든 뒤 고른 색으로 물들임 (sepia 기본 색조 ≈ 38°)
+    st.setProperty('--tf', `grayscale(1) sepia(1) hue-rotate(${Math.round(hueOf(t) - 38)}deg) saturate(2.6) brightness(1.05)`);
+  }
+}
+function drawLooks() {
+  const lk = settings.look || {}, mode = lk.mode || 'default';
+  const L = [['default', '기본', '밝게, 밤엔 어둡게'], ['clear', '투명', '유리처럼 비치게'], ['tint', '틴트', '고른 색 한 가지로']];
+  $('looks').innerHTML = L.map(([k, n, d]) => `<button type="button" class="lk ${k === mode ? 'on' : ''}" data-look="${k}"><span class="lkp lkp-${k}" style="${k === 'tint' ? `--tint:${lk.tint || TINTS[0]}` : ''}"><i></i><i></i></span><b>${n}</b><small>${d}</small></button>`).join('');
+  $('tints').innerHTML = mode === 'tint' ? TINTS.map(c => `<button type="button" class="sw ${c === (lk.tint || TINTS[0]) ? 'sel' : ''}" data-tint="${c}" aria-label="색" style="background:${c}"></button>`).join('') : '';
+}
+$('look-btn').addEventListener('click', () => { drawLooks(); $('look-sheet').classList.add('open'); });
+$('look-close').addEventListener('click', () => $('look-sheet').classList.remove('open'));
+$('looks').addEventListener('click', e => {
+  const b = e.target.closest('[data-look]');
+  if (!b) return;
+  settings = setSettings({ look: { ...(settings.look || {}), mode: b.dataset.look } });
+  applyLook(); drawLooks();
+});
+$('tints').addEventListener('click', e => {
+  const b = e.target.closest('[data-tint]');
+  if (!b) return;
+  settings = setSettings({ look: { ...(settings.look || {}), mode: 'tint', tint: b.dataset.tint } });
+  applyLook(); drawLooks();
+});
 
 // ---------- 시계 고르기·꾸미기 ----------
 let pick = null;
@@ -497,13 +577,14 @@ async function findFaces() {
   }
   finding = false;
 }
-async function loadWeather() { weather = await getWeather(); drawHero(); drawFace(); }
-async function loadEvents() { events = await getEvents(); if (!body.classList.contains('edit')) drawGrid(); drawGlance(); drawFace(true); }
+async function loadWeather() { weather = await getWeather(); wxTried = true; drawHero(); drawFace(true); if (!body.classList.contains('edit')) drawGrid(); }
+async function loadEvents() { events = await getEvents(); eventsLoaded = true; if (!body.classList.contains('edit')) drawGrid(); drawGlance(); drawFace(true); }
 
 async function init() {
   if (load('hint.seen', false)) document.querySelector('.idle-hint')?.remove();
   refreshData();
   await applyBg();
+  applyLook();
   drawHero();
   drawFace(true);
   drawGrid();
@@ -518,7 +599,7 @@ async function init() {
   setInterval(loadAlbum, 25 * 60000);
   const onData = () => { refreshData(); if (!body.classList.contains('edit')) drawGrid(); drawFace(true); drawGlance(); };
   window.addEventListener('kp-meds-changed', onData);
-  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); loadAlbum(); tickSlides(); } if (e.key === 'kp.home.layout') { refreshData(); drawGrid(); } });
+  window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds') || e.key?.startsWith('kp.coffee')) onData(); if (e.key === 'kp.settings') { settings = getSettings(); applyLook(); drawFace(true); drawGlance(); loadEvents(); loadWeather(); loadAlbum(); tickSlides(); } if (e.key === 'kp.home.layout' || e.key === 'kp.home.sizes') { sizes = load('home.sizes', {}); refreshData(); drawGrid(); } });
   setInterval(drawGlance, 30000);
   drawGlance();
   // 알람이 울리면 깨우기
