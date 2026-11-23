@@ -30,7 +30,8 @@ let weather = null;
 let photo = null;
 let album = [];
 // 사진 시계: 공유 앨범이 켜져 있고 사진이 있으면 5분마다 다음 사진, 아니면 태블릿에 넣은 사진 한 장
-const facePhoto = () => (settings.album && album.length ? pickPhoto(album, Date.now(), 5).url : photo);
+const albumNow = () => (settings.album && album.length ? pickPhoto(album, Date.now(), 5) : null);
+const facePhoto = () => albumNow()?.url || photo;
 let layout = [];
 let summary = null;
 let events = [];
@@ -52,7 +53,7 @@ let faceKey = '';
 let lastPhoto = null;
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo: facePhoto(), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`) };
+  return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`) };
 }
 function drawFace(force) {
   const now = new Date();
@@ -65,7 +66,7 @@ function drawFace(force) {
   const ph = facePhoto();
   try {
     renderFace($('face-layer'), now, faceCtx(f));
-    if (f.id === 'photo' && lastPhoto && ph !== lastPhoto) $('face-layer').querySelector('.fc')?.classList.add('swap');
+    if ((f.id === 'photo' || f.id === 'album') && lastPhoto && ph !== lastPhoto) $('face-layer').querySelector('.fc')?.classList.add('swap');
     lastPhoto = ph;
   }
   catch { $('face-layer').innerHTML = `<div class="fc fallback"><div class="bn">${pad(now.getHours())}</div><div class="bn">${pad(now.getMinutes())}</div></div>`; }

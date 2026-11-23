@@ -68,3 +68,16 @@
 .cal table { table-layout: fixed; }
 .cal td { position: relative; }
 .cal td i { position: absolute; left: 50%; bottom: .2vh; bottom: .2cqh; width: .8vh; width: .8cqh; aspect-ratio: 1; border-radius: 50%; transform: translateX(-50%); }
+
+/* 공유 앨범: 사진 가득 + 왼쪽 위 시계 */
+.alb { background: #111; overflow: hidden; }
+.alb .ab, .alb .af { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+.alb .ab { inset: -20%; filter: blur(12vw) brightness(.7); filter: blur(12cqw) brightness(.7); }
+.alb .af.wide { background-size: contain; }
+.alb .ag { position: absolute; left: 0; right: 0; top: 0; height: 42%; background: linear-gradient(rgba(0,0,0,.42), rgba(0,0,0,0)); }
+.alb.darktext .ag { background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,0)); }
+.alb .ac { position: absolute; left: 7vw; left: 7cqw; top: 6vh; top: 6cqh; color: var(--t); text-shadow: 0 .3vh 2vh rgba(0,0,0,.22); }
+.alb.darktext .ac { text-shadow: none; }
+.alb .at { font-size: 15vh; font-size: 15cqh; font-weight: 600; letter-spacing: -.04em; line-height: .9; }
+.alb .fdate { justify-content: flex-start; margin-top: 1.6vh; margin-top: 1.6cqh; font-size: 3vh; font-size: 3cqh; opacity: .95; }
+.alb .nophoto { position: absolute; left: 0; right: 0; top: 50%; text-align: center; color: #fff; opacity: .8; font-size: 2.6vh; font-size: 2.6cqh; }

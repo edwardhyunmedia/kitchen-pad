@@ -1,4 +1,4 @@
-// 시계 페이스 7종. 모든 크기는 cqw/cqh(담는 상자 기준)라 미리보기에서도 그대로 줄어듦
+// 시계 페이스 8종. 모든 크기는 cqw/cqh(담는 상자 기준)라 미리보기에서도 그대로 줄어듦
 import { WEATHER_ICONS, codeInfo } from './weather.js';
 import { dayLabel, sameDay } from './calendar.js';
 
@@ -9,6 +9,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 export const FACES = [
   { id: 'big', name: '큰 숫자', colors: [['#f1efe9', '#1d1d1f', '#ff6a3d'], ['#1c1c1e', '#f5f5f7', '#ffd60a'], ['#e8f0ff', '#1b2a4a', '#3b82f6'], ['#fdeef4', '#3a1d2b', '#e8457c'], ['#eaf4ea', '#1f3324', '#34a853']] },
   { id: 'photo', name: '사진', colors: [['#fff'], ['#1d1d1f']] },
+  { id: 'album', name: '공유 앨범', colors: [['#fff'], ['#1d1d1f']] },
   { id: 'ana', name: '숫자 시계', colors: [['#5e9c6a', '#111', '#fff'], ['#efe9dc', '#1d1d1f', '#e8457c'], ['#26304a', '#f5f5f7', '#ffd60a'], ['#f4b8a2', '#3a1d14', '#fff']] },
   { id: 'mini', name: '미니멀', colors: [['#ead7d4', '#5b2b2b', '#e84c9a'], ['#dfe7ef', '#22364d', '#ff9500'], ['#ecebe4', '#2b2b2e', '#34c759'], ['#2b2b2e', '#f2f2f2', '#ff6a3d']] },
   { id: 'flow', name: '플로우', colors: [['#ff9ad5', '#7aa7ff', '#c79bff'], ['#ffd27a', '#ff8a7a', '#ffb3c7'], ['#7ae0c3', '#6fb8ff', '#b4f0a0'], ['#c3c7d1', '#8e9bb5', '#e6e8ee']] },
@@ -93,6 +94,16 @@ export function renderFace(root, now, ctx) {
       html = `<div class="fc ph ${c[0] === '#fff' ? 'light' : 'dark'}" style="${ctx.photo ? `background-image:url('${ctx.photo}')` : ''}">
         ${ctx.photo ? '' : '<div class="nophoto">설정에서 사진을 고르세요</div>'}<div class="pn">${hh}</div><div class="pn">${mm}</div>${dateLine(now, ctx)}</div>`;
       break;
+    case 'album': {
+      // 공유 앨범 사진을 화면 가득, 위에 작은 시계·날짜·날씨. 가로 사진은 잘리지 않게 통째로 + 뒤에 흐린 같은 사진
+      const u = ctx.photo ? String(ctx.photo).replace(/'/g, '%27') : '';
+      const bg = u ? `background-image:url('${u}')` : '';
+      html = `<div class="fc alb ${c[0] === '#fff' ? '' : 'darktext'}" style="--t:${c[0]}">
+        ${u ? `<div class="ab" style="${bg}"></div><div class="af ${ctx.photoWide ? 'wide' : ''}" style="${bg}"></div>` : '<div class="nophoto">설정에서 아이폰 공유 앨범을 켜주세요</div>'}
+        <div class="ag"></div>
+        <div class="ac"><div class="at">${hh}:${mm}</div>${dateLine(now, ctx)}</div></div>`;
+      break;
+    }
     case 'ana':
       html = `<div class="fc" style="background:${c[0]};color:${c[1]}">${analog(now, c, 'big', 'big')}${ctx.opts.showDate !== false ? `<div class="corner">${DAYS[now.getDay()]} ${now.getDate()}</div>` : ''}</div>`;
       break;
@@ -135,7 +146,7 @@ export function opticalFix(root) {
     const pl = parseFloat(getComputedStyle(el).paddingLeft) || 0;
     if (b) el.style.left = `${el.offsetWidth / 2 - pl - (b.left + b.right) / 2}px`;
   });
-  root.querySelectorAll('.mt, .cal .day').forEach(el => {
+  root.querySelectorAll('.mt, .cal .day, .alb .at').forEach(el => {
     el.style.position = 'relative'; el.style.left = '0px';
     const b = inkBox(el);
     if (b) el.style.left = `${-b.left}px`;
