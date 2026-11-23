@@ -189,3 +189,26 @@ body { word-break: keep-all; }
 .tile .t-pair { display: flex; align-items: baseline; column-gap: .3em; }
 .tile .t-big { font-variant-numeric: normal; }
 .tile .t-big i { margin-left: .06em; }
+
+/* 커피 카드 아이콘 = 설명 열기 (오른쪽 아래 작은 i 표시) */
+.tile .t-info { position: relative; }
+.tile .t-i { position: absolute; right: -2px; bottom: -2px; width: 38%; height: 38%; border-radius: 50%; background: #fff; color: var(--brown); font: 700 calc(12px * var(--s))/1 Georgia, serif; font-style: italic; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+/* 설명 시트 */
+#info-sheet .sheet { background: #fff; }
+.i-art { border-radius: calc(22px * var(--s)); overflow: hidden; aspect-ratio: 16 / 10; }
+.i-art svg { width: 100%; height: 100%; display: block; }
+.i-name { font-size: var(--t-title); font-weight: 700; letter-spacing: -.01em; margin: calc(18px * var(--s)) 0 2px; line-height: 1.2; }
+.i-origin { font-size: var(--t-sub); color: var(--label-2); }
+.i-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(110px * var(--s)), 1fr)); gap: calc(8px * var(--s)); margin: calc(18px * var(--s)) 0; }
+.i-facts div { background: var(--bg-2); border-radius: calc(14px * var(--s)); padding: calc(10px * var(--s)) calc(12px * var(--s)); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.i-facts small { font-size: var(--t-foot); color: var(--label-2); }
+.i-facts b { font-size: var(--t-body); font-weight: 600; overflow-wrap: anywhere; }
+.i-text p { font-size: var(--t-body); line-height: 1.55; margin: 0 0 calc(12px * var(--s)); }
+.i-h { font-size: var(--t-section); font-weight: 700; margin: calc(20px * var(--s)) 0 calc(8px * var(--s)); }
+.i-steps { list-style: none; margin: 0; padding: 0; }
+.i-steps li { display: grid; grid-template-columns: calc(56px * var(--s)) 1fr auto; gap: calc(10px * var(--s)); align-items: baseline; padding: calc(10px * var(--s)) 0; border-bottom: .5px solid var(--sep); font-size: var(--t-body); }
+.i-steps .i-at { color: var(--label-2); font-variant-numeric: tabular-nums; }
+.i-steps .i-to { color: var(--brown); font-weight: 600; }
+.i-steps .i-end { border-bottom: 0; color: var(--label-2); }
+.i-note { font-size: var(--t-sub); color: var(--label-2); margin: calc(12px * var(--s)) 0 0; }
+.i-start { width: 100%; margin-top: calc(20px * var(--s)); background: var(--brown); color: #fff; }

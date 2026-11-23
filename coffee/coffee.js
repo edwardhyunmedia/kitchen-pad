@@ -2,6 +2,7 @@ import { icons } from '../shared/icons.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
+import { ART, aboutOf } from './about.js';
 import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds } from './logic.js';
 
 const $ = id => document.getElementById(id);
@@ -32,7 +33,7 @@ function renderList() {
     const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).join(' · ');
     return `
     <button class="tile ctile" type="button" data-i="${i}">
-      <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
+      <span class="t-top"><span class="glyph t-info" role="button" tabindex="0" data-info="${i}" aria-label="${esc(r.name)} 설명 보기" style="background:var(--brown);color:#fff">${icons.cup}<b class="t-i">i</b></span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
       <span class="t-body">
         <div class="name">${esc(r.name)}</div>
         <div class="t-big t-pair">${r.dose ? `<span>${esc(r.dose)}<i>g</i></span>` : ''}${r.water ? `<span>${esc(r.water)}<i>ml</i></span>` : ''}</div>
@@ -43,9 +44,40 @@ function renderList() {
   }).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }
 $('recipes').addEventListener('click', e => {
+  const info = e.target.closest('[data-info]');
+  if (info) return openInfo(getRecipes()[info.dataset.info]);
   const t = e.target.closest('[data-i]');
   if (t) openTimer(getRecipes()[t.dataset.i]);
 });
+
+// ---------- 설명 (아이콘을 누르면) ----------
+const clock = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+function openInfo(r) {
+  if (!r) return;
+  const a = aboutOf(r);
+  const facts = [['원두', r.dose ? `${r.dose}g` : ''], ['물', r.water ? `${r.water}g` : ''], ['얼음', r.ice ? `${r.ice}g` : ''], ['비율', r.ratio || ''],
+    ['물 온도', r.temp ? `${r.temp}°C` : ''], ['분쇄', r.grind || ''], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
+  let t = 0;
+  const steps = r.steps.map(st => { const at = t; t += st.sec; return `<li><span class="i-at">${clock(at)}</span><span class="i-lb">${esc(st.label)}</span><span class="i-to">${st.pourTo ? `${st.pourTo}g까지` : ''}</span></li>`; }).join('');
+  $('i-kind').textContent = a.kind;
+  $('info-body').innerHTML = `
+    <div class="i-art">${ART[a.art] || ART.v60}</div>
+    <h2 class="i-name">${esc(r.name)}</h2>
+    <div class="i-origin">${esc(a.origin)}</div>
+    <div class="i-facts">${facts.map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div>
+    <div class="i-text">${a.text.map(p => `<p>${esc(p)}</p>`).join('')}</div>
+    <h3 class="i-h">순서</h3>
+    <ol class="i-steps">${steps}<li class="i-end"><span class="i-at">${clock(t)}</span><span class="i-lb">끝</span><span class="i-to"></span></li></ol>
+    ${r.note && !a.text.join(' ').includes(r.note) ? `<p class="i-note">${esc(r.note)}</p>` : ''}
+    <button class="btn i-start" type="button" id="info-start">이 레시피로 시작</button>`;
+  $('info-start').onclick = () => { closeInfo(); openTimer(r); };
+  $('info-sheet').classList.add('open');
+  $('info-body').scrollTop = 0;
+}
+function closeInfo() { $('info-sheet').classList.remove('open'); }
+$('info-close').addEventListener('click', closeInfo);
+$('info-sheet').addEventListener('click', e => { if (e.target === e.currentTarget) closeInfo(); });
+$('recipes').addEventListener('keydown', e => { const info = e.target.closest('[data-info]'); if (info && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openInfo(getRecipes()[info.dataset.info]); } });
 
 // ---------- 타이머 (실행 상태를 저장해서 다른 화면으로 가도 계속 돎) ----------
 $('t-icon').innerHTML = icons.cup;

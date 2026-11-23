@@ -15,7 +15,7 @@
 <body>
 <main class="page">
   <h1 class="title" style="margin-top:40px">커피</h1>
-  <p class="subtitle">레시피를 누르면 타이머가 열려요</p>
+  <p class="subtitle">레시피를 누르면 타이머, 동그란 아이콘을 누르면 설명이 열려요</p>
   <div class="grid" id="recipes"></div>
 </main>
 
@@ -38,6 +38,13 @@
         <button class="round-btn" type="button" aria-label="닫기" id="t-close"></button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="sheet-back" id="info-sheet">
+  <div class="sheet" role="dialog" aria-label="레시피 설명">
+    <div class="navbar"><span></span><h3 id="i-kind">설명</h3><button class="nav-right" type="button" id="info-close">닫기</button></div>
+    <div class="sheet-body" id="info-body"></div>
   </div>
 </div>
 
