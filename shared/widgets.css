@@ -259,3 +259,4 @@ html, body, .scroll { overscroll-behavior: none; }
 .w-split > .w-list { justify-content: center; }
 .w-calm .w-calblk { display: inline-flex; flex-direction: column; align-items: center; align-self: flex-start; }
 .w-calm .w-calblk .w-day { justify-content: center; }
+.w-calm .w-calblk { margin-left: calc(var(--pt) * 7.3); } /* FigCraft: 날짜 덩어리를 다른 위젯 내용 줄에 맞춰 오른쪽으로 */
