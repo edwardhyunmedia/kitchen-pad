@@ -23,6 +23,12 @@ $('t-close').innerHTML = icons.close;
 $('t-reset').innerHTML = icons.reset;
 
 // ---------- 목록 ----------
+// 카드 그림: 레시피 설명의 그림(드리퍼·케멕스·아이스·원두)을 정사각형으로 가운데만 잘라서
+function thumb(r) {
+  const art = ART[aboutOf(r).art] || ART.v60;
+  const hb = (art.match(/fill="(#[0-9a-f]{6})"/i) || [])[1] || '#efe4d6';
+  return `<span class="c-thumb" style="background:${hb}">${art.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ')}</span>`;
+}
 function renderList() {
   const list = getRecipes();
   const last = load('coffee.last', null);
@@ -32,7 +38,7 @@ function renderList() {
     const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? esc(r.grind) : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).join(' · ');
     return `
     <button class="tile ctile" type="button" data-i="${i}">
-      <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
+      <span class="t-top">${thumb(r)}${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
       <span class="t-body">
         <div class="name">${esc(r.name)}</div>
         <div class="t-big t-pair">${r.dose ? `<span>${esc(r.dose)}<i>g</i></span>` : ''}${r.water ? `<span>${esc(r.water)}<i>ml</i></span>` : ''}</div>
