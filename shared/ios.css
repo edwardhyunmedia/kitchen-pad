@@ -293,3 +293,8 @@ html.dark #info-sheet .sheet { background: #1c1c1e; }
 html.dark .i-hero::after { background: linear-gradient(to bottom, rgba(28,28,30,0), #1c1c1e 92%); }
 html.dark .i-close.solid { background: #2c2c2e; color: #fff; }
 html.dark .i-facts > div { background: rgba(120,120,128,.24); }
+
+/* 카드 줄 위치 통일: 이름과 상세 줄은 늘 한 줄 (길면 … ) — 카드마다 제목·숫자·상세가 같은 높이 */
+.tile.ctile .name, .tile.mtile2 .name, .tile.ctile .c-line { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; -webkit-line-clamp: none; }
+.tile.ctile .c-spec { color: var(--label); font-weight: 500; margin-top: calc(2px * var(--s)); }
+html.dark .tile.ctile .c-spec { color: rgba(255,255,255,.92); }

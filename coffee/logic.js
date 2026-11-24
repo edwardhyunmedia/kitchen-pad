@@ -1,7 +1,7 @@
 // 드립커피 타이머 계산 (시간 단위: 초, Timer는 ms 단위 시각을 받음)
 export const DEFAULT_RECIPES = [
   {
-    id: 'basic', name: '기본', dose: 15, water: 250,
+    id: 'basic', name: '기본', dose: 15, water: 250, temp: 93, grind: '16클릭',
     steps: [
       { label: '뜸 들이기', sec: 40, pourTo: 40 },
       { label: '1차 붓기', sec: 40, pourTo: 150 },
@@ -10,7 +10,7 @@ export const DEFAULT_RECIPES = [
     ],
   },
   {
-    id: 'strong', name: '진하게', dose: 18, water: 250,
+    id: 'strong', name: '진하게', dose: 18, water: 250, temp: 93, grind: '15클릭',
     steps: [
       { label: '뜸 들이기', sec: 45, pourTo: 45 },
       { label: '1차 붓기', sec: 45, pourTo: 130 },
@@ -23,7 +23,7 @@ export const DEFAULT_RECIPES = [
 // 사용자가 준 레시피 (기존 저장 목록에도 한 번만 추가됨)
 export const SEED_RECIPES = [
   {
-    id: 'dbl-india', name: '인디아 블렌드', dose: 20, water: 180, temp: 93, grind: '11~11.3', ice: 150, ratio: '1:10',
+    id: 'dbl-india', name: '인디아 블렌드', dose: 20, water: 180, temp: 93, grind: '11클릭', ice: 150, ratio: '1:10',
     note: '3분 타겟 (2:50까지 OK). 얼음 컵 위에 서빙',
     steps: [
       { label: '뜸 들이기', sec: 40, pourTo: 40 },
@@ -35,7 +35,7 @@ export const SEED_RECIPES = [
   },
   // 온라인에 공개된 유명 드립 레시피 (원두 g · 물 g · 시간은 각 출처 그대로, 단계 시간 = 다음 단계 시작까지)
   {
-    id: 'hoffmann-v60', name: '호프만 V60', dose: 15, water: 250, temp: 100, grind: '중간-가늘게', ratio: '1:16.7',
+    id: 'hoffmann-v60', name: '호프만 V60', dose: 15, water: 250, temp: 100, grind: '15클릭', ratio: '1:16.7',
     note: '제임스 호프만 Ultimate V60. 뜸 들일 때 살살 돌리고, 다 부은 뒤 한 번 젓고 돌려서 평평하게. 3:30에 끝',
     steps: [
       { label: '뜸 들이기 (살살 돌리기)', sec: 45, pourTo: 50 },
@@ -46,7 +46,7 @@ export const SEED_RECIPES = [
     ],
   },
   {
-    id: 'hoffmann-1cup', name: '호프만 1잔 V60', dose: 15, water: 250, temp: 100, grind: '중간-가늘게', ratio: '1:16.7',
+    id: 'hoffmann-1cup', name: '호프만 1잔 V60', dose: 15, water: 250, temp: 100, grind: '15클릭', ratio: '1:16.7',
     note: '제임스 호프만 Better 1 Cup. 50g씩 나눠 붓고 사이사이 10초 쉼. 3:00쯤 끝',
     steps: [
       { label: '뜸 들이기 (살살 돌리기)', sec: 45, pourTo: 50 },
@@ -61,7 +61,7 @@ export const SEED_RECIPES = [
     ],
   },
   {
-    id: 'kasuya-46', name: '카스야 4:6', dose: 20, water: 300, temp: 92, grind: '굵게', ratio: '1:15',
+    id: 'kasuya-46', name: '카스야 4:6', dose: 20, water: 300, temp: 92, grind: '22클릭', ratio: '1:15',
     note: '테츠 카스야 4:6 (2016 월드 브루어스컵 우승). 첫 붓기를 줄이면 더 달고, 늘리면 더 새콤. 3:30에 드리퍼 빼기',
     steps: [
       { label: '1차 붓기', sec: 45, pourTo: 50 },
@@ -72,7 +72,7 @@ export const SEED_RECIPES = [
     ],
   },
   {
-    id: 'hoffmann-chemex', name: '호프만 케멕스', dose: 30, water: 500, temp: 100, grind: '중간', ratio: '1:16.7',
+    id: 'hoffmann-chemex', name: '호프만 케멕스', dose: 30, water: 500, temp: 100, grind: '20클릭', ratio: '1:16.7',
     note: '제임스 호프만 케멕스 (2잔). 다 부은 뒤 한 번 젓기. 4:15쯤 끝',
     steps: [
       { label: '뜸 들이기 (살살 돌리기)', sec: 45, pourTo: 60 },
@@ -83,7 +83,7 @@ export const SEED_RECIPES = [
     ],
   },
   {
-    id: 'iced-v60', name: '아이스 드립 (일본식)', dose: 30, water: 330, ice: 170, temp: 100, grind: '평소보다 조금 가늘게', ratio: '1:16.7 (얼음 포함)',
+    id: 'iced-v60', name: '아이스 드립 (일본식)', dose: 30, water: 330, ice: 170, temp: 100, grind: '13클릭', ratio: '1:16.7 (얼음 포함)',
     note: '서버에 얼음 170g 먼저 담고 그 위로 내리기. 다 내려오면 서버를 돌려 얼음 녹이기',
     steps: [
       { label: '뜸 들이기', sec: 30, pourTo: 60 },
@@ -118,9 +118,32 @@ export function mergeSeeds(recipes, seeded, seeds = SEED_RECIPES) {
     done.push(RENAME_FLAG);
     changed = true;
   }
+  if (!done.includes(GRIND_FLAG)) {
+    out = out.map(x => {
+      const want = TIMEMORE_CLICKS[x.id];
+      if (!want) return x;
+      const y = { ...x };
+      if (!y.grind || y.grind === OLD_GRIND[x.id]) y.grind = want;
+      if (!y.temp && (x.id === 'basic' || x.id === 'strong')) y.temp = 93;
+      return y;
+    });
+    done.push(GRIND_FLAG);
+    changed = true;
+  }
   return { recipes: out, seeded: done, changed };
 }
 const RENAME_FLAG = 'rename:dbl-short';
+
+// 분쇄도는 타임모어 C3(밤나무 C3 계열) 클릭 수로 통일 — 완전히 조인 0에서 푼 클릭 수. 높을수록 굵게
+// V60 11~18, 핸드드립 전체 11~24, 프렌치프레스 19~25 범위 안에서 레시피 성격대로
+export const TIMEMORE_CLICKS = {
+  basic: '16클릭', strong: '15클릭', 'dbl-india': '11클릭', 'hoffmann-v60': '15클릭', 'hoffmann-1cup': '15클릭',
+  'kasuya-46': '22클릭', 'hoffmann-chemex': '20클릭', 'iced-v60': '13클릭',
+};
+// 예전 표기 (이 값 그대로일 때만 바꿈 — 사용자가 고친 값은 둠)
+const OLD_GRIND = { 'dbl-india': '11~11.3', 'hoffmann-v60': '중간-가늘게', 'hoffmann-1cup': '중간-가늘게', 'kasuya-46': '굵게', 'hoffmann-chemex': '중간', 'iced-v60': '평소보다 조금 가늘게' };
+const GRIND_FLAG = 'grind:timemore-c3';
+export const grindText = g => (g ? (/^\d+클릭$/.test(g) ? `타임모어 C3 ${g}` : g) : '');
 const OLD_DBL_NAME = '딥블루레이크 인디아 블랜드';
 
 export const totalSec = r => r.steps.reduce((a, s) => a + s.sec, 0);

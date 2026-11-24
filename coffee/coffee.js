@@ -4,7 +4,7 @@ import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
 import { ART, ABOUT, aboutOf } from './about.js';
-import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds } from './logic.js';
+import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds, grindText } from './logic.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -28,15 +28,16 @@ function renderList() {
   const last = load('coffee.last', null);
   // 카드가 커져서 내리기 전에 필요한 걸 다 보여줌: 원두 g · 물 ml (크게), 온도·분쇄·얼음, 걸리는 시간·단계 수
   $('recipes').innerHTML = list.map((r, i) => {
-    const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(' · ');
+    // 모든 카드가 같은 줄 구성: 이름(한 줄) / 원두·물 / 온도·분쇄·얼음(한 줄) / 시간·단계(한 줄) → 위치가 카드마다 같음
+    const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? esc(r.grind) : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).join(' · ');
     return `
     <button class="tile ctile" type="button" data-i="${i}">
       <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
       <span class="t-body">
         <div class="name">${esc(r.name)}</div>
         <div class="t-big t-pair">${r.dose ? `<span>${esc(r.dose)}<i>g</i></span>` : ''}${r.water ? `<span>${esc(r.water)}<i>ml</i></span>` : ''}</div>
-        ${extra ? `<div class="state">${extra}</div>` : ''}
-        <div class="state">${mmss(totalSec(r))} · ${r.steps.length}단계</div>
+        <div class="state c-line c-spec">${extra || '&nbsp;'}</div>
+        <div class="state c-line">${mmss(totalSec(r))} · ${r.steps.length}단계</div>
       </span>
     </button>`;
   }).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
@@ -53,7 +54,7 @@ function openInfo(r) {
   if (!r) return;
   const a = aboutOf(r);
   const facts = [['원두', r.dose ? `${r.dose}g` : ''], ['물', r.water ? `${r.water}g` : ''], ['얼음', r.ice ? `${r.ice}g` : ''], ['비율', r.ratio || ''],
-    ['물 온도', r.temp ? `${r.temp}°C` : ''], ['분쇄', r.grind || ''], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
+    ['물 온도', r.temp ? `${r.temp}°C` : ''], ['분쇄', grindText(r.grind)], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
   let t = 0;
   const steps = r.steps.map(st => { const at = t; t += st.sec; return `<li><span class="i-at">${clock(at)}</span><span class="i-lb">${esc(st.label)}</span><span class="i-to">${st.pourTo ? `${st.pourTo}g까지` : ''}</span></li>`; }).join('');
   const art = ART[a.art] || ART.v60;
@@ -208,7 +209,7 @@ function renderEdit() {
       <div class="row"><span class="label grow">물</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:70px"><span class="unit">g</span></div>
       <div class="row"><span class="label grow">물 온도</span><input type="number" value="${esc(r.temp ?? '')}" placeholder="-" data-f="${ri}.temp" style="width:70px"><span class="unit">°C</span></div>
       <div class="row"><span class="label grow">얼음</span><input type="number" value="${esc(r.ice ?? '')}" placeholder="-" data-f="${ri}.ice" style="width:70px"><span class="unit">g</span></div>
-      <div class="row"><span class="label">분쇄</span><input class="grow" type="text" value="${esc(r.grind ?? '')}" placeholder="예: 11~11.3" data-f="${ri}.grind" maxlength="20"></div>
+      <div class="row"><span class="label">분쇄</span><input class="grow" type="text" value="${esc(r.grind ?? '')}" placeholder="예: 16클릭 (타임모어 C3)" data-f="${ri}.grind" maxlength="20"></div>
       <div class="row"><span class="label">비율</span><input class="grow" type="text" value="${esc(r.ratio ?? '')}" placeholder="예: 1:10" data-f="${ri}.ratio" maxlength="10"></div>
       <div class="row"><span class="label">메모</span><input class="grow" type="text" value="${esc(r.note ?? '')}" placeholder="예: 얼음 컵 위에 서빙" data-f="${ri}.note" maxlength="60"></div>
     </div>

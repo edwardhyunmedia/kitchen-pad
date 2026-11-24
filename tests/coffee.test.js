@@ -77,3 +77,34 @@ test('딥블루레이크 이름은 "인디아 블렌드"로 한 번만 바뀜 (�
   assert.equal(again.changed, false);
   assert.equal(SEED_RECIPES.find(x => x.id === 'dbl-india').name, '인디아 블렌드');
 });
+
+import { TIMEMORE_CLICKS, grindText } from '../coffee/logic.js';
+test('분쇄는 타임모어 C3 클릭 기준: 모든 기본·시드 레시피에 온도와 클릭', () => {
+  for (const r of [...DEFAULT_RECIPES, ...SEED_RECIPES]) {
+    assert.match(r.grind, /^\d+클릭$/, r.id);
+    assert.ok(r.temp > 0, r.id);
+  }
+  const c = id => parseInt([...DEFAULT_RECIPES, ...SEED_RECIPES].find(r => r.id === id).grind);
+  assert.ok(c('iced-v60') < c('hoffmann-v60') && c('hoffmann-v60') < c('hoffmann-chemex') && c('hoffmann-chemex') < c('kasuya-46'));
+  assert.equal(c('dbl-india'), 11);
+});
+test('저장된 레시피의 옛 분쇄 표기는 한 번만 클릭으로 (사용자가 고친 값은 그대로)', () => {
+  const saved = [
+    { id: 'basic', name: '기본', dose: 15, water: 250, steps: [{ label: 'a', sec: 10 }] },
+    { id: 'dbl-india', name: '인디아 블렌드', dose: 20, water: 180, temp: 93, grind: '11~11.3', steps: [{ label: 'a', sec: 10 }] },
+    { id: 'kasuya-46', name: '카스야', dose: 20, water: 300, temp: 92, grind: '내 설정', steps: [{ label: 'a', sec: 10 }] },
+  ];
+  const a = mergeSeeds(saved, SEED_RECIPES.map(r => r.id).concat('order:dbl-first', 'rename:dbl-short'));
+  const g = id => a.recipes.find(r => r.id === id);
+  assert.equal(g('basic').grind, TIMEMORE_CLICKS.basic);
+  assert.equal(g('basic').temp, 93);
+  assert.equal(g('dbl-india').grind, '11클릭');
+  assert.equal(g('kasuya-46').grind, '내 설정');
+  assert.ok(a.changed);
+  assert.equal(mergeSeeds(a.recipes, a.seeded).changed, false);
+});
+test('분쇄 표시: 클릭이면 타임모어 C3 붙임', () => {
+  assert.equal(grindText('16클릭'), '타임모어 C3 16클릭');
+  assert.equal(grindText('굵게'), '굵게');
+  assert.equal(grindText(''), '');
+});
