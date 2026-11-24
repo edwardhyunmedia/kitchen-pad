@@ -15,28 +15,39 @@
 <body>
 <main class="page">
   <h1 class="title" style="margin-top:40px">커피</h1>
-  <p class="subtitle">레시피를 누르면 타이머, 동그란 아이콘을 누르면 설명이 열려요</p>
+  <p class="subtitle">레시피를 누르면 설명이 열리고, 시작하면 타이머로 넘어가요</p>
   <div class="grid" id="recipes"></div>
 </main>
 
 <div class="sheet-back" id="timer-sheet">
-  <div class="sheet" role="dialog" aria-label="타이머">
-    <div class="detail">
-      <div class="d-head" style="padding-top:16px">
-        <span class="glyph" id="t-icon"></span>
-        <div class="txt"><div class="t1" id="t-title"></div><div class="t2" id="t-sub"></div></div>
+  <div class="sheet tm" role="dialog" aria-label="타이머">
+    <div class="tm-top">
+      <span class="tm-glyph" id="t-icon"></span>
+      <div class="tm-id"><div class="tm-name" id="t-title"></div><div class="tm-meta" id="t-sub"></div></div>
+      <button class="tm-x" type="button" aria-label="닫기" id="t-close"></button>
+    </div>
+    <div class="tm-ring">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="tm-bg1" cx="100" cy="100" r="94"/>
+        <circle class="tm-all" id="t-all" cx="100" cy="100" r="94" pathLength="100"/>
+        <circle class="tm-bg2" cx="100" cy="100" r="78"/>
+        <circle class="tm-arc" id="t-arc" cx="100" cy="100" r="78" pathLength="100"/>
+      </svg>
+      <div class="tm-center">
+        <div class="tm-step" id="t-step"></div>
+        <div class="tm-sec"><span id="t-sec">0</span><small id="t-unit">초</small></div>
+        <div class="tm-pour" id="t-pour"></div>
       </div>
-      <div class="d-main">
-        <div><div class="d-step" id="t-step"></div><div class="d-pour" id="t-pour"></div></div>
-        <div class="d-sec"><span id="t-sec">0</span><small>초</small></div>
-        <div class="capsule" id="t-cap"><div class="fill" id="t-fill"></div></div>
-        <div><div class="d-next" id="t-next"></div><div class="dots" id="t-dots" style="margin-top:10px"></div></div>
-      </div>
-      <div class="controls">
-        <button class="round-btn" type="button" aria-label="처음부터" id="t-reset"></button>
-        <button class="round-btn main" type="button" aria-label="시작" id="t-play"></button>
-        <button class="round-btn" type="button" aria-label="닫기" id="t-close"></button>
-      </div>
+    </div>
+    <div class="tm-line">
+      <div class="tm-track" id="t-track"></div>
+      <div class="tm-times"><span id="t-el">0:00</span><span id="t-total">0:00</span></div>
+    </div>
+    <div class="tm-next" id="t-next"></div>
+    <div class="tm-ctrl">
+      <button class="round-btn" type="button" aria-label="처음부터" id="t-reset"></button>
+      <button class="round-btn main tm-play" type="button" aria-label="시작" id="t-play"></button>
+      <span class="tm-gap" aria-hidden="true"></span>
     </div>
   </div>
 </div>
@@ -45,6 +56,7 @@
   <div class="sheet i-sheet" role="dialog" aria-label="레시피 설명">
     <div class="i-scroll" id="info-body"></div>
     <button class="i-close" type="button" id="info-close" aria-label="닫기"></button>
+    <div class="i-bar"><button class="btn i-start" type="button" id="info-start"></button></div>
   </div>
 </div>
 

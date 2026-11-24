@@ -229,3 +229,67 @@ body { word-break: keep-all; }
 .tile .t-week > span:last-child { white-space: nowrap; }
 /* 커피·약: 첫 화면엔 카드 4개만 — 아래 버튼 줄 뒤를 화면 배경으로 덮어 다음 줄이 비치지 않게 */
 body.fit4 .bottombar { background: linear-gradient(to bottom, transparent, var(--page-bg, #fff) 18px) !important; }
+
+/* ---------- 커피 타이머 (리디자인) ----------
+   멀리서도 읽히게: 가운데 큰 링(안쪽 = 지금 단계, 바깥 얇은 링 = 전체), 숫자 하나만 크게.
+   아래엔 단계 길이만큼 나눈 막대로 전체 흐름, 그 밑에 "다음" 한 줄. */
+.tm { display: flex; flex-direction: column; padding: calc(18px * var(--s)) calc(22px * var(--s)) calc(26px * var(--s)); gap: calc(14px * var(--s)); }
+.tm-top { display: flex; align-items: center; gap: calc(12px * var(--s)); }
+.tm-glyph { width: calc(46px * var(--s)); height: calc(46px * var(--s)); flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--brown); color: #fff; }
+.tm-glyph svg { width: 54%; height: 54%; }
+.tm-id { flex: 1; min-width: 0; }
+.tm-name { font-size: var(--t-head); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-meta { font-size: var(--t-sub); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tm-x { width: calc(46px * var(--s)); height: calc(46px * var(--s)); flex: none; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--fill-3); color: var(--label); }
+.tm-x svg { width: 46%; height: 46%; }
+
+.tm-ring { position: relative; width: min(100%, 44vh); aspect-ratio: 1; margin: auto; flex: none; }
+.tm-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.tm-ring circle { fill: none; }
+.tm-bg1 { stroke: var(--fill-3); stroke-width: 3; }
+.tm-all { stroke: rgba(172,127,94,.45); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+.tm-bg2 { stroke: rgba(172,127,94,.12); stroke-width: 14; }
+.tm-arc { stroke: var(--brown); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+.tm.done .tm-arc, .tm.done .tm-all { stroke: var(--green); }
+.tm.done .tm-bg2 { stroke: rgba(52,199,89,.14); }
+.tm-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(6px * var(--s)); text-align: center; padding: 0 18%; }
+.tm-step { font-size: var(--t-body); font-weight: 600; color: var(--ink-2); }
+.tm-sec { font-size: calc(96px * var(--s)); font-weight: 300; letter-spacing: -0.045em; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.tm-sec small { font-size: 0.26em; font-weight: 500; color: var(--ink-2); letter-spacing: 0; margin-left: 0.15em; }
+.tm.done .tm-sec { font-size: calc(64px * var(--s)); font-weight: 600; color: var(--green); }
+.tm-pour { font-size: var(--t-body); font-weight: 700; color: var(--brown); background: rgba(172,127,94,.14); padding: calc(5px * var(--s)) calc(14px * var(--s)); border-radius: 99px; }
+.tm-pour.empty { visibility: hidden; }
+.tm.done .tm-pour { color: var(--green); background: rgba(52,199,89,.14); }
+
+.tm-line { display: flex; flex-direction: column; gap: calc(6px * var(--s)); }
+.tm-track { display: flex; gap: calc(4px * var(--s)); height: calc(10px * var(--s)); }
+.tm-track span { min-width: calc(8px * var(--s)); border-radius: 99px; background: var(--fill-3); overflow: hidden; }
+.tm-track i { display: block; height: 100%; width: 0; background: var(--brown); border-radius: inherit; }
+.tm-track span.done i { background: rgba(172,127,94,.55); }
+.tm.done .tm-track i { background: var(--green); }
+.tm-times { display: flex; justify-content: space-between; font-size: var(--t-foot); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.tm-next { display: flex; align-items: baseline; gap: calc(8px * var(--s)); min-height: calc(56px * var(--s)); padding: calc(14px * var(--s)) calc(18px * var(--s)); border-radius: calc(18px * var(--s)); background: var(--fill-4); font-size: var(--t-body); line-height: 1.35; }
+.tm-next small { font-size: var(--t-sub); color: var(--ink-2); font-weight: 600; flex: none; }
+.tm-next b { font-weight: 600; }
+.tm-next span { color: var(--brown); font-weight: 600; }
+.tm-next em { margin-left: auto; font-style: normal; color: var(--ink-2); font-variant-numeric: tabular-nums; flex: none; }
+
+.tm-ctrl { display: flex; justify-content: center; align-items: center; gap: calc(28px * var(--s)); }
+.tm-ctrl .tm-play { width: calc(88px * var(--s)); height: calc(88px * var(--s)); }
+.tm-ctrl .tm-play svg { width: 40%; height: 40%; }
+.tm-gap { width: calc(70px * var(--s)); height: calc(70px * var(--s)); }
+html.dark .tm-x { background: rgba(120,120,128,.28); color: #fff; }
+
+/* 설명 시트: "시작하기"는 아래에 늘 보이게 */
+.i-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: calc(28px * var(--s)) calc(20px * var(--s)) calc(20px * var(--s)); background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 40%); border-radius: 0 0 var(--r-sheet) var(--r-sheet); }
+.i-bar .i-start { margin: 0; display: flex; align-items: center; justify-content: center; gap: calc(8px * var(--s)); height: calc(60px * var(--s)); border-radius: 99px; font-size: var(--t-head); font-weight: 700; box-shadow: 0 8px 18px rgba(172,127,94,.3); }
+.i-bar .i-start svg { width: calc(22px * var(--s)); height: calc(22px * var(--s)); fill: currentColor; }
+.i-bar .i-start small { font-size: var(--t-sub); font-weight: 500; opacity: .8; margin-left: calc(4px * var(--s)); }
+.i-pad { padding-bottom: calc(110px * var(--s)) !important; }
+html.dark .i-bar { background: linear-gradient(to bottom, rgba(28,28,30,0), #1c1c1e 40%); }
+/* 설명 시트 야간 모드 (흰 배경에 흰 글씨 되던 문제) */
+html.dark #info-sheet .sheet { background: #1c1c1e; }
+html.dark .i-hero::after { background: linear-gradient(to bottom, rgba(28,28,30,0), #1c1c1e 92%); }
+html.dark .i-close.solid { background: #2c2c2e; color: #fff; }
+html.dark .i-facts > div { background: rgba(120,120,128,.24); }

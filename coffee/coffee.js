@@ -15,9 +15,6 @@ const getRecipes = () => load('coffee.recipes', DEFAULT_RECIPES);
   const m = mergeSeeds(getRecipes(), load('coffee.seeded', []));
   if (m.changed) { save('coffee.recipes', m.recipes); save('coffee.seeded', m.seeded); }
 }
-const info = r => [
-  `원두 ${r.dose}g`, `물 ${r.water}g`, r.temp ? `${r.temp}°C` : '', r.grind ? `분쇄 ${r.grind}` : '', r.ice ? `얼음 ${r.ice}g` : '', r.ratio ? `비율 ${r.ratio}` : '',
-].filter(Boolean).join(', ');
 const mmss = s => `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`;
 
 $('back').innerHTML = icons.home;
@@ -34,7 +31,7 @@ function renderList() {
     const extra = [r.temp ? `${esc(r.temp)}°` : '', r.grind ? `분쇄 ${esc(r.grind)}` : '', r.ice ? `얼음 ${esc(r.ice)}g` : ''].filter(Boolean).map(x => `<span class="nw">${x}</span>`).join(' · ');
     return `
     <button class="tile ctile" type="button" data-i="${i}">
-      <span class="t-top"><span class="glyph t-info" role="button" tabindex="0" data-info="${i}" aria-label="${esc(r.name)} 설명 보기" style="background:var(--brown);color:#fff">${icons.cup}<b class="t-i">i</b></span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
+      <span class="t-top"><span class="glyph" style="background:var(--brown);color:#fff">${icons.cup}</span>${r.id === last ? '<span class="t-tag">최근</span>' : ''}</span>
       <span class="t-body">
         <div class="name">${esc(r.name)}</div>
         <div class="t-big t-pair">${r.dose ? `<span>${esc(r.dose)}<i>g</i></span>` : ''}${r.water ? `<span>${esc(r.water)}<i>ml</i></span>` : ''}</div>
@@ -44,14 +41,13 @@ function renderList() {
     </button>`;
   }).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
 }
+// 카드를 누르면 설명부터 — 거기서 시작하면 타이머
 $('recipes').addEventListener('click', e => {
-  const info = e.target.closest('[data-info]');
-  if (info) return openInfo(getRecipes()[info.dataset.info]);
   const t = e.target.closest('[data-i]');
-  if (t) openTimer(getRecipes()[t.dataset.i]);
+  if (t) openInfo(getRecipes()[t.dataset.i]);
 });
 
-// ---------- 설명 (아이콘을 누르면) ----------
+// ---------- 설명 (카드를 누르면) ----------
 const clock = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 function openInfo(r) {
   if (!r) return;
@@ -72,8 +68,8 @@ function openInfo(r) {
     <h3 class="i-h">순서</h3>
     <ol class="i-steps">${steps}<li class="i-end"><span class="i-at">${clock(t)}</span><span class="i-lb">끝</span><span class="i-to"></span></li></ol>
     ${r.note && !ABOUT[r.id] ? `<p class="i-note">${esc(r.note)}</p>` : ''}
-    <button class="btn i-start" type="button" id="info-start">이 레시피로 시작</button>
     </div>`;
+  $('info-start').innerHTML = `${icons.play}<span>시작하기</span><small>${mmss(totalSec(r))}</small>`;
   $('info-start').onclick = () => { closeInfo(); openTimer(r); };
   $('info-sheet').classList.add('open');
   $('info-body').scrollTop = 0;
@@ -83,7 +79,6 @@ function closeInfo() { $('info-sheet').classList.remove('open'); }
 $('info-close').innerHTML = icons.close;
 $('info-close').addEventListener('click', closeInfo);
 $('info-sheet').addEventListener('click', e => { if (e.target === e.currentTarget) closeInfo(); });
-$('recipes').addEventListener('keydown', e => { const info = e.target.closest('[data-info]'); if (info && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openInfo(getRecipes()[info.dataset.info]); } });
 
 // ---------- 타이머 (실행 상태를 저장해서 다른 화면으로 가도 계속 돎) ----------
 $('t-icon').innerHTML = icons.cup;
@@ -99,7 +94,9 @@ function openTimer(r) {
   recipe = r;
   lastStep = timerState(recipe, runElapsed(myRun(), Date.now())).stepIndex;
   $('t-title').textContent = r.name;
-  $('t-sub').textContent = info(r);
+  $('t-sub').textContent = [r.dose ? `${r.dose}g` : '', r.water ? `${r.water}ml` : '', r.temp ? `${r.temp}°` : '', r.ice ? `얼음 ${r.ice}g` : ''].filter(Boolean).join(' · ');
+  $('t-track').innerHTML = r.steps.map(x => `<span style="flex:${x.sec}"><i></i></span>`).join('');
+  $('t-total').textContent = clock(totalSec(r));
   $('timer-sheet').classList.add('open');
   window.kpCoffeeOpen = true;
   tellParent({ type: 'coffee-open', open: true });
@@ -124,14 +121,32 @@ function draw() {
   if (st.done && running()) { beep(3); save('coffee.run', pauseRun(myRun(), now)); }
   lastStep = st.stepIndex;
 
-  $('t-sec').textContent = st.done ? 0 : st.stepRemaining;
+  const total = totalSec(recipe);
   const stepStart = recipe.steps.slice(0, st.stepIndex).reduce((a, x) => a + x.sec, 0);
-  $('t-fill').style.height = st.done ? '100%' : `${Math.min(100, ((el - stepStart) / step.sec) * 100)}%`;
-  $('t-cap').classList.toggle('done', st.done);
-  $('t-step').textContent = st.done ? '추출 완료' : step.label;
-  $('t-pour').textContent = !st.done && step.pourTo ? `${step.pourTo}g까지 붓기` : '';
-  $('t-next').textContent = st.done ? (recipe.note || '') : el === 0 && recipe.note ? recipe.note : next ? `다음: ${next.label}` : `남은 시간 ${mmss(st.totalRemaining)}`;
-  $('t-dots').innerHTML = recipe.steps.map((_, i) => `<span class="${st.done || i < st.stepIndex ? 'done' : i === st.stepIndex ? 'now' : ''}"></span>`).join('');
+  const stepPct = st.done ? 100 : Math.min(100, ((el - stepStart) / step.sec) * 100);
+  const sheet = $('timer-sheet').querySelector('.tm');
+  sheet.classList.toggle('done', st.done);
+  sheet.classList.toggle('idle', el === 0);
+  const allPct = Math.min(100, (el / total) * 100);
+  // 0%일 땐 둥근 끝이 점처럼 남지 않게 숨김
+  $('t-arc').style.strokeDashoffset = 100 - stepPct;
+  $('t-arc').style.opacity = stepPct > 0.5 ? 1 : 0;
+  $('t-all').style.strokeDashoffset = 100 - allPct;
+  $('t-all').style.opacity = allPct > 0.5 ? 1 : 0;
+  $('t-sec').textContent = st.done ? '완료' : st.stepRemaining;
+  $('t-unit').textContent = st.done ? '' : '초';
+  $('t-step').textContent = st.done ? '추출 끝' : `${st.stepIndex + 1}/${recipe.steps.length} · ${step.label}`;
+  $('t-pour').textContent = st.done ? clock(total) : step.pourTo ? `${step.pourTo}g까지 붓기` : '';
+  $('t-pour').classList.toggle('empty', !st.done && !step.pourTo);
+  [...$('t-track').children].forEach((seg, i) => {
+    seg.className = st.done || i < st.stepIndex ? 'done' : i === st.stepIndex ? 'now' : '';
+    seg.firstChild.style.width = st.done || i < st.stepIndex ? '100%' : i === st.stepIndex ? `${stepPct}%` : '0%';
+  });
+  $('t-el').textContent = clock(Math.min(total, Math.floor(el)));
+  $('t-next').innerHTML = st.done ? esc(recipe.note || '맛있게 드세요')
+    : el === 0 && recipe.note ? esc(recipe.note)
+    : next ? `<small>다음</small><b>${esc(next.label)}</b>${next.pourTo ? `<span>${next.pourTo}g까지</span>` : ''}<em>${next.sec}초</em>`
+    : `<small>마지막 단계</small><b>남은 시간 ${mmss(st.totalRemaining)}</b>`;
   $('t-play').innerHTML = running() ? icons.pause : icons.play;
   $('t-play').setAttribute('aria-label', running() ? '일시정지' : '시작');
   if (running()) raf = requestAnimationFrame(draw);
