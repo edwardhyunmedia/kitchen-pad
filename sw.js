@@ -1,5 +1,5 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v56';
+const VERSION = 'kp-v57';
 const FILES = [
   "./",
   "meds/",
@@ -9,6 +9,14 @@ const FILES = [
   "coffee/index.html",
   "coffee/logic.js",
   "coffee/about.js",
+  "coffee/photos/dbl-india.webp",
+  "coffee/photos/basic.webp",
+  "coffee/photos/strong.webp",
+  "coffee/photos/hoffmann-v60.webp",
+  "coffee/photos/hoffmann-1cup.webp",
+  "coffee/photos/kasuya-46.webp",
+  "coffee/photos/hoffmann-chemex.webp",
+  "coffee/photos/iced-v60.webp",
   "index.html",
   "meds/index.html",
   "meds/logic.js",

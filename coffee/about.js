@@ -113,6 +113,10 @@ export const ABOUT = {
 };
 
 // 사용자가 만든 레시피는 숫자로 짧은 설명
+// 카드 사진 (Unsplash 무료 사진, 앱 안에 들어 있음 — 밖에서 불러오지 않음)
+const PHOTOS = ['dbl-india', 'basic', 'strong', 'hoffmann-v60', 'hoffmann-1cup', 'kasuya-46', 'hoffmann-chemex', 'iced-v60'];
+export const photoOf = r => `photos/${PHOTOS.includes(r.id) ? r.id : r.ice ? 'iced-v60' : 'basic'}.webp`;
+
 export function aboutOf(r) {
   if (ABOUT[r.id]) return ABOUT[r.id];
   const ratio = r.dose && r.water ? `1:${(r.water / r.dose).toFixed(1).replace(/\.0$/, '')}` : '';

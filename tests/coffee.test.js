@@ -108,3 +108,11 @@ test('분쇄 칸 이름: 클릭이면 타임모어 C3 기준이라고 표시', (
   assert.equal(grindLabel('굵게'), '분쇄');
   assert.equal(grindLabel(undefined), '분쇄');
 });
+
+import { photoOf } from '../coffee/about.js';
+import { existsSync } from 'node:fs';
+test('카드 사진: 모든 기본·시드 레시피에 실제 사진 파일, 내 레시피는 얼음 여부로 대체', () => {
+  for (const r of [...DEFAULT_RECIPES, ...SEED_RECIPES]) assert.ok(existsSync(new URL(`../coffee/${photoOf(r)}`, import.meta.url)), r.id);
+  assert.equal(photoOf({ id: 'mine', ice: 100 }), photoOf({ id: 'iced-v60' }));
+  assert.equal(photoOf({ id: 'mine' }), photoOf({ id: 'basic' }));
+});

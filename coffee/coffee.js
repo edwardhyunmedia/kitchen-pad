@@ -3,7 +3,7 @@ import { fitTiles } from '../shared/fit.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
-import { ART, ABOUT, aboutOf } from './about.js';
+import { ART, ABOUT, aboutOf, photoOf } from './about.js';
 import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds, grindLabel } from './logic.js';
 
 const $ = id => document.getElementById(id);
@@ -23,11 +23,9 @@ $('t-close').innerHTML = icons.close;
 $('t-reset').innerHTML = icons.reset;
 
 // ---------- 목록 ----------
-// 카드 그림: 레시피 설명의 그림(드리퍼·케멕스·아이스·원두)을 정사각형으로 가운데만 잘라서
+// 카드 사진: 레시피에 맞는 실사 사진 (정사각형)
 function thumb(r) {
-  const art = ART[aboutOf(r).art] || ART.v60;
-  const hb = (art.match(/fill="(#[0-9a-f]{6})"/i) || [])[1] || '#efe4d6';
-  return `<span class="c-thumb" style="background:${hb}">${art.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ')}</span>`;
+  return `<span class="c-thumb"><img src="${photoOf(r)}" alt="" loading="lazy" decoding="async"></span>`;
 }
 function renderList() {
   const list = getRecipes();
