@@ -23,7 +23,7 @@ export function nextSize(id, sizes = {}) {
 }
 
 export function defaultLayout() {
-  return ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:wx', 'w:meds', 'w:cal'];
+  return ['app:meds', 'app:coffee', 'w:wx', 'app:cal', 'app:settings', 'w:coffee', 'w:meds', 'w:cal'];
 }
 
 // 약 중간 위젯 줄을 반으로: 왼쪽 날씨(작게), 오른쪽 약(작게). 저장된 배치에 한 번만 적용
@@ -55,6 +55,15 @@ export function moveItem(layout, dragged, target) {
     const from = layout.indexOf(dragged), to = layout.indexOf(target);
     out.splice(from < to ? i + 1 : i, 0, dragged);
   }
+  return out;
+}
+
+// 두 아이템 자리 맞바꾸기 (하나라도 없으면 그대로)
+export function swapItems(layout, a, b) {
+  const i = layout.indexOf(a), j = layout.indexOf(b);
+  if (i < 0 || j < 0) return [...layout];
+  const out = [...layout];
+  [out[i], out[j]] = [out[j], out[i]];
   return out;
 }
 

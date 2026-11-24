@@ -3,7 +3,7 @@ import { APP_ICONS } from './appicons.js';
 import { load, save } from './store.js';
 import { getConfig, getLog } from '../meds/state.js';
 import { medsSummary } from './summary.js';
-import { normalizeLayout, splitMedsWithWeather, itemSize, nextSize, moveItem, removeItem, addItem, addable, WIDGET_SIZES } from './layout.js';
+import { normalizeLayout, splitMedsWithWeather, swapItems, itemSize, nextSize, moveItem, removeItem, addItem, addable, WIDGET_SIZES } from './layout.js';
 import { widgetBox, widgetBody, WIDGET_INFO, SYM } from './widgets.js';
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
@@ -52,6 +52,12 @@ if (!load('mig.wxsplit', false)) {
   if (Array.isArray(saved)) save('home.layout', r.layout);
   save('home.sizes', r.sizes);
   save('mig.wxsplit', true);
+}
+// 한 번만: 날씨는 위 오른쪽, 커피는 약 왼쪽으로 (자리 맞바꿈)
+if (!load('mig.wxswap', false)) {
+  const saved = load('home.layout', null);
+  if (Array.isArray(saved)) save('home.layout', swapItems(saved, 'w:coffee', 'w:wx'));
+  save('mig.wxswap', true);
 }
 let sizes = load('home.sizes', {});
 

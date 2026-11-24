@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { allItems, itemSize, nextSize, defaultLayout, normalizeLayout, moveItem, removeItem, addItem, addable, splitMedsWithWeather } from '../shared/layout.js';
+import { allItems, itemSize, nextSize, defaultLayout, normalizeLayout, moveItem, removeItem, addItem, addable, splitMedsWithWeather, swapItems } from '../shared/layout.js';
 
 const people = [{ id: 'me', name: '나' }, { id: 'wife', name: '아내' }];
 
@@ -30,9 +30,9 @@ test('old layout with per-person and next-dose widgets becomes the new default',
   const old = ['app:meds', 'app:coffee', 'w:person:me', 'app:settings', 'w:person:wife', 'w:coffee', 'w:cal', 'w:next'];
   assert.deepEqual(normalizeLayout(old, people), defaultLayout(people));
 });
-test('default layout: weather small widget left of meds small widget', () => {
+test('default layout: weather top right, coffee left of meds', () => {
   const d = defaultLayout(people);
-  assert.deepEqual(d, ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:wx', 'w:meds', 'w:cal']);
+  assert.deepEqual(d, ['app:meds', 'app:coffee', 'w:wx', 'app:cal', 'app:settings', 'w:coffee', 'w:meds', 'w:cal']);
   assert.equal(new Set(d).size, d.length);
 });
 test('split: saved layout without weather gets weather before meds, both small', () => {
@@ -73,4 +73,10 @@ test('remove and add back', () => {
 });
 test('a removed meds widget can be added back', () => {
   assert.ok(addable(['app:meds'], people).includes('w:meds'));
+});
+
+test('swap exchanges two items, leaves layout alone when one is missing', () => {
+  const l = ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:wx', 'w:meds', 'w:cal'];
+  assert.deepEqual(swapItems(l, 'w:coffee', 'w:wx'), ['app:meds', 'app:coffee', 'w:wx', 'app:cal', 'app:settings', 'w:coffee', 'w:meds', 'w:cal']);
+  assert.deepEqual(swapItems(['w:cal', 'w:wx'], 'w:coffee', 'w:wx'), ['w:cal', 'w:wx']);
 });
