@@ -3,6 +3,7 @@ import { fitTiles } from '../shared/fit.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
+import { savePhotoAs, getPhotoUrlFor, deletePhotoFor } from '../shared/settings.js';
 import { ART, ABOUT, aboutOf, photoOf } from './about.js';
 import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds, grindLabel } from './logic.js';
 
@@ -24,8 +25,16 @@ $('t-reset').innerHTML = icons.reset;
 
 // ---------- 목록 ----------
 // 카드 사진: 레시피에 맞는 실사 사진 (정사각형)
+// 직접 고른 사진이 있으면 그걸로 (태블릿 안에만 저장 — 앱 파일이나 인터넷에 올라가지 않음)
+const photoKey = r => `coffee:${r.id}`;
 function thumb(r) {
-  return `<span class="c-thumb"><img src="${photoOf(r)}" alt="" loading="lazy" decoding="async"></span>`;
+  return `<span class="c-thumb"><img src="${photoOf(r)}" alt="" loading="lazy" decoding="async" data-pk="${esc(photoKey(r))}"></span>`;
+}
+async function applyMyPhotos(root) {
+  for (const img of root.querySelectorAll('img[data-pk]')) {
+    const u = await getPhotoUrlFor(img.dataset.pk);
+    if (u) img.src = u;
+  }
 }
 function renderList() {
   const list = getRecipes();
@@ -45,6 +54,7 @@ function renderList() {
       </span>
     </button>`;
   }).join('') || '<p class="empty">레시피가 없어요. 아래 설정 버튼에서 추가하세요.</p>';
+  applyMyPhotos($('recipes'));
 }
 // 카드를 누르면 설명부터 — 거기서 시작하면 타이머
 $('recipes').addEventListener('click', e => {
@@ -208,6 +218,7 @@ function renderEdit() {
   $('edit-body').innerHTML = draft.map((r, ri) => `
     <p class="group-label">${esc(String(r.name).trim() || '새 레시피')}</p>
     <div class="group">
+      <div class="row"><span class="label grow">사진</span>${thumb(r)}<label class="row-btn" style="width:auto;color:var(--blue);cursor:pointer;margin-left:12px">사진 고르기<input type="file" accept="image/*" data-photo="${ri}" hidden></label><button class="row-btn" type="button" style="width:auto;margin-left:12px" data-unphoto="${ri}">기본 사진</button></div>
       <div class="row"><span class="label">이름</span><input class="grow" type="text" value="${esc(r.name)}" placeholder="레시피 이름" data-f="${ri}.name" maxlength="20"></div>
       <div class="row"><span class="label grow">원두</span><input type="number" value="${esc(r.dose)}" data-f="${ri}.dose" style="width:70px"><span class="unit">g</span></div>
       <div class="row"><span class="label grow">물</span><input type="number" value="${esc(r.water)}" data-f="${ri}.water" style="width:70px"><span class="unit">g</span></div>
@@ -230,7 +241,14 @@ function renderEdit() {
     </div>
     <div class="group" style="margin-top:10px"><div class="row"><button class="row-btn danger center" type="button" data-delrecipe="${ri}">${armed === ri ? '한 번 더 누르면 삭제' : `${esc(String(r.name).trim() || '이 레시피')} 삭제`}</button></div></div>`).join('') +
     `<div class="group" style="margin-top:22px"><div class="row"><button class="row-btn" type="button" data-addrecipe>+ 레시피 추가</button></div></div>`;
+  applyMyPhotos($('edit-body'));
 }
+$('edit-body').addEventListener('change', async e => {
+  const ri = e.target.dataset.photo;
+  if (ri == null || !e.target.files?.[0]) return;
+  await savePhotoAs(photoKey(draft[ri]), e.target.files[0], 480);
+  renderEdit(); renderList();
+});
 $('edit-body').addEventListener('input', e => {
   const d = e.target.dataset;
   if (d.f) { const [ri, k] = d.f.split('.'); draft[ri][k] = e.target.value; }
@@ -243,9 +261,11 @@ $('edit-body').addEventListener('click', e => {
   if (!d.delrecipe) armed = null;
   if (d.addstep) draft[d.addstep].steps.push({ label: '붓기', sec: 30, pourTo: '' });
   else if (d.delstep) { const [ri, si] = d.delstep.split('.'); draft[ri].steps.splice(si, 1); }
+  else if (d.unphoto) { deletePhotoFor(photoKey(draft[d.unphoto])).then(() => { renderEdit(); renderList(); }); return; }
   else if (d.delrecipe) {
     const ri = Number(d.delrecipe);
     if (armed !== ri) { armed = ri; renderEdit(); return; }
+    deletePhotoFor(photoKey(draft[ri]));
     draft.splice(ri, 1);
   }
   else if ('addrecipe' in d) draft.push({ id: newId(), name: '', dose: 15, water: 250, steps: [{ label: '뜸 들이기', sec: 40, pourTo: 40 }] });

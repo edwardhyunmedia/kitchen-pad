@@ -33,28 +33,41 @@ async function idb(mode, fn) {
   });
 }
 
-// 사진을 1600px 이하 JPEG로 줄여서 저장
-export async function savePhoto(file) {
+// 사진을 max px 이하 JPEG로 줄여서 저장 (기기 안 IndexedDB에만)
+export async function savePhotoAs(key, file, max = 1600) {
   const bmp = await createImageBitmap(file);
-  const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const cv = document.createElement('canvas');
   cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
   cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
   const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.86));
-  await idb('readwrite', s => s.put(blob, 'bg'));
-  photoUrl = null;
-  return getPhotoUrl();
+  await idb('readwrite', s => s.put(blob, key));
+  if (urls[key]) URL.revokeObjectURL(urls[key]);
+  delete urls[key];
+  return getPhotoUrlFor(key);
 }
+const urls = {};
+export async function getPhotoUrlFor(key) {
+  if (urls[key]) return urls[key];
+  try {
+    const blob = await idb('readonly', s => s.get(key));
+    if (blob) urls[key] = URL.createObjectURL(blob);
+  } catch { /* 사진 없음 */ }
+  return urls[key] || null;
+}
+export async function deletePhotoFor(key) {
+  try { await idb('readwrite', s => s.delete(key)); } catch { /* 없음 */ }
+  if (urls[key]) URL.revokeObjectURL(urls[key]);
+  delete urls[key];
+}
+export async function savePhoto(file) { photoUrl = null; return savePhotoAs('bg', file); }
 let photoUrl = null;
 export async function getPhotoUrl() {
   if (photoUrl) return photoUrl;
-  try {
-    const blob = await idb('readonly', s => s.get('bg'));
-    if (blob) photoUrl = URL.createObjectURL(blob);
-  } catch { /* 사진 없음 */ }
+  photoUrl = await getPhotoUrlFor('bg');
   return photoUrl;
 }
 export async function deletePhoto() {
-  await idb('readwrite', s => s.delete('bg'));
+  await deletePhotoFor('bg');
   photoUrl = null;
 }
