@@ -1,4 +1,5 @@
 import { icons } from '../shared/icons.js';
+import { fitTiles } from '../shared/fit.js';
 import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
@@ -235,3 +236,4 @@ $('open-edit').addEventListener('click', openEdit);
 $('edit-done').addEventListener('click', closeEdit);
 
 renderList();
+fitTiles();

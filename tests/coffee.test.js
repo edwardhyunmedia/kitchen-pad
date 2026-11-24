@@ -64,3 +64,16 @@ test('online recipes: pours add up and end at the brew water', () => {
   assert.equal(totalSec(SEED_RECIPES.find(r => r.id === 'hoffmann-1cup')), 180); // 3:00
   assert.equal(totalSec(SEED_RECIPES.find(r => r.id === 'kasuya-46')), 210); // 3:30
 });
+
+test('딥블루레이크 이름은 "인디아 블렌드"로 한 번만 바뀜 (사용자가 고친 이름은 그대로)', () => {
+  const old = { id: 'dbl-india', name: '딥블루레이크 인디아 블랜드', dose: 20, water: 180, steps: [{ name: 'a', sec: 10 }] };
+  const r1 = mergeSeeds([old], []);
+  assert.equal(r1.recipes.find(x => x.id === 'dbl-india').name, '인디아 블렌드');
+  assert.ok(r1.changed);
+  const mine = { ...old, name: '내가 바꾼 이름' };
+  const r2 = mergeSeeds([mine], []);
+  assert.equal(r2.recipes.find(x => x.id === 'dbl-india').name, '내가 바꾼 이름');
+  const again = mergeSeeds(r1.recipes, r1.seeded);
+  assert.equal(again.changed, false);
+  assert.equal(SEED_RECIPES.find(x => x.id === 'dbl-india').name, '인디아 블렌드');
+});

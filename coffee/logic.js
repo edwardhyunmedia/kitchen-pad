@@ -23,7 +23,7 @@ export const DEFAULT_RECIPES = [
 // 사용자가 준 레시피 (기존 저장 목록에도 한 번만 추가됨)
 export const SEED_RECIPES = [
   {
-    id: 'dbl-india', name: '딥블루레이크 인디아 블랜드', dose: 20, water: 180, temp: 93, grind: '11~11.3', ice: 150, ratio: '1:10',
+    id: 'dbl-india', name: '인디아 블렌드', dose: 20, water: 180, temp: 93, grind: '11~11.3', ice: 150, ratio: '1:10',
     note: '3분 타겟 (2:50까지 OK). 얼음 컵 위에 서빙',
     steps: [
       { label: '뜸 들이기', sec: 40, pourTo: 40 },
@@ -112,8 +112,16 @@ export function mergeSeeds(recipes, seeded, seeds = SEED_RECIPES) {
     done.push(ORDER_FLAG);
     changed = true;
   }
+  // 예전 긴 이름 → 짧게 (사용자가 직접 바꾼 이름은 건드리지 않음)
+  if (!done.includes(RENAME_FLAG)) {
+    out = out.map(x => x.id === FIRST_ID && x.name === OLD_DBL_NAME ? { ...x, name: '인디아 블렌드' } : x);
+    done.push(RENAME_FLAG);
+    changed = true;
+  }
   return { recipes: out, seeded: done, changed };
 }
+const RENAME_FLAG = 'rename:dbl-short';
+const OLD_DBL_NAME = '딥블루레이크 인디아 블랜드';
 
 export const totalSec = r => r.steps.reduce((a, s) => a + s.sec, 0);
 

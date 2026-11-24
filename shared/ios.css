@@ -223,7 +223,9 @@ body { word-break: keep-all; }
 .i-note { font-size: var(--t-sub); color: var(--label-2); margin: calc(12px * var(--s)) 0 0; }
 .i-start { width: 100%; margin-top: calc(20px * var(--s)); background: var(--brown); color: #fff; }
 /* 정보 많은 카드(커피·약): 정사각 고정 대신 내용만큼 — 한 줄의 두 카드는 같은 높이로 맞춤 (실기기 533px 폭에서 넘치던 문제) */
-.grid .ctile, .grid .mtile2 { aspect-ratio: auto; min-height: calc(190px * var(--s)); }
+.grid .ctile, .grid .mtile2 { aspect-ratio: auto; min-height: var(--tile-h, calc(190px * var(--s))); }
 .tile .state .nw { white-space: nowrap; }
 .tile .t-week { flex-wrap: wrap; row-gap: calc(4px * var(--s)); }
 .tile .t-week > span:last-child { white-space: nowrap; }
+/* 커피·약: 첫 화면엔 카드 4개만 — 아래 버튼 줄 뒤를 화면 배경으로 덮어 다음 줄이 비치지 않게 */
+body.fit4 .bottombar { background: linear-gradient(to bottom, transparent, var(--page-bg, #fff) 18px) !important; }

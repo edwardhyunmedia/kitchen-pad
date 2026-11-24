@@ -1,4 +1,5 @@
 import { icons } from '../shared/icons.js';
+import { fitTiles } from '../shared/fit.js';
 import { todaySlots, toggleTaken, dateKey, history } from './logic.js';
 import { getConfig, setConfig, getLog, setLog } from './state.js';
 
@@ -174,3 +175,4 @@ window.addEventListener('kp-meds-changed', () => { render(); if (!$('hist').hidd
 window.addEventListener('storage', e => { if (e.key?.startsWith('kp.meds')) { render(); if (!$('hist').hidden) renderHist(); } });
 render();
 setInterval(render, 30000);
+fitTiles();
