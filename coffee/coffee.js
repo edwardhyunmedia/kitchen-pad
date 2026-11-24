@@ -4,7 +4,7 @@ import { load, save } from '../shared/store.js';
 import { beep } from '../shared/alarm.js';
 import { tellParent } from '../shared/inframe.js';
 import { ART, ABOUT, aboutOf } from './about.js';
-import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds, grindText } from './logic.js';
+import { DEFAULT_RECIPES, timerState, totalSec, startRun, pauseRun, runElapsed, mergeSeeds, grindLabel } from './logic.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -54,7 +54,7 @@ function openInfo(r) {
   if (!r) return;
   const a = aboutOf(r);
   const facts = [['원두', r.dose ? `${r.dose}g` : ''], ['물', r.water ? `${r.water}g` : ''], ['얼음', r.ice ? `${r.ice}g` : ''], ['비율', r.ratio || ''],
-    ['물 온도', r.temp ? `${r.temp}°C` : ''], ['분쇄', grindText(r.grind)], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
+    ['물 온도', r.temp ? `${r.temp}°C` : ''], [grindLabel(r.grind), r.grind || ''], ['시간', mmss(totalSec(r))]].filter(f => f[1]);
   let t = 0;
   const steps = r.steps.map(st => { const at = t; t += st.sec; return `<li><span class="i-at">${clock(at)}</span><span class="i-lb">${esc(st.label)}</span><span class="i-to">${st.pourTo ? `${st.pourTo}g까지` : ''}</span></li>`; }).join('');
   const art = ART[a.art] || ART.v60;

@@ -143,7 +143,8 @@ export const TIMEMORE_CLICKS = {
 // 예전 표기 (이 값 그대로일 때만 바꿈 — 사용자가 고친 값은 둠)
 const OLD_GRIND = { 'dbl-india': '11~11.3', 'hoffmann-v60': '중간-가늘게', 'hoffmann-1cup': '중간-가늘게', 'kasuya-46': '굵게', 'hoffmann-chemex': '중간', 'iced-v60': '평소보다 조금 가늘게' };
 const GRIND_FLAG = 'grind:timemore-c3';
-export const grindText = g => (g ? (/^\d+클릭$/.test(g) ? `타임모어 C3 ${g}` : g) : '');
+// 설명 칸 이름: 클릭 수면 어느 그라인더 기준인지 이름에 붙임 (값은 짧게 '22클릭')
+export const grindLabel = g => (/^\d+클릭$/.test(g || '') ? '분쇄 · 타임모어 C3' : '분쇄');
 const OLD_DBL_NAME = '딥블루레이크 인디아 블랜드';
 
 export const totalSec = r => r.steps.reduce((a, s) => a + s.sec, 0);

@@ -78,7 +78,7 @@ test('딥블루레이크 이름은 "인디아 블렌드"로 한 번만 바뀜 (�
   assert.equal(SEED_RECIPES.find(x => x.id === 'dbl-india').name, '인디아 블렌드');
 });
 
-import { TIMEMORE_CLICKS, grindText } from '../coffee/logic.js';
+import { TIMEMORE_CLICKS, grindLabel } from '../coffee/logic.js';
 test('분쇄는 타임모어 C3 클릭 기준: 모든 기본·시드 레시피에 온도와 클릭', () => {
   for (const r of [...DEFAULT_RECIPES, ...SEED_RECIPES]) {
     assert.match(r.grind, /^\d+클릭$/, r.id);
@@ -103,8 +103,8 @@ test('저장된 레시피의 옛 분쇄 표기는 한 번만 클릭으로 (사�
   assert.ok(a.changed);
   assert.equal(mergeSeeds(a.recipes, a.seeded).changed, false);
 });
-test('분쇄 표시: 클릭이면 타임모어 C3 붙임', () => {
-  assert.equal(grindText('16클릭'), '타임모어 C3 16클릭');
-  assert.equal(grindText('굵게'), '굵게');
-  assert.equal(grindText(''), '');
+test('분쇄 칸 이름: 클릭이면 타임모어 C3 기준이라고 표시', () => {
+  assert.equal(grindLabel('16클릭'), '분쇄 · 타임모어 C3');
+  assert.equal(grindLabel('굵게'), '분쇄');
+  assert.equal(grindLabel(undefined), '분쇄');
 });
