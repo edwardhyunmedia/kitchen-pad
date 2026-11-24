@@ -123,7 +123,8 @@ function cal(size, d) {
   const cls = special ? ' special' : '';
   if (size === 's') return `<div class="w-calhd${cls}">${dateBlock(now, special)}</div><div class="w-evs">${body(2)}</div>${stale}`;
   // 중간: 왼쪽은 요일과 아주 큰 날짜를 세로 가운데에 (FigCraft에서 고친 모양)
-  if (size === 'm') return `<div class="w-split"><div class="w-side w-calm${cls}"><div class="w-fill"></div>${dateBlock(now, special)}<div class="w-fill"></div>${stale}</div><div class="w-list">${body(3)}</div></div>`;
+  // 요일은 큰 날짜 숫자 위 가운데에 (FigCraft에서 다시 고친 모양)
+  if (size === 'm') return `<div class="w-split"><div class="w-side w-calm${cls}"><div class="w-fill"></div><div class="w-calblk">${dateBlock(now, special)}</div><div class="w-fill"></div>${stale}</div><div class="w-list">${body(3)}</div></div>`;
   // 크게: 날짜별로 묶어서
   let html = '', last = '', n = 0;
   if (c.state !== 'ok' || !list.length) html = body(6);

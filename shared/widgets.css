@@ -255,3 +255,7 @@ html, body, .scroll { overscroll-behavior: none; }
 
 /* 커피 위젯 숫자도 고정폭 숫자 안 씀 (FigCraft와 같은 간격) */
 .w-cnum { font-variant-numeric: normal; }
+/* 중간 위젯 오른쪽 목록은 위젯 세로 가운데에 (FigCraft 홈 수정) — 약·일정·커피 모두 같게 */
+.w-split > .w-list { justify-content: center; }
+.w-calm .w-calblk { display: inline-flex; flex-direction: column; align-items: center; align-self: flex-start; }
+.w-calm .w-calblk .w-day { justify-content: center; }
