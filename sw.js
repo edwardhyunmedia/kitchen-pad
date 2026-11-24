@@ -1,5 +1,5 @@
 // 오프라인용 캐시. 배포할 때마다 VERSION 숫자를 올림.
-const VERSION = 'kp-v51';
+const VERSION = 'kp-v52';
 const FILES = [
   "./",
   "meds/",

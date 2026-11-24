@@ -4,7 +4,7 @@ export const APPS = ['app:meds', 'app:coffee', 'app:cal', 'app:wx', 'app:setting
 export const WIDGETS = ['w:meds', 'w:coffee', 'w:cal', 'w:wx'];
 // 위젯마다 쓸모 있는 크기만 (애플 지침: 유용한 경우에만 여러 크기)
 export const WIDGET_SIZES = { 'w:meds': ['s', 'm', 'l'], 'w:cal': ['s', 'm', 'l'], 'w:wx': ['s', 'm'], 'w:coffee': ['s', 'm'] };
-export const DEFAULT_SIZES = { 'w:meds': 'm', 'w:cal': 'm', 'w:wx': 's', 'w:coffee': 's' };
+export const DEFAULT_SIZES = { 'w:meds': 's', 'w:cal': 'm', 'w:wx': 's', 'w:coffee': 's' };
 
 export function allItems() {
   return [...APPS, ...WIDGETS];
@@ -23,7 +23,15 @@ export function nextSize(id, sizes = {}) {
 }
 
 export function defaultLayout() {
-  return ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:meds', 'w:cal'];
+  return ['app:meds', 'app:coffee', 'w:coffee', 'app:cal', 'app:settings', 'w:wx', 'w:meds', 'w:cal'];
+}
+
+// 약 중간 위젯 줄을 반으로: 왼쪽 날씨(작게), 오른쪽 약(작게). 저장된 배치에 한 번만 적용
+export function splitMedsWithWeather(layout, sizes = {}) {
+  if (!Array.isArray(layout) || !layout.includes('w:meds')) return { layout, sizes };
+  const out = layout.filter(id => id !== 'w:wx');
+  out.splice(out.indexOf('w:meds'), 0, 'w:wx');
+  return { layout: out, sizes: { ...sizes, 'w:meds': 's', 'w:wx': 's' } };
 }
 
 // 예전 배치(사람별 약 위젯, 다음 약 위젯)는 약 위젯 하나로 합쳐진 새 기본 배치로 바꿈

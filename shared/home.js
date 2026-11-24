@@ -3,7 +3,7 @@ import { APP_ICONS } from './appicons.js';
 import { load, save } from './store.js';
 import { getConfig, getLog } from '../meds/state.js';
 import { medsSummary } from './summary.js';
-import { normalizeLayout, itemSize, nextSize, moveItem, removeItem, addItem, addable, WIDGET_SIZES } from './layout.js';
+import { normalizeLayout, splitMedsWithWeather, itemSize, nextSize, moveItem, removeItem, addItem, addable, WIDGET_SIZES } from './layout.js';
 import { widgetBox, widgetBody, WIDGET_INFO, SYM } from './widgets.js';
 import { FACES, faceById, renderFace } from './faces.js';
 import { getSettings, setSettings, getPhotoUrl } from './settings.js';
@@ -45,6 +45,14 @@ let layout = [];
 let summary = null;
 let events = [];
 let eventsLoaded = false, wxTried = false;
+// 한 번만: 저장된 배치의 약 중간 위젯 → 날씨 작게 + 약 작게
+if (!load('mig.wxsplit', false)) {
+  const saved = load('home.layout', null);
+  const r = splitMedsWithWeather(Array.isArray(saved) ? saved : ['w:meds'], load('home.sizes', {}));
+  if (Array.isArray(saved)) save('home.layout', r.layout);
+  save('home.sizes', r.sizes);
+  save('mig.wxsplit', true);
+}
 let sizes = load('home.sizes', {});
 
 // ---------- 배경 ----------
