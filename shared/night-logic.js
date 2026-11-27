@@ -6,3 +6,5 @@ export function isNight(now, from, to) {
   const n = now.getHours() * 60 + now.getMinutes();
   return f < t ? n >= f && n < t : n >= f || n < t;
 }
+// 야간에 after초 동안 안 만지면 더 어둡게 (알람 울릴 땐 안 어둡게, after 0 = 끔)
+export const shouldIdleDim = ({ night, idleMs, after, alarm = false }) => !!night && !alarm && Number(after) > 0 && idleMs >= Number(after) * 1000;

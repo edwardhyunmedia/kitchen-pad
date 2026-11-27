@@ -72,8 +72,10 @@ select { font: inherit; border: 0; background: none; color: var(--ink-2); text-a
     <div class="row"><span class="label grow">시작</span><input type="time" id="night-from"></div>
     <div class="row"><span class="label grow">끝</span><input type="time" id="night-to"></div>
     <div class="row"><span class="label grow">화면 밝기도 낮추기</span><button class="switch" type="button" id="night-dim" aria-label="화면 밝기 낮추기"></button></div>
+    <div class="row"><span class="label grow">안 만지면 더 어둡게</span>
+      <select id="night-idle"><option value="0">끄기</option><option value="60">1분 뒤</option><option value="120">2분 뒤</option><option value="300">5분 뒤</option><option value="600">10분 뒤</option></select></div>
   </div>
-  <p class="note">정한 시간에는 화면 전체가 검은 바탕으로 바뀌어요. 화면 밝기 낮추기는 Fully Kiosk Plus에서만 돼요.</p>
+  <p class="note">정한 시간에는 화면 전체가 검은 바탕으로 바뀌어요. 그 시간에 정한 만큼 안 만지면 화면이 한 번 더 어두워지고, 아무 데나 한 번 누르면 다시 밝아져요(그 터치는 버튼으로 안 눌려요). 알람이 울리면 바로 밝아져요. 화면 밝기 자체를 낮추는 건 Fully Kiosk Plus에서만 돼요.</p>
 
   <p class="group-label">구글 캘린더</p>
   <div class="group">

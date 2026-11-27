@@ -18,3 +18,12 @@ test('equal or broken times mean off', () => {
   assert.equal(isNight(at(1, 0), '06:00', '06:00'), false);
   assert.equal(isNight(at(1, 0), 'x', '06:00'), false);
 });
+
+import { shouldIdleDim } from '../shared/night-logic.js';
+test('새벽에 정한 시간 동안 안 만지면 더 어둡게', () => {
+  assert.equal(shouldIdleDim({ night: true, idleMs: 120000, after: 120 }), true);
+  assert.equal(shouldIdleDim({ night: true, idleMs: 119000, after: 120 }), false);
+  assert.equal(shouldIdleDim({ night: false, idleMs: 999999, after: 120 }), false);
+  assert.equal(shouldIdleDim({ night: true, idleMs: 999999, after: 0 }), false);
+  assert.equal(shouldIdleDim({ night: true, idleMs: 999999, after: 120, alarm: true }), false);
+});

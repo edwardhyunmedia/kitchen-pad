@@ -130,10 +130,12 @@ function drawNight() {
   $('night-dim').classList.toggle('on', !!n.dimScreen);
   $('night-from').value = n.from;
   $('night-to').value = n.to;
+  $('night-idle').value = String(n.idleDim ?? 120);
 }
 const setNight = patch => { setSettings({ night: { ...getSettings().night, ...patch } }); drawNight(); };
 $('night-on').addEventListener('click', () => setNight({ on: !getSettings().night.on }));
 $('night-dim').addEventListener('click', () => setNight({ dimScreen: !getSettings().night.dimScreen }));
 $('night-from').addEventListener('change', e => e.target.value && setNight({ from: e.target.value }));
 $('night-to').addEventListener('change', e => e.target.value && setNight({ to: e.target.value }));
+$('night-idle').addEventListener('change', e => setNight({ idleDim: Number(e.target.value) }));
 drawNight();

@@ -2,7 +2,7 @@
 import { load, save } from './store.js';
 import { DEFAULT_FACE } from './faces.js';
 
-export const DEFAULT_SETTINGS = { weather: false, album: false, albumSec: 60, idleSec: 30, face: DEFAULT_FACE, bg: { type: 'default', blur: 18, dim: 0.18 }, night: { on: true, from: '00:00', to: '06:00', dimScreen: true } };
+export const DEFAULT_SETTINGS = { weather: false, album: false, albumSec: 60, idleSec: 30, face: DEFAULT_FACE, bg: { type: 'default', blur: 18, dim: 0.18 }, night: { on: true, from: '00:00', to: '06:00', dimScreen: true, idleDim: 120 } };
 
 export function getSettings() {
   const s = load('settings', {});
