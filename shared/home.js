@@ -11,7 +11,7 @@ import { getWeather } from './weather.js';
 import { getAlbum, pickPhoto } from './album.js';
 import { createSlides } from './slides.js';
 import { findFocus, savedFocus } from './focus.js';
-import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, dayLabel } from './calendar.js';
+import { getEvents, todayEvents, upcoming, fmtTime, nextEvents, weekEvents, dayLabel } from './calendar.js';
 import { DEFAULT_RECIPES, startRun, timerState, runElapsed, mergeSeeds } from '../coffee/logic.js';
 import { toggleTaken } from '../meds/logic.js';
 import { setLog } from '../meds/state.js';
@@ -77,7 +77,7 @@ async function applyBg() {
 let faceKey = '';
 function faceCtx(opts) {
   const recipes = load('coffee.recipes', DEFAULT_RECIPES);
-  return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`), wdata: wdata(), modIds: modIds() };
+  return { opts, weather, photo: facePhoto(), photoWide: (a => !!a && a.w > a.h)(albumNow()), summary, log: getLog(), coffeeName: recipes[0]?.name, events: todayEvents(events, new Date()), nextEvents: nextEvents(events, new Date(), 3), weekEvents: weekEvents(events, new Date(), 5), eventDays: events.map(e => `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`), wdata: wdata(), modIds: modIds() };
 }
 function drawFace(force) {
   const now = new Date();
@@ -409,7 +409,8 @@ function glanceHtml() {
   if (!summary || f === 'mod' || f === 'cal') return '';
   const late = summary.people.find(p => p.late);
   if (late) return `<span class="gl late"><i></i>${esc(late.name)} ${esc(late.lateTime)} ${esc(late.lateMed)} 아직 안 먹음</span>`;
-  const ev = todayEvents(events, new Date()).find(e => !e.allDay && e.start > new Date());
+  // 시계에 일정 목록이 이미 나오면 아래 알약에는 일정을 또 띄우지 않음 (약만)
+  const ev = settings.face.showEvents === false ? todayEvents(events, new Date()).find(e => !e.allDay && e.start > new Date()) : null;
   const n = summary.next;
   if (ev && (!n || fmtTime(ev.start) <= n.time)) return `<span class="gl cal"><i></i>${fmtTime(ev.start)} ${esc(ev.title)}</span>`;
   return n ? `<span class="gl"><i></i>다음 약 ${esc(n.time)} ${esc(n.medName)} <small>${esc(n.personName)}</small></span>` : '';

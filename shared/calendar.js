@@ -24,6 +24,11 @@ export function dayLabel(d, now) {
 }
 // 다가오는 일정 n개 (오늘이 아니어도)
 export const nextEvents = (events, now, n) => upcoming(events, now).sort((a, b) => a.start - b.start).slice(0, n);
+// 시계 화면용: 지금부터 7일 안의 남은 일정 (최대 max개)
+export const weekEvents = (events, now, max = 6) => {
+  const limit = now.getTime() + 7 * 86400000;
+  return upcoming(events, now).filter(e => e.start.getTime() < limit).sort((a, b) => a.start - b.start).slice(0, max);
+};
 export const todayEvents = (events, now) => upcoming(events, now).filter(e => sameDay(e.start, now) || (e.allDay && e.start <= now));
 
 // 시작 minutes분 전부터 시작 후 5분까지 한 번 울림 (종일 일정 제외)

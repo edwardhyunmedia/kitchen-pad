@@ -24,14 +24,22 @@ function dateLine(now, ctx, extraWeather = true) {
   const parts = [];
   if (ctx.opts.showDate !== false) parts.push(`${now.getMonth() + 1}월 ${now.getDate()}일 ${DAYS[now.getDay()]}요일`);
   if (extraWeather && ctx.opts.showWeather !== false && ctx.weather) parts.push(`<span class="fw">${WEATHER_ICONS[codeInfo(ctx.weather.code).icon]}${ctx.weather.temp}°</span>`);
-  return (parts.length ? `<div class="fdate">${parts.join('')}</div>` : '') + eventLine(now, ctx);
+  return (parts.length ? `<div class="fdate">${parts.join('')}</div>` : '') + eventList(now, ctx);
 }
 const wxSpan = ctx => (ctx.opts.showWeather !== false && ctx.weather ? `<span class="fw">${WEATHER_ICONS[codeInfo(ctx.weather.code).icon]}${ctx.weather.temp}°</span>` : '');
-// 다가오는 일정 한 줄 (시계 고르기에서 '일정'을 켰을 때)
+// 다가오는 일정: 7일치 목록 (시계 고르기에서 '일정'을 켰을 때)
+const evText = (e, now) => `${esc(dayLabel(e.start, now))} ${e.allDay ? '종일' : `${pad(e.start.getHours())}:${pad(e.start.getMinutes())}`} ${esc(e.title)}`;
+function eventList(now, ctx) {
+  if (ctx.opts.showEvents === false) return '';
+  const list = ctx.weekEvents || (ctx.nextEvents || []).slice(0, 1);
+  if (!list.length) return '';
+  return `<div class="fevs">${list.map(e => `<div class="fev">${evText(e, now)}</div>`).join('')}</div>`;
+}
+// 다가오는 일정 한 줄 (좁은 자리용)
 function eventLine(now, ctx) {
   const e = ctx.opts.showEvents !== false && (ctx.nextEvents || [])[0];
   if (!e) return '';
-  return `<div class="fev">${esc(dayLabel(e.start, now))} ${e.allDay ? '종일' : `${pad(e.start.getHours())}:${pad(e.start.getMinutes())}`} ${esc(e.title)}</div>`;
+  return `<div class="fev">${evText(e, now)}</div>`;
 }
 
 function analog(now, c, numerals, style) {

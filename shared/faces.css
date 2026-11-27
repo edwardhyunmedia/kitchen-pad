@@ -89,3 +89,7 @@
 .cal .wd .fw svg { width: 1.2em; height: 1.2em; vertical-align: -.2em; }
 /* 숫자 시계 왼쪽 아래 글자: 아래 알림 알약보다 위에 */
 .corner { bottom: calc(max(3vh, 16px) + clamp(44px, 6vh, 64px) + 2vh); }
+/* 7일 일정 목록: 첫 줄은 그대로, 나머지는 조금 작고 촘촘하게 */
+.fevs { margin-top: 1.2vh; margin-top: 1.2cqh; }
+.fevs .fev { margin-top: 0; }
+.fevs .fev + .fev { margin-top: .5vh; margin-top: .5cqh; font-size: 2.1vh; font-size: 2.1cqh; opacity: .68; }

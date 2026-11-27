@@ -70,3 +70,12 @@ test('events on a day include multi-day all-day events, all-day first', () => {
   assert.deepEqual(eventsOn(list, new Date(2026, 10, 23)).map(e => e.id), ['trip', 'dentist']);
   assert.deepEqual(eventsOn(list, new Date(2026, 10, 25)).map(e => e.id), []);
 });
+
+import { weekEvents } from '../shared/calendar.js';
+test('시계 화면 일정: 지금부터 7일 안의 남은 일정만, 시간순, 최대 개수', () => {
+  const now = new Date(2026, 10, 27, 9, 0);
+  const ev = (d, h, title, allDay = false) => ({ title, start: new Date(2026, 10, d, h), end: new Date(2026, 10, d, h + 1), allDay });
+  const list = [ev(27, 8, '지남'), ev(27, 10, '병원'), ev(28, 0, '종일', true), ev(30, 14, '월요일'), ev(4, 9, '7일 넘음'), ev(3, 23, '마지막날')].map(e => (e.title === '7일 넘음' || e.title === '마지막날' ? { ...e, start: new Date(2026, 11, e.start.getDate(), e.start.getHours()), end: new Date(2026, 11, e.start.getDate(), e.start.getHours() + 1) } : e));
+  assert.deepEqual(weekEvents(list, now, 10).map(e => e.title), ['병원', '종일', '월요일', '마지막날']);
+  assert.deepEqual(weekEvents(list, now, 2).map(e => e.title), ['병원', '종일']);
+});
